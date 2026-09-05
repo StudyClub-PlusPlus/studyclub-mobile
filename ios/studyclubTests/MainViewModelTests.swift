@@ -111,7 +111,7 @@ final class MainViewModelTests: XCTestCase {
     }
 }
 
-private actor TestStudyRepository: StudyRepository {
+private actor TestStudyRepository: RepositoryProtocol {
     enum Behavior: Sendable {
         case success([Study])
         case failure
@@ -132,7 +132,7 @@ private actor TestStudyRepository: StudyRepository {
         case let .success(studies):
             return studies
         case .failure:
-            throw StudyRepositoryError.unavailable
+            throw RepositoryError.unavailable
         case let .delayedSuccess(studies, nanoseconds, ignoresCancellation):
             if ignoresCancellation {
                 try? await Task.sleep(nanoseconds: nanoseconds)

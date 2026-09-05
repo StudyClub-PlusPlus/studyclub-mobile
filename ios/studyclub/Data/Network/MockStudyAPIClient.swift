@@ -29,10 +29,10 @@ actor MockStudyAPIClient: StudyAPIClient {
         case .empty:
             return []
         case .failure:
-            throw StudyRepositoryError.unavailable
+            throw RepositoryError.unavailable
         case .failureOnce:
             if requestCount == 1 {
-                throw StudyRepositoryError.unavailable
+                throw RepositoryError.unavailable
             }
             return Self.samples
         case .loading:

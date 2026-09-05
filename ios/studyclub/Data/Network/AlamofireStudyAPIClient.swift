@@ -20,7 +20,8 @@ final class AlamofireStudyAPIClient: StudyAPIClient, @unchecked Sendable {
         } catch is CancellationError {
             throw CancellationError()
         } catch {
-            throw StudyRepositoryError.unavailable
+            throw RepositoryError.unavailable
         }
     }
 }
+

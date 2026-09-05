@@ -9,7 +9,7 @@ extension StudyDTO {
             maximumMembers > 0,
             currentMembers <= maximumMembers
         else {
-            throw StudyRepositoryError.invalidData
+            throw RepositoryError.invalidData
         }
 
         let domainStatus: Study.Status
@@ -19,7 +19,7 @@ extension StudyDTO {
         case "almost_full":
             domainStatus = .almostFull
         default:
-            throw StudyRepositoryError.invalidData
+            throw RepositoryError.invalidData
         }
 
         return Study(

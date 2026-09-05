@@ -10,7 +10,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     ) {
         guard let windowScene = scene as? UIWindowScene else { return }
 
-        let repository = RepositoryFactory.makeStudyRepository()
+        let repository: RepositoryProtocol = RepositoryFactory.makeStudyRepository()
         let viewModel = MainViewModel(repository: repository)
         let mainViewController = MainViewController(viewModel: viewModel)
         let navigationController = UINavigationController(rootViewController: mainViewController)

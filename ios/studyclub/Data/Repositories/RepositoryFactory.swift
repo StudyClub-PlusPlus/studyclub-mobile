@@ -3,15 +3,15 @@ import Foundation
 enum RepositoryFactory {
     static func makeStudyRepository(
         arguments: [String] = ProcessInfo.processInfo.arguments
-    ) -> any StudyRepository {
+    ) -> any RepositoryProtocol {
         let scenario = mockScenario(from: arguments)
         let client = MockStudyAPIClient(scenario: scenario)
-        return DefaultStudyRepository(client: client)
+        return Repository(client: client)
     }
 
-    static func makeLiveStudyRepository(baseURL: URL) -> any StudyRepository {
+    static func makeLiveStudyRepository(baseURL: URL) -> any RepositoryProtocol {
         let client = AlamofireStudyAPIClient(baseURL: baseURL)
-        return DefaultStudyRepository(client: client)
+        return Repository(client: client)
     }
 
     private static func mockScenario(from arguments: [String]) -> MockStudyScenario {

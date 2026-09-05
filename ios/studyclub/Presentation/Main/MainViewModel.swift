@@ -13,13 +13,13 @@ final class MainViewModel {
         stateSubject.value
     }
 
-    private let repository: any StudyRepository
+    private let repository: RepositoryProtocol
     private var studiesByID: [Study.ID: Study] = [:]
     private var loadTask: Task<Void, Never>?
     private var requestGeneration = 0
     private var hasStartedInitialLoad = false
 
-    init(repository: any StudyRepository) {
+    init(repository: RepositoryProtocol) {
         self.repository = repository
     }
 

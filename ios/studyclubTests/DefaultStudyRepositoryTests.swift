@@ -4,7 +4,7 @@ import XCTest
 final class DefaultStudyRepositoryTests: XCTestCase {
     func testRepositoryReturnsDomainModels() async throws {
         let client = MockStudyAPIClient(scenario: .content, delayNanoseconds: 0)
-        let repository = DefaultStudyRepository(client: client)
+        let repository = Repository(client: client)
 
         let studies = try await repository.fetchStudies()
 
@@ -14,7 +14,7 @@ final class DefaultStudyRepositoryTests: XCTestCase {
 
     func testRepositoryPreservesEmptySuccess() async throws {
         let client = MockStudyAPIClient(scenario: .empty, delayNanoseconds: 0)
-        let repository = DefaultStudyRepository(client: client)
+        let repository = Repository(client: client)
 
         let studies = try await repository.fetchStudies()
         XCTAssertEqual(studies, [])
@@ -22,13 +22,13 @@ final class DefaultStudyRepositoryTests: XCTestCase {
 
     func testRepositoryMapsTransportFailure() async {
         let client = FailingStudyAPIClient()
-        let repository = DefaultStudyRepository(client: client)
+        let repository = Repository(client: client)
 
         do {
             _ = try await repository.fetchStudies()
             XCTFail("Expected an unavailable error")
         } catch {
-            XCTAssertEqual(error as? StudyRepositoryError, .unavailable)
+            XCTAssertEqual(error as? RepositoryError, .unavailable)
         }
     }
 
@@ -43,7 +43,7 @@ final class DefaultStudyRepositoryTests: XCTestCase {
             status: "recruiting",
             topics: nil
         )
-        let repository = DefaultStudyRepository(
+        let repository = Repository(
             client: DuplicateStudyAPIClient(studies: [duplicate, duplicate])
         )
 
@@ -51,13 +51,13 @@ final class DefaultStudyRepositoryTests: XCTestCase {
             _ = try await repository.fetchStudies()
             XCTFail("Expected an invalid data error")
         } catch {
-            XCTAssertEqual(error as? StudyRepositoryError, .invalidData)
+            XCTAssertEqual(error as? RepositoryError, .invalidData)
         }
     }
 
     func testRepositoryPreservesCancellation() async {
         let client = MockStudyAPIClient(scenario: .loading, delayNanoseconds: 0)
-        let repository = DefaultStudyRepository(client: client)
+        let repository = Repository(client: client)
         let task = Task { try await repository.fetchStudies() }
 
         await Task.yield()

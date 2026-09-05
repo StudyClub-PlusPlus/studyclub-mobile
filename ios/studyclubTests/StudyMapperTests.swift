@@ -49,7 +49,7 @@ final class StudyMapperTests: XCTestCase {
         )
 
         XCTAssertThrowsError(try dto.toDomain()) { error in
-            XCTAssertEqual(error as? StudyRepositoryError, .invalidData)
+            XCTAssertEqual(error as? RepositoryError, .invalidData)
         }
     }
 
@@ -66,7 +66,7 @@ final class StudyMapperTests: XCTestCase {
         )
 
         XCTAssertThrowsError(try dto.toDomain()) { error in
-            XCTAssertEqual(error as? StudyRepositoryError, .invalidData)
+            XCTAssertEqual(error as? RepositoryError, .invalidData)
         }
     }
 }

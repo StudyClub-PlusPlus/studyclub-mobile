@@ -1,10 +1,10 @@
 import Foundation
 
-protocol StudyRepository: Sendable {
+protocol RepositoryProtocol: Sendable {
     func fetchStudies() async throws -> [Study]
 }
 
-enum StudyRepositoryError: Error, Equatable, Sendable {
+enum RepositoryError: Error, Equatable, Sendable {
     case unavailable
     case invalidData
 }
