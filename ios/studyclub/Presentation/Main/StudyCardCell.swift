@@ -126,31 +126,31 @@ final class StudyCardCell: UICollectionViewCell {
         isAccessibilityElement = true
         accessibilityTraits = .button
 
-
-
-
-
-
-
-
-        headerStack.addArrangedSubview(categoryLabel)
-        headerStack.addArrangedSubview(headerSpacer)
-        headerStack.addArrangedSubview(statusLabel)
-
-        [memberImageView, memberLabel, footerSpacer, disclosureImageView].forEach(footerStack.addArrangedSubview)
+        contentView.addSubview(contentStack)
         [headerStack, titleLabel, summaryLabel, footerStack].forEach(contentStack.addArrangedSubview)
         contentStack.setCustomSpacing(AppTheme.Spacing.small, after: titleLabel)
-        contentView.addSubview(contentStack)
-
         NSLayoutConstraint.activate([
-            memberImageView.widthAnchor.constraint(equalToConstant: 16),
-            memberImageView.heightAnchor.constraint(equalToConstant: 16),
-            disclosureImageView.widthAnchor.constraint(equalToConstant: 14),
             contentStack.topAnchor.constraint(equalTo: contentView.topAnchor, constant: AppTheme.Spacing.regular),
             contentStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: AppTheme.Spacing.regular),
             contentStack.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -AppTheme.Spacing.regular),
             contentStack.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -AppTheme.Spacing.regular)
         ])
+
+        headerStack.addArrangedSubview(categoryLabel)
+        headerStack.addArrangedSubview(headerSpacer)
+        headerStack.addArrangedSubview(statusLabel)
+
+        footerStack.addArrangedSubview(memberImageView)
+        NSLayoutConstraint.activate([
+            memberImageView.widthAnchor.constraint(equalToConstant: 16),
+            memberImageView.heightAnchor.constraint(equalToConstant: 16)
+        ])
+
+        footerStack.addArrangedSubview(memberLabel)
+        footerStack.addArrangedSubview(footerSpacer)
+
+        footerStack.addArrangedSubview(disclosureImageView)
+        disclosureImageView.widthAnchor.constraint(equalToConstant: 14).isActive = true
     }
 
     private func updateHeaderLayout() {

@@ -120,38 +120,56 @@ final class DetailViewController: UIViewController {
         view.accessibilityIdentifier = "detail.screen"
 
         view.addSubview(scrollView)
-        view.addSubview(stateView)
-        scrollView.addSubview(contentView)
-        contentView.addSubview(stackView)
-        categoryContainer.addSubview(categoryLabel)
-        [categoryContainer, titleLabel, metadataLabel, summaryLabel,
-         divider, topicsTitleLabel, topicsStack].forEach(stackView.addArrangedSubview)
-
-        stackView.setCustomSpacing(AppTheme.Spacing.small, after: categoryContainer)
-        stackView.setCustomSpacing(AppTheme.Spacing.small, after: titleLabel)
-        stackView.setCustomSpacing(AppTheme.Spacing.xLarge, after: summaryLabel)
-        stackView.setCustomSpacing(AppTheme.Spacing.xLarge, after: divider)
-        NSLayoutConstraint.activate([
-            stateView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            stateView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            stateView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            stateView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            categoryLabel.topAnchor.constraint(equalTo: categoryContainer.topAnchor),
-            categoryLabel.leadingAnchor.constraint(equalTo: categoryContainer.leadingAnchor),
-            categoryLabel.trailingAnchor.constraint(lessThanOrEqualTo: categoryContainer.trailingAnchor),
-            categoryLabel.bottomAnchor.constraint(equalTo: categoryContainer.bottomAnchor),
-            divider.heightAnchor.constraint(equalToConstant: 1 / max(traitCollection.displayScale, 1))
-        ])
         NSLayoutConstraint.activate([
             scrollView.topAnchor.constraint(equalTo: view.topAnchor),
             scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+
+        view.addSubview(stateView)
+        NSLayoutConstraint.activate([
+            stateView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            stateView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            stateView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            stateView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+        ])
+
+        scrollView.addSubview(contentView)
+        NSLayoutConstraint.activate([
             contentView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
             contentView.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
             contentView.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor),
             contentView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
-            contentView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor),
+            contentView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor)
+        ])
+
+        contentView.addSubview(stackView)
+        stackView.addArrangedSubview(categoryContainer)
+        stackView.setCustomSpacing(AppTheme.Spacing.small, after: categoryContainer)
+        categoryContainer.addSubview(categoryLabel)
+        NSLayoutConstraint.activate([
+            categoryLabel.topAnchor.constraint(equalTo: categoryContainer.topAnchor),
+            categoryLabel.leadingAnchor.constraint(equalTo: categoryContainer.leadingAnchor),
+            categoryLabel.trailingAnchor.constraint(lessThanOrEqualTo: categoryContainer.trailingAnchor),
+            categoryLabel.bottomAnchor.constraint(equalTo: categoryContainer.bottomAnchor)
+        ])
+
+        stackView.addArrangedSubview(titleLabel)
+        stackView.setCustomSpacing(AppTheme.Spacing.small, after: titleLabel)
+
+        stackView.addArrangedSubview(metadataLabel)
+
+        stackView.addArrangedSubview(summaryLabel)
+        stackView.setCustomSpacing(AppTheme.Spacing.xLarge, after: summaryLabel)
+
+        stackView.addArrangedSubview(divider)
+        stackView.setCustomSpacing(AppTheme.Spacing.xLarge, after: divider)
+        divider.heightAnchor.constraint(equalToConstant: 1 / max(traitCollection.displayScale, 1)).isActive = true
+
+        stackView.addArrangedSubview(topicsTitleLabel)
+        stackView.addArrangedSubview(topicsStack)
+        NSLayoutConstraint.activate([
             stackView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: AppTheme.Spacing.xLarge),
             stackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: AppTheme.Spacing.large),
             stackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -AppTheme.Spacing.large),

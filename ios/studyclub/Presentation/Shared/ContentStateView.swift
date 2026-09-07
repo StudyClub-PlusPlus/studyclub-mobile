@@ -119,33 +119,39 @@ final class ContentStateView: UIView {
     private func configureView() {
         backgroundColor = AppTheme.Palette.canvas
 
-
-
-
-
-        [activityIndicator, imageView, titleLabel, messageLabel].forEach(stackView.addArrangedSubview)
-        stackView.setCustomSpacing(AppTheme.Spacing.large, after: imageView)
-
         addSubview(scrollView)
-        scrollView.addSubview(scrollContentView)
-        scrollContentView.addSubview(stackView)
-
-        let centerYConstraint = stackView.centerYAnchor.constraint(equalTo: scrollContentView.centerYAnchor)
-        centerYConstraint.priority = .defaultHigh
-
         NSLayoutConstraint.activate([
-            imageView.widthAnchor.constraint(equalToConstant: 44),
-            imageView.heightAnchor.constraint(equalToConstant: 44),
             scrollView.topAnchor.constraint(equalTo: topAnchor),
             scrollView.leadingAnchor.constraint(equalTo: leadingAnchor),
             scrollView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: bottomAnchor)
+        ])
+
+        scrollView.addSubview(scrollContentView)
+        NSLayoutConstraint.activate([
             scrollContentView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
             scrollContentView.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
             scrollContentView.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor),
             scrollContentView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
             scrollContentView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor),
-            scrollContentView.heightAnchor.constraint(greaterThanOrEqualTo: scrollView.frameLayoutGuide.heightAnchor),
+            scrollContentView.heightAnchor.constraint(greaterThanOrEqualTo: scrollView.frameLayoutGuide.heightAnchor)
+        ])
+
+        scrollContentView.addSubview(stackView)
+        stackView.addArrangedSubview(activityIndicator)
+
+        stackView.addArrangedSubview(imageView)
+        stackView.setCustomSpacing(AppTheme.Spacing.large, after: imageView)
+        NSLayoutConstraint.activate([
+            imageView.widthAnchor.constraint(equalToConstant: 44),
+            imageView.heightAnchor.constraint(equalToConstant: 44)
+        ])
+
+        stackView.addArrangedSubview(titleLabel)
+        stackView.addArrangedSubview(messageLabel)
+        let centerYConstraint = stackView.centerYAnchor.constraint(equalTo: scrollContentView.centerYAnchor)
+        centerYConstraint.priority = .defaultHigh
+        NSLayoutConstraint.activate([
             centerYConstraint,
             stackView.topAnchor.constraint(greaterThanOrEqualTo: scrollContentView.topAnchor, constant: AppTheme.Spacing.xLarge),
             stackView.bottomAnchor.constraint(lessThanOrEqualTo: scrollContentView.bottomAnchor, constant: -AppTheme.Spacing.xLarge),

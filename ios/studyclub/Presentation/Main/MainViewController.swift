@@ -48,16 +48,17 @@ final class MainViewController: UIViewController {
         navigationController?.navigationBar.prefersLargeTitles = true
         view.backgroundColor = AppTheme.Palette.canvas
 
-        collectionView.delegate = self
-
         view.addSubview(collectionView)
-        view.addSubview(stateView)
-
+        collectionView.delegate = self
         NSLayoutConstraint.activate([
             collectionView.topAnchor.constraint(equalTo: view.topAnchor),
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+
+        view.addSubview(stateView)
+        NSLayoutConstraint.activate([
             stateView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             stateView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             stateView.trailingAnchor.constraint(equalTo: view.trailingAnchor),

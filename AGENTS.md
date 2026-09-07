@@ -26,6 +26,7 @@ Before changing iOS code, read:
 - Do not add a UseCase, Router, Coordinator, or generic DI container without a concrete second use case and an architecture decision update.
 - Lists and feeds define loading, content, empty, and failure behavior. Current screens request once from ViewModel init via a private fetch method; retry, refresh, and Task management are deferred until needed.
 - Store fixed views with their default styling in private let initialization closures. configureView handles hierarchy and layout together; updateViews applies display data. ViewControllers use Combine as a notification and read values from the ViewModel.
+- Within configureView, group work by view: add the view, configure arranged subviews or relationship-dependent values, and activate its constraints together. Do not split all hierarchy operations and all layout operations into separate phases.
 - Collection views use stable identifiers and diffable snapshots. Selection never depends on a stale array index.
 - Naming examples in this repository are provisional. Preserve ownership and dependency rules even when names change.
 
