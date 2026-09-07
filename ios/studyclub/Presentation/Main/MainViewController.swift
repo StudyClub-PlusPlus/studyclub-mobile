@@ -22,7 +22,7 @@ final class MainViewController: UIViewController {
         return view
     }()
     private var dataSource: UICollectionViewDiffableDataSource<Section, Study.ID>!
-    private var itemsByID: [Study.ID: StudyListItemViewData] = [:]
+    private var itemsByID: [Study.ID: StudyCardCellViewModel] = [:]
     private var cancellables = Set<AnyCancellable>()
 
     init(viewModel: MainViewModel) {
@@ -67,7 +67,7 @@ final class MainViewController: UIViewController {
     }
 
     private func configureDataSource() {
-        let registration = UICollectionView.CellRegistration<StudyCardCell, StudyListItemViewData> {
+        let registration = UICollectionView.CellRegistration<StudyCardCell, StudyCardCellViewModel> {
             cell, _, item in
             cell.updateViews(with: item)
         }

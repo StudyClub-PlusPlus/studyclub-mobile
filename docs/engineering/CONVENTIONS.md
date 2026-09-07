@@ -8,19 +8,20 @@ Current names are defaults, not a permanent style law. A rename is allowed when 
 |---|---|---|
 | Server parsing model | `*DTO` | `StudyDTO` |
 | Internal application model | noun | `Study` |
-| Screen-ready display value | `*ViewData` | `StudyListItemViewData` |
-| Display state | `*ViewState` | `MainViewState` |
+| Cell display model | `*CellViewModel` | `StudyCardCellViewModel` |
+| Screen load status | nested `LoadState` | `MainViewModel.LoadState` |
 | Repository abstraction | noun + `Repository` | `StudyRepository` |
 | Repository implementation | `Default*Repository` | `DefaultStudyRepository` |
 | Composition helper | `*Factory` | `RepositoryFactory` |
 
 Avoid mechanical names such as `RepositoryProtocol`, `RepositoryImpl`, `ServerModel`, and `ClientModel` when the role can be stated more precisely.
 
-The model flow is `DTO -> Domain model -> ViewData/ViewState`:
+The model flow is `DTO -> Domain model -> ViewModel display values`:
 
 - Data decodes a server response into a DTO and maps it to a Domain model.
 - Repositories return Domain models so transport details do not escape Data.
-- Presentation derives screen-ready `ViewData` and exhaustive `ViewState` from Domain models.
+- Presentation derives screen-ready display values from Domain models and models loading status separately inside each screen ViewModel.
+- A cell ViewModel may be an immutable struct containing display formatting only. Keep it beside its cell; it does not need a repository, publisher, or reference semantics.
 - ViewData is optional for a simple screen, but when it exists it must contain display meaning only and must not become a second business model.
 
 ## Repository creation

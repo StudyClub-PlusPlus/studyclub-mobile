@@ -7,7 +7,7 @@ final class MainViewModelTests: XCTestCase {
     func testStatePublisherSynchronouslyReplaysCurrentStateWhenSinkBinds() {
         let repository = TestStudyRepository(behaviors: [])
         let viewModel = MainViewModel(repository: repository)
-        var receivedStates: [MainViewState] = []
+        var receivedStates: [MainViewModel.LoadState] = []
 
         let cancellable = viewModel.statePublisher.sink { state in
             receivedStates.append(state)
@@ -24,7 +24,7 @@ final class MainViewModelTests: XCTestCase {
 
         await waitUntil { viewModel.currentState == .content }
 
-        XCTAssertEqual(viewModel.items, [StudyListItemViewData(study: expected)])
+        XCTAssertEqual(viewModel.items, [StudyCardCellViewModel(study: expected)])
         XCTAssertEqual(viewModel.study(for: "selected"), expected)
     }
 
@@ -49,10 +49,10 @@ final class MainViewModelTests: XCTestCase {
         let repository = TestStudyRepository(behaviors: [.success([expected])])
         let viewModel = MainViewModel(repository: repository)
         await waitUntil { viewModel.currentState == .content }
-        var receivedStates: [MainViewState] = []
+        var receivedStates: [MainViewModel.LoadState] = []
         let subscription = viewModel.statePublisher.sink { state in
             receivedStates.append(state)
-            XCTAssertEqual(viewModel.items, [StudyListItemViewData(study: expected)])
+            XCTAssertEqual(viewModel.items, [StudyCardCellViewModel(study: expected)])
         }
         XCTAssertEqual(receivedStates, [.content])
         let requests = await repository.requestCount

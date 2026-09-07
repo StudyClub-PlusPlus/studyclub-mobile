@@ -3,19 +3,26 @@ import Foundation
 
 @MainActor
 final class MainViewModel {
-    private let stateSubject = CurrentValueSubject<MainViewState, Never>(.loading)
+    enum LoadState: Equatable {
+        case loading
+        case content
+        case empty
+        case failure
+    }
 
-    var statePublisher: AnyPublisher<MainViewState, Never> {
+    private let stateSubject = CurrentValueSubject<LoadState, Never>(.loading)
+
+    var statePublisher: AnyPublisher<LoadState, Never> {
         stateSubject.eraseToAnyPublisher()
     }
 
-    var currentState: MainViewState {
+    var currentState: LoadState {
         stateSubject.value
     }
 
     private let repository: RepositoryProtocol
     private var studiesByID: [Study.ID: Study] = [:]
-    private(set) var items: [StudyListItemViewData] = []
+    private(set) var items: [StudyCardCellViewModel] = []
 
     convenience init() {
         self.init(repository: RepositoryFactory.makeStudyRepository())
@@ -57,7 +64,7 @@ final class MainViewModel {
             stateSubject.send(.empty)
             return
         }
-        items = studies.map(StudyListItemViewData.init)
+        items = studies.map(StudyCardCellViewModel.init)
         stateSubject.send(.content)
     }
 }

@@ -1,13 +1,6 @@
 import Foundation
 
-enum MainViewState: Equatable {
-    case loading
-    case content
-    case empty
-    case failure
-}
-
-struct StudyListItemViewData: Identifiable, Hashable {
+struct StudyCardCellViewModel: Identifiable, Hashable {
     let id: String
     let category: String
     let title: String

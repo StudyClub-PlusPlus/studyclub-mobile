@@ -108,7 +108,7 @@ final class StudyCardCell: UICollectionViewCell {
         updateHeaderLayout()
     }
 
-    func updateViews(with item: StudyListItemViewData) {
+    func updateViews(with item: StudyCardCellViewModel) {
         categoryLabel.text = item.category
         statusLabel.text = item.statusText
         titleLabel.text = item.title
