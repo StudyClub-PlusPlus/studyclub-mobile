@@ -48,7 +48,7 @@ Use the shared `AppTheme` source rather than one-off values.
 - Scrollable readable column
 - Category label, large study title, member/status metadata, summary, and “이 스터디에서 다룰 내용” section
 - Content comes from the independently fetched Domain model for the selected ID.
-- Detail uses the shared state surface for loading and failure with detail-specific Korean copy and retry. Content and state surfaces are mutually exclusive.
+- Detail uses the existing state surface for loading and failure with detail-specific Korean copy. Failure has no retry button and directs the user back; common ErrorView work is deferred. Content and state surfaces are mutually exclusive.
 
 ## Interaction
 

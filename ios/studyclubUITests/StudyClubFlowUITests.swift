@@ -54,21 +54,17 @@ final class StudyClubFlowUITests: XCTestCase {
     }
 
     @MainActor
-    func testDetailFailureRetryLoadsSelectedStudy() {
-        let app = launchApp(scenario: "detail-failure-once")
+    func testDetailFailureAllowsBackNavigationWithoutRetry() {
+        let app = launchApp(scenario: "detail-failure")
         let selected = app.descendants(matching: .any)["main.study.algorithm"]
         XCTAssertTrue(selected.waitForExistence(timeout: 3))
         selected.tap()
         XCTAssertTrue(app.otherElements["detail.state.failure"].waitForExistence(timeout: 3))
         capture(app, name: "detail-failure")
-        let retry = app.buttons["detail.state.action"]
-        XCTAssertTrue(retry.isHittable)
-        XCTAssertGreaterThanOrEqual(retry.frame.height, 44)
-        retry.tap()
-        XCTAssertTrue(app.staticTexts["detail.title"].waitForExistence(timeout: 3))
-        XCTAssertEqual(app.staticTexts["detail.title"].label, "알고리즘 문제 풀이")
-        XCTAssertFalse(app.otherElements["detail.state.failure"].exists)
-        capture(app, name: "detail-retry-content")
+        XCTAssertFalse(app.buttons["detail.state.action"].exists)
+        XCTAssertFalse(app.staticTexts["detail.title"].exists)
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        XCTAssertTrue(selected.waitForExistence(timeout: 3))
     }
 
     @MainActor

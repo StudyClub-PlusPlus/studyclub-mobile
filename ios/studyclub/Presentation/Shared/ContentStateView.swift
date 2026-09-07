@@ -73,7 +73,8 @@ final class ContentStateView: UIView {
             case .failure:
                 accessibilityIdentifier = "detail.state.failure"
                 titleLabel.text = "상세 정보를 불러오지 못했어요"
-                actionButton.accessibilityLabel = "스터디 상세 다시 시도"
+                messageLabel.text = "이전 화면으로 돌아가 주세요."
+                actionButton.isHidden = true
             case .empty:
                 break
             }

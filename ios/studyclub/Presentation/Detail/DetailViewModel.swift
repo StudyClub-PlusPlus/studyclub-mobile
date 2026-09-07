@@ -24,9 +24,6 @@ final class DetailViewModel {
 
     private let studyID: Study.ID
     private let repository: any RepositoryProtocol
-    private var loadTask: Task<Void, Never>?
-    private var requestGeneration = 0
-    private var hasStartedInitialLoad = false
 
     convenience init(studyID: Study.ID) {
         self.init(studyID: studyID, repository: RepositoryFactory.makeStudyRepository())
@@ -35,36 +32,16 @@ final class DetailViewModel {
     init(studyID: Study.ID, repository: any RepositoryProtocol) {
         self.studyID = studyID
         self.repository = repository
+        fetchDetail()
     }
 
-    deinit { loadTask?.cancel() }
-
-    func loadIfNeeded() {
-        guard !hasStartedInitialLoad else { return }
-        hasStartedInitialLoad = true
-        startLoad()
-    }
-
-    func retry() { startLoad() }
-
-    private func startLoad() {
-        requestGeneration += 1
-        let generation = requestGeneration
-        loadTask?.cancel()
-        category = ""
-        title = ""
-        summary = ""
-        memberText = ""
-        statusText = ""
-        topics = []
-        stateSubject.send(.loading)
+    private func fetchDetail() {
         let repository = repository
         let studyID = studyID
-        loadTask = Task { [weak self] in
+        Task { [weak self] in
             do {
                 let study = try await repository.fetchStudy(id: studyID)
-                try Task.checkCancellation()
-                guard let self, generation == self.requestGeneration else { return }
+                guard let self else { return }
                 guard study.id == studyID else { throw RepositoryError.invalidData }
                 self.category = study.category
                 self.title = study.title
@@ -73,12 +50,8 @@ final class DetailViewModel {
                 self.statusText = study.status.displayText
                 self.topics = study.topics
                 self.stateSubject.send(.content)
-            } catch is CancellationError {
-                return
             } catch {
-                guard !Task.isCancelled,
-                      let self, generation == self.requestGeneration else { return }
-                self.stateSubject.send(.failure)
+                self?.stateSubject.send(.failure)
             }
         }
     }

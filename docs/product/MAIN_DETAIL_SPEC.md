@@ -35,7 +35,7 @@ Detail presents:
 - learning topics
 - standard back navigation
 
-Detail loads once per screen instance and exposes loading, content, and failure with retry. Retry immediately hides content and starts one new request. Cancellation and request identity checks prevent older responses from replacing newer results. An unknown or mismatched ID is a failure; zero topics is valid content.
+Detail starts one request from ViewModel init and exposes loading, content, and failure without retry. Failure instructs the user to return to the previous screen. Common ErrorView work is deferred. Detail does not retain or cancel its Task; requests may finish after back navigation. An unknown or mismatched ID is a failure; zero topics is valid content.
 
 There is no join action, editing, or persistence.
 
@@ -48,6 +48,6 @@ The client and repository expose separate list and detail operations: `fetchStud
 - `failure`: every request fails
 - `failure-once`: the first request fails and retry succeeds
 - `loading`: a deterministic long-running request for state and accessibility QA
-- `detail-failure`, `detail-failure-once`, `detail-loading`: list succeeds, detail exercises its own failure, retry or loading lifecycle
+- `detail-failure`, `detail-loading`: list succeeds, detail exercises its own failure or loading lifecycle
 
 The iOS and Android implementations may use different UI frameworks, but state meaning, stable selection behavior, Korean copy intent, and retry policy should remain equivalent.

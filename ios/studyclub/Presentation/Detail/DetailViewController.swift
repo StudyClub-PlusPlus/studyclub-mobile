@@ -111,7 +111,6 @@ final class DetailViewController: UIViewController {
         super.viewDidLoad()
         configureView()
         bindViewModel()
-        viewModel.loadIfNeeded()
     }
 
     private func configureView() {
@@ -119,12 +118,7 @@ final class DetailViewController: UIViewController {
         navigationItem.largeTitleDisplayMode = .never
         view.backgroundColor = AppTheme.Palette.canvas
         view.accessibilityIdentifier = "detail.screen"
-        configureHierarchy()
-        configureLayout()
-        stateView.onAction = { [weak self] in self?.viewModel.retry() }
-    }
 
-    private func configureHierarchy() {
         view.addSubview(scrollView)
         view.addSubview(stateView)
         scrollView.addSubview(contentView)
@@ -132,9 +126,7 @@ final class DetailViewController: UIViewController {
         categoryContainer.addSubview(categoryLabel)
         [categoryContainer, titleLabel, metadataLabel, summaryLabel,
          divider, topicsTitleLabel, topicsStack].forEach(stackView.addArrangedSubview)
-    }
 
-    private func configureLayout() {
         stackView.setCustomSpacing(AppTheme.Spacing.small, after: categoryContainer)
         stackView.setCustomSpacing(AppTheme.Spacing.small, after: titleLabel)
         stackView.setCustomSpacing(AppTheme.Spacing.xLarge, after: summaryLabel)
@@ -179,13 +171,13 @@ final class DetailViewController: UIViewController {
                     self.stateView.render(.failure, context: .detail)
                 case .content:
                     self.stateView.isHidden = true
-                    self.renderContent()
+                    self.updateViews()
                 }
             }
             .store(in: &cancellables)
     }
 
-    private func renderContent() {
+    private func updateViews() {
         categoryLabel.text = viewModel.category
         titleLabel.text = viewModel.title
         metadataLabel.text = "\(viewModel.memberText)  ·  \(viewModel.statusText)"

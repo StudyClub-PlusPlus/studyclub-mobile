@@ -7,7 +7,6 @@ enum MockStudyScenario: String, Sendable {
     case failureOnce = "failure-once"
     case loading
     case detailFailure = "detail-failure"
-    case detailFailureOnce = "detail-failure-once"
     case detailLoading = "detail-loading"
 }
 
@@ -15,7 +14,6 @@ actor MockStudyAPIClient: StudyAPIClient {
     private let scenario: MockStudyScenario
     private let delayNanoseconds: UInt64
     private var requestCount = 0
-    private var detailRequestCount = 0
 
     init(scenario: MockStudyScenario, delayNanoseconds: UInt64 = 250_000_000) {
         self.scenario = scenario
@@ -28,7 +26,7 @@ actor MockStudyAPIClient: StudyAPIClient {
         try Task.checkCancellation()
 
         switch scenario {
-        case .content, .detailFailure, .detailFailureOnce, .detailLoading:
+        case .content, .detailFailure, .detailLoading:
             return Self.samples
         case .empty:
             return []
@@ -46,13 +44,10 @@ actor MockStudyAPIClient: StudyAPIClient {
     }
 
     func fetchStudy(id: Study.ID) async throws -> StudyDTO {
-        detailRequestCount += 1
         try await Task.sleep(nanoseconds: delayNanoseconds)
         try Task.checkCancellation()
         switch scenario {
         case .failure, .detailFailure:
-            throw RepositoryError.unavailable
-        case .detailFailureOnce where detailRequestCount == 1:
             throw RepositoryError.unavailable
         case .loading, .detailLoading:
             try await Task.sleep(nanoseconds: .max)

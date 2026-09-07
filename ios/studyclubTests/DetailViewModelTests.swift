@@ -21,60 +21,56 @@ final class DetailViewModelTests: XCTestCase {
                 content.fulfill()
             }
         }
-        model.loadIfNeeded()
-        model.loadIfNeeded()
         await fulfillment(of: [content], timeout: 2)
         let ids = await repository.requestedIDs
         XCTAssertEqual(ids, ["selected"])
-        XCTAssertEqual(states, [.loading, .loading, .content])
+        XCTAssertEqual(states, [.loading, .content])
         withExtendedLifetime(subscription) {}
     }
 
-    func testFailureRetryAndStaleResponseProtection() async {
-        let repository = DetailRepositoryDouble(failsFirst: true)
+    func testFailureEndsLoadingWithoutAnotherRequest() async {
+        let repository = DetailRepositoryDouble(shouldFail: true)
         let model = DetailViewModel(studyID: "selected", repository: repository)
         let failed = expectation(description: "failure")
-        let content = expectation(description: "content")
         let subscription = model.statePublisher.sink { state in
             if state == .failure { failed.fulfill() }
-            if state == .content { content.fulfill() }
         }
-        model.loadIfNeeded()
         await fulfillment(of: [failed], timeout: 2)
-        model.retry()
-        XCTAssertEqual(model.currentState, .loading)
-        await fulfillment(of: [content], timeout: 2)
-        XCTAssertEqual(model.title, "상세 응답")
+        XCTAssertEqual(model.currentState, .failure)
+        XCTAssertEqual(model.title, "")
+        let ids = await repository.requestedIDs
+        XCTAssertEqual(ids, ["selected"])
         withExtendedLifetime(subscription) {}
     }
 
-    func testCancelledRequestIgnoringCancellationCannotOverwriteRetry() async {
-        let repository = DetailRepositoryDouble(delaysFirst: true)
+    func testSubscriberReceivesContentAfterRequestHasAlreadyFinished() async {
+        let repository = DetailRepositoryDouble()
         let model = DetailViewModel(studyID: "selected", repository: repository)
-        let fresh = expectation(description: "fresh content")
-        let subscription = model.statePublisher.sink { state in
-            if state == .content { fresh.fulfill() }
+        let loaded = expectation(description: "loaded before binding")
+        let initialSubscription = model.statePublisher.sink { state in
+            if state == .content { loaded.fulfill() }
         }
-        model.loadIfNeeded()
-        while await repository.requestedIDs.isEmpty { await Task.yield() }
-        model.retry()
-        await fulfillment(of: [fresh], timeout: 2)
-        await repository.releaseFirstRequest()
-        for _ in 0..<20 { await Task.yield() }
-        XCTAssertEqual(model.title, "상세 응답")
-        withExtendedLifetime(subscription) {}
+        await fulfillment(of: [loaded], timeout: 2)
+        initialSubscription.cancel()
+
+        var receivedStates: [DetailViewModel.LoadState] = []
+        let lateSubscription = model.statePublisher.sink { state in
+            receivedStates.append(state)
+            XCTAssertEqual(model.title, "상세 응답")
+        }
+        XCTAssertEqual(receivedStates, [.content])
+        let ids = await repository.requestedIDs
+        XCTAssertEqual(ids, ["selected"])
+        withExtendedLifetime(lateSubscription) {}
     }
 }
 
 private actor DetailRepositoryDouble: RepositoryProtocol {
     private(set) var requestedIDs: [Study.ID] = []
-    let failsFirst: Bool
-    let delaysFirst: Bool
-    private var continuation: CheckedContinuation<Void, Never>?
+    let shouldFail: Bool
 
-    init(failsFirst: Bool = false, delaysFirst: Bool = false) {
-        self.failsFirst = failsFirst
-        self.delaysFirst = delaysFirst
+    init(shouldFail: Bool = false) {
+        self.shouldFail = shouldFail
     }
 
     func fetchStudies() async throws -> [Study] {
@@ -84,19 +80,9 @@ private actor DetailRepositoryDouble: RepositoryProtocol {
 
     func fetchStudy(id: Study.ID) async throws -> Study {
         requestedIDs.append(id)
-        let first = requestedIDs.count == 1
-        if first && failsFirst { throw RepositoryError.unavailable }
-        if first && delaysFirst {
-            await withCheckedContinuation { continuation = $0 }
-        }
-        return Study(id: id, category: "iOS",
-                     title: first && delaysFirst ? "오래된 응답" : "상세 응답",
+        if shouldFail { throw RepositoryError.unavailable }
+        return Study(id: id, category: "iOS", title: "상세 응답",
                      summary: "전체 설명", currentMembers: 2, maximumMembers: 8,
                      status: .recruiting, topics: [])
-    }
-
-    func releaseFirstRequest() {
-        continuation?.resume()
-        continuation = nil
     }
 }

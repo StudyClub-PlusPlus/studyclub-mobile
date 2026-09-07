@@ -23,6 +23,6 @@ failure --retry--> loading
 
 ## Future stale-content policy
 
-Detail uses loading, content, and failure with retry. Its six display values live directly on the ViewModel as read-only-to-consumers properties; the private subject publishes only load status after all display fields are updated. Empty topics is valid content. Missing or mismatched study identity is failure. Retry clears display fields and hides content until success; initial load runs once and stale requests cannot publish.
+Detail uses loading, content, and failure without retry. Its six display values live directly on the ViewModel as read-only-to-consumers properties; the private subject publishes only load status after all display fields are updated. Empty topics is valid content. Missing or mismatched study identity is failure. DetailViewModel starts one request from init via private fetchDetail(). No public load method, load flag, Task retention or cancellation is needed. Weak captures allow the ViewModel to be released while the request finishes. CurrentValueSubject replays status to late subscribers.
 
 When cached or paginated content is introduced, define whether refresh failure preserves existing content before implementation. The current mock scaffold has no cache and therefore uses mutually exclusive terminal states.
