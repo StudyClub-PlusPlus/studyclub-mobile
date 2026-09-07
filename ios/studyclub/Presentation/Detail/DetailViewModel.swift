@@ -28,6 +28,10 @@ final class DetailViewModel {
     private var requestGeneration = 0
     private var hasStartedInitialLoad = false
 
+    convenience init(studyID: Study.ID) {
+        self.init(studyID: studyID, repository: RepositoryFactory.makeStudyRepository())
+    }
+
     init(studyID: Study.ID, repository: any RepositoryProtocol) {
         self.studyID = studyID
         self.repository = repository

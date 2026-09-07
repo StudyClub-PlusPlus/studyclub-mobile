@@ -88,7 +88,7 @@ iOS는 다음 기준으로 구성합니다.
 - Diffable Data Source + Compositional Layout
 - Alamofire + `URLRequestConvertible` Router
 - DTO → Domain Model → ViewState
-- App 영역에서 의존성을 조립하고 화면 전환 시 필요한 의존성을 명시적으로 전달
+- ViewModel에서 RepositoryFactory로 Repository를 생성하고, 화면 전환 시에는 필요한 ID만 전달
 
 자세한 내용은 아래 문서에서 확인할 수 있습니다.
 

@@ -19,10 +19,10 @@ Before changing iOS code, read:
 - iOS uses UIKit and programmatic Auto Layout.
 - The architecture is MVVM + Repository. `R` does not mean Router.
 - Swift Concurrency owns asynchronous operations. Combine is limited to ViewModel-to-View observation through a private subject and read-only publisher; do not use `@Published` for this project.
-- Source dependencies are `Presentation -> Domain` and `Data -> Domain`. Domain imports no UI, reactive, or networking framework.
+- Source dependencies are `Presentation -> Domain` and `Data -> Domain`, with `Presentation -> Data.RepositoryFactory` allowed for repository creation. Domain imports no UI, reactive, or networking framework.
 - DTOs stay inside Data. Repository protocols return Domain models.
-- ViewModels receive dependencies explicitly. Never call `RepositoryFactory` from a ViewModel initializer or default argument.
-- `RepositoryFactory` is a composition helper, not a service locator.
+- App-facing ViewModel initializers obtain repositories through `RepositoryFactory`; ViewControllers do not receive or forward repositories. Keep separate repository-injecting initializers for unit tests.
+- `RepositoryFactory` owns repository/client construction. Do not add mutable global overrides or a generic service locator.
 - Do not add a UseCase, Router, Coordinator, or generic DI container without a concrete second use case and an architecture decision update.
 - Lists and feeds must define loading, content, empty, failure, and retry behavior before implementation.
 - Collection views use stable identifiers and diffable snapshots. Selection never depends on a stale array index.

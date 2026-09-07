@@ -8,16 +8,14 @@ final class MainViewController: UIViewController {
     }
 
     private let viewModel: MainViewModel
-    private let repository: any RepositoryProtocol
     private let collectionView: UICollectionView
     private let stateView = ContentStateView()
     private var dataSource: UICollectionViewDiffableDataSource<Section, Study.ID>!
     private var itemsByID: [Study.ID: StudyListItemViewData] = [:]
     private var cancellables = Set<AnyCancellable>()
 
-    init(viewModel: MainViewModel, repository: any RepositoryProtocol) {
+    init(viewModel: MainViewModel) {
         self.viewModel = viewModel
-        self.repository = repository
         collectionView = UICollectionView(frame: .zero, collectionViewLayout: Self.makeLayout())
         super.init(nibName: nil, bundle: nil)
     }
@@ -149,7 +147,7 @@ extension MainViewController: UICollectionViewDelegate {
             return
         }
 
-        let detailViewModel = DetailViewModel(studyID: studyID, repository: repository)
+        let detailViewModel = DetailViewModel(studyID: studyID)
         let detailViewController = DetailViewController(viewModel: detailViewModel)
         navigationController?.pushViewController(detailViewController, animated: true)
     }

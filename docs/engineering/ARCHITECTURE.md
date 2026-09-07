@@ -5,13 +5,14 @@
 StudyClub iOS starts with three top-level source layers:
 
 ```text
-App -> Data + Presentation
+App -> Presentation
 Presentation -> Domain
+Presentation -> Data.RepositoryFactory (repository creation only)
 Data -> Domain
 Domain -> Foundation only
 ```
 
-`App` is the composition boundary. `SceneDelegate` creates the initial concrete repository, ViewModel, and ViewController. A screen may assemble its immediate next screen from already-injected abstractions when the flow is as small as Main → Detail.
+`SceneDelegate` creates the initial ViewModel and ViewController. Each ViewModel obtains its repository through `RepositoryFactory` in its app-facing initializer. Screens may assemble their immediate next screen when the flow is as small as Main → Detail.
 
 ## Domain
 
@@ -42,11 +43,11 @@ Presentation owns UIKit screens, ViewModels, view state, and display formatting.
 
 ViewControllers own UIKit lifecycle and immediate navigation. They do not decode DTOs or create concrete repository implementations.
 
-Main passes the selected stable ID and its injected repository abstraction to Detail at the ViewController composition site. DetailViewModel performs its own asynchronous detail request. Its category, title, summary, member/status text, and topics are directly readable properties with private setters; a private subject publishes loading/content/failure after display values are updated together. Production detail transport remains unconfigured until a real endpoint and schema are supplied.
+Main passes only the selected stable ID to DetailViewModel, which obtains its own repository through the factory. DetailViewModel performs its own asynchronous detail request. Its category, title, summary, member/status text, and topics are directly readable properties with private setters; a private subject publishes loading/content/failure after display values are updated together. Production detail transport remains unconfigured until a real endpoint and schema are supplied.
 
 ## Composition
 
-`RepositoryFactory` may choose mock or live dependencies based on launch configuration. It is called at an explicit composition site and its result is injected. It must not be reached from arbitrary screens or ViewModels as a global service locator.
+`RepositoryFactory` owns repository/client construction. App-facing ViewModel convenience initializers call it, while separate repository-accepting initializers allow deterministic unit tests. This deliberately permits a Presentation-to-Data dependency only for factory access. The default factory creates a fresh mock repository/client per ViewModel using launch arguments; live construction remains an explicit factory method.
 
 ## Deferred abstractions
 

@@ -23,9 +23,10 @@ The model flow is `DTO -> Domain model -> ViewData/ViewState`:
 - Presentation derives screen-ready `ViewData` and exhaustive `ViewState` from Domain models.
 - ViewData is optional for a simple screen, but when it exists it must contain display meaning only and must not become a second business model.
 
-## Dependency injection
+## Repository creation
 
-- Initializers receive required dependencies explicitly.
+- App-facing ViewModel initializers obtain repositories through `RepositoryFactory`. ViewControllers do not receive or forward repositories.
+- Keep a separate initializer accepting a repository protocol for deterministic unit tests.
 - No dependency factory in a default initializer argument.
 - Tests supply their own repository or client test double.
 - Factories may build object graphs but do not expose mutable global state.

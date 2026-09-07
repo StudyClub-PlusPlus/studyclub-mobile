@@ -19,6 +19,10 @@ final class MainViewModel {
     private var requestGeneration = 0
     private var hasStartedInitialLoad = false
 
+    convenience init() {
+        self.init(repository: RepositoryFactory.makeStudyRepository())
+    }
+
     init(repository: RepositoryProtocol) {
         self.repository = repository
     }
