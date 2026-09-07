@@ -1,15 +1,86 @@
 import UIKit
 
 final class StudyCardCell: UICollectionViewCell {
-    private let categoryLabel = InsetLabel()
-    private let statusLabel = UILabel()
-    private let titleLabel = UILabel()
-    private let summaryLabel = UILabel()
-    private let memberImageView = UIImageView(image: UIImage(systemName: "person.2"))
-    private let memberLabel = UILabel()
-    private let disclosureImageView = UIImageView(image: UIImage(systemName: "chevron.right"))
+    private let categoryLabel = {
+        let view = InsetLabel()
+        view.font = .preferredFont(forTextStyle: .caption1)
+        view.adjustsFontForContentSizeCategory = true
+        view.textColor = AppTheme.Palette.accent
+        view.backgroundColor = AppTheme.Palette.accent.withAlphaComponent(0.10)
+        view.layer.cornerRadius = AppTheme.Radius.control
+        view.layer.cornerCurve = .continuous
+        view.clipsToBounds = true
+        view.numberOfLines = 0
+        return view
+    }()
+    private let statusLabel = {
+        let view = UILabel()
+        view.font = .preferredFont(forTextStyle: .caption1)
+        view.adjustsFontForContentSizeCategory = true
+        view.textColor = AppTheme.Palette.secondaryText
+        view.numberOfLines = 0
+        return view
+    }()
+    private let titleLabel = {
+        let view = UILabel()
+        view.font = .preferredFont(forTextStyle: .headline)
+        view.adjustsFontForContentSizeCategory = true
+        view.textColor = AppTheme.Palette.primaryText
+        view.numberOfLines = 0
+        return view
+    }()
+    private let summaryLabel = {
+        let view = UILabel()
+        view.font = .preferredFont(forTextStyle: .subheadline)
+        view.adjustsFontForContentSizeCategory = true
+        view.textColor = AppTheme.Palette.secondaryText
+        view.numberOfLines = 0
+        return view
+    }()
+    private let memberImageView = {
+        let view = UIImageView(image: UIImage(systemName: "person.2"))
+        view.tintColor = AppTheme.Palette.secondaryText
+        view.setContentHuggingPriority(.required, for: .horizontal)
+        view.isAccessibilityElement = false
+        return view
+    }()
+    private let memberLabel = {
+        let view = UILabel()
+        view.font = .preferredFont(forTextStyle: .caption1)
+        view.adjustsFontForContentSizeCategory = true
+        view.textColor = AppTheme.Palette.secondaryText
+        return view
+    }()
+    private let disclosureImageView = {
+        let view = UIImageView(image: UIImage(systemName: "chevron.right"))
+        view.tintColor = AppTheme.Palette.secondaryText
+        view.setContentHuggingPriority(.required, for: .horizontal)
+        view.isAccessibilityElement = false
+        return view
+    }()
+    private let footerSpacer = UIView()
+    private let footerStack: UIStackView = {
+        let stack = UIStackView()
+        stack.axis = .horizontal
+        stack.alignment = .center
+        stack.spacing = AppTheme.Spacing.small
+        return stack
+    }()
+    private let contentStack: UIStackView = {
+        let stack = UIStackView()
+        stack.axis = .vertical
+        stack.spacing = AppTheme.Spacing.medium
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        return stack
+    }()
     private let headerSpacer = UIView()
-    private let headerStack = UIStackView()
+    private let headerStack = {
+        let view = UIStackView()
+        view.axis = .horizontal
+        view.alignment = .center
+        view.spacing = AppTheme.Spacing.small
+        return view
+    }()
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -37,7 +108,7 @@ final class StudyCardCell: UICollectionViewCell {
         updateHeaderLayout()
     }
 
-    func configure(with item: StudyListItemViewData) {
+    func updateViews(with item: StudyListItemViewData) {
         categoryLabel.text = item.category
         statusLabel.text = item.statusText
         titleLabel.text = item.title
@@ -55,60 +126,20 @@ final class StudyCardCell: UICollectionViewCell {
         isAccessibilityElement = true
         accessibilityTraits = .button
 
-        categoryLabel.font = .preferredFont(forTextStyle: .caption1)
-        categoryLabel.adjustsFontForContentSizeCategory = true
-        categoryLabel.textColor = AppTheme.Palette.accent
-        categoryLabel.backgroundColor = AppTheme.Palette.accent.withAlphaComponent(0.10)
-        categoryLabel.layer.cornerRadius = AppTheme.Radius.control
-        categoryLabel.layer.cornerCurve = .continuous
-        categoryLabel.clipsToBounds = true
-        categoryLabel.numberOfLines = 0
 
-        statusLabel.font = .preferredFont(forTextStyle: .caption1)
-        statusLabel.adjustsFontForContentSizeCategory = true
-        statusLabel.textColor = AppTheme.Palette.secondaryText
-        statusLabel.numberOfLines = 0
 
-        titleLabel.font = .preferredFont(forTextStyle: .headline)
-        titleLabel.adjustsFontForContentSizeCategory = true
-        titleLabel.textColor = AppTheme.Palette.primaryText
-        titleLabel.numberOfLines = 0
 
-        summaryLabel.font = .preferredFont(forTextStyle: .subheadline)
-        summaryLabel.adjustsFontForContentSizeCategory = true
-        summaryLabel.textColor = AppTheme.Palette.secondaryText
-        summaryLabel.numberOfLines = 0
 
-        memberImageView.tintColor = AppTheme.Palette.secondaryText
-        memberImageView.setContentHuggingPriority(.required, for: .horizontal)
-        memberImageView.isAccessibilityElement = false
 
-        memberLabel.font = .preferredFont(forTextStyle: .caption1)
-        memberLabel.adjustsFontForContentSizeCategory = true
-        memberLabel.textColor = AppTheme.Palette.secondaryText
 
-        disclosureImageView.tintColor = AppTheme.Palette.secondaryText
-        disclosureImageView.setContentHuggingPriority(.required, for: .horizontal)
-        disclosureImageView.isAccessibilityElement = false
 
         headerStack.addArrangedSubview(categoryLabel)
         headerStack.addArrangedSubview(headerSpacer)
         headerStack.addArrangedSubview(statusLabel)
-        headerStack.axis = .horizontal
-        headerStack.alignment = .center
-        headerStack.spacing = AppTheme.Spacing.small
 
-        let footerSpacer = UIView()
-        let footerStack = UIStackView(arrangedSubviews: [memberImageView, memberLabel, footerSpacer, disclosureImageView])
-        footerStack.axis = .horizontal
-        footerStack.alignment = .center
-        footerStack.spacing = AppTheme.Spacing.small
-
-        let contentStack = UIStackView(arrangedSubviews: [headerStack, titleLabel, summaryLabel, footerStack])
-        contentStack.axis = .vertical
-        contentStack.spacing = AppTheme.Spacing.medium
+        [memberImageView, memberLabel, footerSpacer, disclosureImageView].forEach(footerStack.addArrangedSubview)
+        [headerStack, titleLabel, summaryLabel, footerStack].forEach(contentStack.addArrangedSubview)
         contentStack.setCustomSpacing(AppTheme.Spacing.small, after: titleLabel)
-        contentStack.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(contentStack)
 
         NSLayoutConstraint.activate([

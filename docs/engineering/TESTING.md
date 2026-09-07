@@ -4,8 +4,8 @@
 
 - DTO-to-Domain mapping, including optional/default handling and invalid member counts
 - repository success, empty, error propagation, cancellation behavior, and duplicate identifier rejection
-- ViewModel loading-to-content, loading-to-empty, loading-to-failure, and retry-to-success transitions
-- stale-request protection
+- ViewModel initialization triggers one request; loading-to-content/empty/failure transitions
+- Display values are ready before notification and available to late subscribers
 - display formatting that contains non-trivial policy
 
 Test doubles are injected through protocols. Tests must not call the static factory from the system under test.
@@ -17,7 +17,6 @@ Mock behavior is selected with deterministic launch arguments:
 - `--mock-scenario content`
 - `--mock-scenario empty`
 - `--mock-scenario failure`
-- `--mock-scenario failure-once`
 - `--mock-scenario loading`
 - `--mock-scenario detail-failure`
 - `--mock-scenario detail-loading`
@@ -26,10 +25,10 @@ Required smoke flows:
 
 1. Content launches and the second study opens the matching Detail.
 2. Empty state renders without cells.
-3. Failure state exposes retry, and `failure-once` resolves to content after retry.
+3. Main failure and empty states expose no retry/reload action.
 4. Loading remains visible while a deterministic long-running request is active.
 5. Detail failure has no retry button; both failure and loading allow back navigation.
-6. Detail screenshots are retained in XCTest result attachments.
+6. Main and Detail screenshots are retained in XCTest result attachments.
 
 ## Verification order
 

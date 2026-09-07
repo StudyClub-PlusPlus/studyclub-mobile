@@ -5,7 +5,7 @@
 3. Add DTOs, mappers, clients, and repository implementation changes inside Data.
 4. Add Presentation ViewState, ViewModel, UIKit view/controller, and accessibility identifiers.
 5. Obtain repositories through RepositoryFactory in app-facing ViewModel initializers; keep protocol-injecting initializers for unit tests.
-6. Add loading/content/empty/failure/retry policy for every async list or feed.
+6. Define loading/content/empty/failure behavior. Current screens load once from ViewModel init; retry and request management are deferred until required.
 7. Add mapper, repository, ViewModel, and user-flow tests.
 8. Update architecture or convention docs if a dependency rule changes.
 9. Build, test, run the Simulator flow, and review fresh visual evidence.

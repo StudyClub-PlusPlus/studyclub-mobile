@@ -22,9 +22,9 @@ final class MainViewModelTests: XCTestCase {
         let repository = TestStudyRepository(behaviors: [.success([expected])])
         let viewModel = MainViewModel(repository: repository)
 
-        viewModel.loadIfNeeded()
-        await waitUntil { viewModel.currentState == .content([StudyListItemViewData(study: expected)]) }
+        await waitUntil { viewModel.currentState == .content }
 
+        XCTAssertEqual(viewModel.items, [StudyListItemViewData(study: expected)])
         XCTAssertEqual(viewModel.study(for: "selected"), expected)
     }
 
@@ -32,44 +32,32 @@ final class MainViewModelTests: XCTestCase {
         let repository = TestStudyRepository(behaviors: [.success([])])
         let viewModel = MainViewModel(repository: repository)
 
-        viewModel.loadIfNeeded()
         await waitUntil { viewModel.currentState == .empty }
     }
 
-    func testFailureThenRetryTransitionsThroughLoadingToContent() async {
-        let expected = makeStudy(id: "retry", title: "다시 만난 스터디")
-        let repository = TestStudyRepository(behaviors: [
-            .failure,
-            .delayedSuccess([expected], nanoseconds: 50_000_000, ignoresCancellation: false)
-        ])
+    func testFailureEndsLoadingWithoutRetry() async {
+        let repository = TestStudyRepository(behaviors: [.failure])
         let viewModel = MainViewModel(repository: repository)
-
-        viewModel.loadIfNeeded()
         await waitUntil { viewModel.currentState == .failure }
-
-        viewModel.retry()
-        XCTAssertEqual(viewModel.currentState, .loading)
-        await waitUntil { viewModel.currentState == .content([StudyListItemViewData(study: expected)]) }
+        XCTAssertTrue(viewModel.items.isEmpty)
+        let requests = await repository.requestCount
+        XCTAssertEqual(requests, 1)
     }
 
-    func testCancelledStaleRequestCannotOverwriteRetry() async {
-        let stale = makeStudy(id: "stale", title: "오래된 응답")
-        let fresh = makeStudy(id: "fresh", title: "최신 응답")
-        let repository = TestStudyRepository(behaviors: [
-            .delayedSuccess([stale], nanoseconds: 120_000_000, ignoresCancellation: true),
-            .success([fresh])
-        ])
+    func testLateSubscriberReadsItemsAfterContentWasPublished() async {
+        let expected = makeStudy(id: "late", title: "이미 받은 응답")
+        let repository = TestStudyRepository(behaviors: [.success([expected])])
         let viewModel = MainViewModel(repository: repository)
-
-        viewModel.loadIfNeeded()
-        try? await Task.sleep(nanoseconds: 10_000_000)
-        viewModel.retry()
-
-        await waitUntil { viewModel.currentState == .content([StudyListItemViewData(study: fresh)]) }
-        try? await Task.sleep(nanoseconds: 150_000_000)
-
-        XCTAssertEqual(viewModel.currentState, .content([StudyListItemViewData(study: fresh)]))
-        XCTAssertNil(viewModel.study(for: "stale"))
+        await waitUntil { viewModel.currentState == .content }
+        var receivedStates: [MainViewState] = []
+        let subscription = viewModel.statePublisher.sink { state in
+            receivedStates.append(state)
+            XCTAssertEqual(viewModel.items, [StudyListItemViewData(study: expected)])
+        }
+        XCTAssertEqual(receivedStates, [.content])
+        let requests = await repository.requestCount
+        XCTAssertEqual(requests, 1)
+        withExtendedLifetime(subscription) {}
     }
 
     func testDuplicateIdentifiersTransitionToFailureInsteadOfCrashing() async {
@@ -77,7 +65,6 @@ final class MainViewModelTests: XCTestCase {
         let repository = TestStudyRepository(behaviors: [.success([duplicate, duplicate])])
         let viewModel = MainViewModel(repository: repository)
 
-        viewModel.loadIfNeeded()
         await waitUntil { viewModel.currentState == .failure }
 
         XCTAssertNil(viewModel.study(for: "duplicate"))
@@ -118,9 +105,9 @@ private actor TestStudyRepository: RepositoryProtocol {
     enum Behavior: Sendable {
         case success([Study])
         case failure
-        case delayedSuccess([Study], nanoseconds: UInt64, ignoresCancellation: Bool)
     }
 
+    private(set) var requestCount = 0
     private var behaviors: [Behavior]
 
     init(behaviors: [Behavior]) {
@@ -128,6 +115,7 @@ private actor TestStudyRepository: RepositoryProtocol {
     }
 
     func fetchStudies() async throws -> [Study] {
+        requestCount += 1
         guard !behaviors.isEmpty else { return [] }
         let behavior = behaviors.removeFirst()
 
@@ -136,13 +124,7 @@ private actor TestStudyRepository: RepositoryProtocol {
             return studies
         case .failure:
             throw RepositoryError.unavailable
-        case let .delayedSuccess(studies, nanoseconds, ignoresCancellation):
-            if ignoresCancellation {
-                try? await Task.sleep(nanoseconds: nanoseconds)
-            } else {
-                try await Task.sleep(nanoseconds: nanoseconds)
-            }
-            return studies
+
         }
     }
 }

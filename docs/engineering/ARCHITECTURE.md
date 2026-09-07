@@ -39,15 +39,17 @@ A DTO is a parsing contract, not an application model. It never crosses the repo
 
 ## Presentation
 
-Presentation owns UIKit screens, ViewModels, view state, and display formatting. ViewModels depend on Domain protocols. They use async repository calls and expose read-only Combine publishers backed by a private `CurrentValueSubject`. ViewControllers subscribe with `.sink` in `viewDidLoad` and own the resulting `AnyCancellable` values.
+Presentation owns UIKit screens, ViewModels, view state, and display formatting. ViewModels depend on Domain protocols. Each starts one async repository call from init through a private method, stores its display values, and exposes status notifications through a read-only Combine publisher backed by a private `CurrentValueSubject`. ViewControllers subscribe with `.sink` in `viewDidLoad`, own the resulting `AnyCancellable` values, and call `updateViews()` to read the ViewModel. Requests are not retained or cancelled by the ViewModel in the current one-request screens.
 
 ViewControllers own UIKit lifecycle and immediate navigation. They do not decode DTOs or create concrete repository implementations.
 
-Main passes only the selected stable ID to DetailViewModel, which obtains its own repository through the factory. DetailViewModel performs its own asynchronous detail request. Its category, title, summary, member/status text, and topics are directly readable properties with private setters; a private subject publishes loading/content/failure after display values are updated together. Production detail transport remains unconfigured until a real endpoint and schema are supplied.
+Main passes only the selected stable ID to DetailViewModel, which obtains its own repository through the factory and starts one asynchronous detail request from init. Its category, title, summary, member/status text, and topics are directly readable properties with private setters; a private subject publishes loading/content/failure after display values are updated together. Production detail transport remains unconfigured until a real endpoint and schema are supplied.
 
 ## Composition
 
-`RepositoryFactory` owns repository/client construction. App-facing ViewModel convenience initializers call it, while separate repository-accepting initializers allow deterministic unit tests. This deliberately permits a Presentation-to-Data dependency only for factory access. The default factory creates a fresh mock repository/client per ViewModel using launch arguments; live construction remains an explicit factory method.
+`RepositoryFactory` owns repository/client construction. App-facing ViewModel convenience initializers call it, while separate repository-accepting initializers allow deterministic unit tests. Repository operations still use protocols and return Domain models; DTOs and concrete repository construction stay inside Data. This deliberately permits a Presentation-to-Data dependency only for factory access, replacing the earlier composition-root-only rule to avoid forwarding repositories through screens.
+
+The current default factory creates a fresh mock repository/client per ViewModel using launch arguments; it does not share a singleton or cache. Live construction remains a separate explicit factory method.
 
 ## Deferred abstractions
 

@@ -11,15 +11,58 @@ final class ContentStateView: UIView {
         case failure
     }
 
-    var onAction: (() -> Void)?
+    private let activityIndicator = {
+        let view = UIActivityIndicatorView(style: .medium)
+        view.hidesWhenStopped = true
+        view.color = AppTheme.Palette.accent
+        view.accessibilityIdentifier = "main.loading.indicator"
+        return view
+    }()
+    private let imageView = {
+        let view = UIImageView()
+        view.contentMode = .scaleAspectFit
+        view.preferredSymbolConfiguration = UIImage.SymbolConfiguration(pointSize: 32, weight: .regular)
+        view.isAccessibilityElement = false
+        return view
+    }()
+    private let titleLabel = {
+        let view = UILabel()
+        view.font = .preferredFont(forTextStyle: .headline)
+        view.textColor = AppTheme.Palette.primaryText
+        view.textAlignment = .center
+        view.numberOfLines = 0
+        view.adjustsFontForContentSizeCategory = true
+        return view
+    }()
+    private let messageLabel = {
+        let view = UILabel()
+        view.font = .preferredFont(forTextStyle: .subheadline)
+        view.textColor = AppTheme.Palette.secondaryText
+        view.textAlignment = .center
+        view.numberOfLines = 0
+        view.adjustsFontForContentSizeCategory = true
+        return view
+    }()
+    private let scrollView = {
+        let view = UIScrollView()
+        view.alwaysBounceVertical = true
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    private let scrollContentView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
 
-    private let activityIndicator = UIActivityIndicatorView(style: .medium)
-    private let imageView = UIImageView()
-    private let titleLabel = UILabel()
-    private let messageLabel = UILabel()
-    private let actionButton = UIButton(type: .system)
-    private let scrollView = UIScrollView()
-    private let scrollContentView = UIView()
+    private let stackView: UIStackView = {
+        let stack = UIStackView()
+        stack.axis = .vertical
+        stack.alignment = .center
+        stack.spacing = AppTheme.Spacing.medium
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        return stack
+    }()
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -31,11 +74,10 @@ final class ContentStateView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func render(_ state: State, context: Context = .main) {
+    func updateViews(_ state: State, context: Context = .main) {
         isHidden = false
         activityIndicator.stopAnimating()
         imageView.isHidden = false
-        actionButton.isHidden = false
 
         switch state {
         case .loading:
@@ -44,26 +86,20 @@ final class ContentStateView: UIView {
             imageView.isHidden = true
             titleLabel.text = "스터디를 불러오는 중이에요"
             messageLabel.text = "잠시만 기다려 주세요."
-            actionButton.isHidden = true
         case .empty:
             accessibilityIdentifier = "main.state.empty"
             imageView.image = UIImage(systemName: "books.vertical")
             imageView.tintColor = AppTheme.Palette.secondaryText
             titleLabel.text = "아직 열린 스터디가 없어요"
-            messageLabel.text = "새로운 모임이 생겼는지 다시 확인해 보세요."
-            actionButton.configuration?.title = "새로고침"
-            actionButton.accessibilityLabel = "스터디 목록 새로고침"
+            messageLabel.text = "등록된 스터디가 없어요."
         case .failure:
             accessibilityIdentifier = "main.state.failure"
             imageView.image = UIImage(systemName: "exclamationmark.circle")
             imageView.tintColor = AppTheme.Palette.error
             titleLabel.text = "목록을 불러오지 못했어요"
-            messageLabel.text = "연결을 확인한 뒤 다시 시도해 주세요."
-            actionButton.configuration?.title = "다시 시도"
-            actionButton.accessibilityLabel = "스터디 목록 다시 시도"
+            messageLabel.text = "지금은 목록을 확인할 수 없어요."
         }
         let prefix = context == .detail ? "detail" : "main"
-        actionButton.accessibilityIdentifier = "\(prefix).state.action"
         activityIndicator.accessibilityIdentifier = "\(prefix).loading.indicator"
         if context == .detail {
             switch state {
@@ -74,7 +110,6 @@ final class ContentStateView: UIView {
                 accessibilityIdentifier = "detail.state.failure"
                 titleLabel.text = "상세 정보를 불러오지 못했어요"
                 messageLabel.text = "이전 화면으로 돌아가 주세요."
-                actionButton.isHidden = true
             case .empty:
                 break
             }
@@ -84,59 +119,13 @@ final class ContentStateView: UIView {
     private func configureView() {
         backgroundColor = AppTheme.Palette.canvas
 
-        activityIndicator.hidesWhenStopped = true
-        activityIndicator.color = AppTheme.Palette.accent
-        activityIndicator.accessibilityIdentifier = "main.loading.indicator"
 
-        imageView.contentMode = .scaleAspectFit
-        imageView.preferredSymbolConfiguration = UIImage.SymbolConfiguration(pointSize: 32, weight: .regular)
-        imageView.isAccessibilityElement = false
 
-        titleLabel.font = .preferredFont(forTextStyle: .headline)
-        titleLabel.textColor = AppTheme.Palette.primaryText
-        titleLabel.textAlignment = .center
-        titleLabel.numberOfLines = 0
-        titleLabel.adjustsFontForContentSizeCategory = true
 
-        messageLabel.font = .preferredFont(forTextStyle: .subheadline)
-        messageLabel.textColor = AppTheme.Palette.secondaryText
-        messageLabel.textAlignment = .center
-        messageLabel.numberOfLines = 0
-        messageLabel.adjustsFontForContentSizeCategory = true
 
-        var buttonConfiguration = UIButton.Configuration.filled()
-        buttonConfiguration.baseBackgroundColor = AppTheme.Palette.accent
-        buttonConfiguration.baseForegroundColor = .white
-        buttonConfiguration.cornerStyle = .medium
-        buttonConfiguration.contentInsets = NSDirectionalEdgeInsets(
-            top: AppTheme.Spacing.medium,
-            leading: AppTheme.Spacing.regular,
-            bottom: AppTheme.Spacing.medium,
-            trailing: AppTheme.Spacing.regular
-        )
-        actionButton.configuration = buttonConfiguration
-        actionButton.accessibilityIdentifier = "main.state.action"
-        actionButton.addAction(UIAction { [weak self] _ in
-            self?.onAction?()
-        }, for: .touchUpInside)
-
-        let stackView = UIStackView(arrangedSubviews: [
-            activityIndicator,
-            imageView,
-            titleLabel,
-            messageLabel,
-            actionButton
-        ])
-        stackView.axis = .vertical
-        stackView.alignment = .center
-        stackView.spacing = AppTheme.Spacing.medium
+        [activityIndicator, imageView, titleLabel, messageLabel].forEach(stackView.addArrangedSubview)
         stackView.setCustomSpacing(AppTheme.Spacing.large, after: imageView)
-        stackView.setCustomSpacing(AppTheme.Spacing.xLarge, after: messageLabel)
-        stackView.translatesAutoresizingMaskIntoConstraints = false
 
-        scrollView.alwaysBounceVertical = true
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
-        scrollContentView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(scrollView)
         scrollView.addSubview(scrollContentView)
         scrollContentView.addSubview(stackView)
@@ -147,8 +136,6 @@ final class ContentStateView: UIView {
         NSLayoutConstraint.activate([
             imageView.widthAnchor.constraint(equalToConstant: 44),
             imageView.heightAnchor.constraint(equalToConstant: 44),
-            actionButton.heightAnchor.constraint(greaterThanOrEqualToConstant: 44),
-            actionButton.widthAnchor.constraint(greaterThanOrEqualToConstant: 120),
             scrollView.topAnchor.constraint(equalTo: topAnchor),
             scrollView.leadingAnchor.constraint(equalTo: leadingAnchor),
             scrollView.trailingAnchor.constraint(equalTo: trailingAnchor),

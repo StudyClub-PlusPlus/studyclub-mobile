@@ -37,10 +37,10 @@ Use the shared `AppTheme` source rather than one-off values.
 ## State anatomy
 
 - Loading: centered activity indicator and short Korean status label
-- Empty: neutral system symbol, “아직 열린 스터디가 없어요”, supporting copy, and reload action
-- Failure: error system symbol, “목록을 불러오지 못했어요”, supporting copy, and retry action
+- Empty: neutral system symbol, “아직 열린 스터디가 없어요”, and supporting copy
+- Failure: error system symbol, “목록을 불러오지 못했어요”, and supporting copy
 - State surfaces replace the collection content and remain centered inside the safe content area
-- Retry uses one clear filled action with a minimum 44-point target
+- Retry and reload controls are deferred to later common ErrorView work
 
 ## Detail anatomy
 
@@ -52,8 +52,7 @@ Use the shared `AppTheme` source rather than one-off values.
 
 ## Interaction
 
-- The app loads Main once on first appearance.
-- A retry returns to loading before resolving.
+- Main and Detail each start one request when their ViewModel is initialized.
 - Tapping any visible card pushes exactly that item’s Detail.
 - Use standard navigation transitions and system highlight behavior. Do not add decorative entrance animations.
 - Respect Reduce Motion automatically by relying on UIKit system transitions.
@@ -63,7 +62,7 @@ Use the shared `AppTheme` source rather than one-off values.
 - All text uses Dynamic Type and can wrap without clipping.
 - Cards expose a combined label and the button trait; the disclosure image is decorative.
 - State images are hidden from VoiceOver when the adjacent text conveys the same meaning.
-- Retry/reload controls have explicit labels and at least 44 by 44 points.
+- Future interactive controls require explicit labels and at least 44 by 44 points.
 - Color never carries status alone. Light and dark appearances use semantic colors.
 - Korean copy must not clip, truncate important nouns, or leave single particles on isolated lines at accessibility text sizes.
 
@@ -75,7 +74,7 @@ Enumerate and capture these surfaces after the last UI edit:
 2. Detail for the second study
 3. Main empty
 4. Main failure
-5. Main loading or retry transition where deterministically observable
+5. Main loading
 
 Check safe areas, card alignment, Korean wrapping, dark-mode semantics, Dynamic Type behavior, VoiceOver metadata, state exclusivity, and correct Detail content. Any blocking finding must be fixed and re-captured before completion.
 

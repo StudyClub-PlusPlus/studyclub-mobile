@@ -11,6 +11,7 @@ final class StudyClubFlowUITests: XCTestCase {
         let selectedStudy = app.descendants(matching: .any)["main.study.algorithm"]
 
         XCTAssertTrue(selectedStudy.waitForExistence(timeout: 3))
+        capture(app, name: "main-content")
         selectedStudy.tap()
 
         let detailTitle = app.staticTexts["detail.title"]
@@ -28,21 +29,18 @@ final class StudyClubFlowUITests: XCTestCase {
 
         XCTAssertTrue(app.otherElements["main.state.empty"].waitForExistence(timeout: 3))
         XCTAssertFalse(app.otherElements["main.state.failure"].exists)
+        XCTAssertFalse(app.buttons["main.state.action"].exists)
+        capture(app, name: "main-empty")
         XCTAssertFalse(app.collectionViews["main.collection"].isHittable)
     }
 
     @MainActor
-    func testFailureRetryLoadsContent() {
-        let app = launchApp(scenario: "failure-once")
-        let failureState = app.otherElements["main.state.failure"]
-        XCTAssertTrue(failureState.waitForExistence(timeout: 3))
-
-        let retryButton = app.buttons["main.state.action"]
-        XCTAssertTrue(retryButton.waitForExistence(timeout: 1))
-        retryButton.tap()
-
-        XCTAssertTrue(app.descendants(matching: .any)["main.study.ios-architecture"].waitForExistence(timeout: 3))
-        XCTAssertFalse(failureState.exists)
+    func testFailureHasNoRetryAction() {
+        let app = launchApp(scenario: "failure")
+        XCTAssertTrue(app.otherElements["main.state.failure"].waitForExistence(timeout: 3))
+        XCTAssertFalse(app.buttons["main.state.action"].exists)
+        XCTAssertFalse(app.collectionViews["main.collection"].isHittable)
+        capture(app, name: "main-failure")
     }
 
     @MainActor
@@ -50,6 +48,7 @@ final class StudyClubFlowUITests: XCTestCase {
         let app = launchApp(scenario: "loading")
 
         XCTAssertTrue(app.otherElements["main.state.loading"].waitForExistence(timeout: 2))
+        capture(app, name: "main-loading")
         XCTAssertFalse(app.collectionViews["main.collection"].isHittable)
     }
 

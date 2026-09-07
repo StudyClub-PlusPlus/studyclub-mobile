@@ -8,15 +8,25 @@ final class MainViewController: UIViewController {
     }
 
     private let viewModel: MainViewModel
-    private let collectionView: UICollectionView
-    private let stateView = ContentStateView()
+    private let collectionView: UICollectionView = {
+        let view = UICollectionView(frame: .zero, collectionViewLayout: MainViewController.makeLayout())
+        view.backgroundColor = .clear
+        view.alwaysBounceVertical = true
+        view.accessibilityIdentifier = "main.collection"
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    private let stateView: ContentStateView = {
+        let view = ContentStateView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
     private var dataSource: UICollectionViewDiffableDataSource<Section, Study.ID>!
     private var itemsByID: [Study.ID: StudyListItemViewData] = [:]
     private var cancellables = Set<AnyCancellable>()
 
     init(viewModel: MainViewModel) {
         self.viewModel = viewModel
-        collectionView = UICollectionView(frame: .zero, collectionViewLayout: Self.makeLayout())
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -30,7 +40,6 @@ final class MainViewController: UIViewController {
         configureView()
         configureDataSource()
         bindViewModel()
-        viewModel.loadIfNeeded()
     }
 
     private func configureView() {
@@ -39,16 +48,7 @@ final class MainViewController: UIViewController {
         navigationController?.navigationBar.prefersLargeTitles = true
         view.backgroundColor = AppTheme.Palette.canvas
 
-        collectionView.backgroundColor = .clear
-        collectionView.alwaysBounceVertical = true
         collectionView.delegate = self
-        collectionView.accessibilityIdentifier = "main.collection"
-        collectionView.translatesAutoresizingMaskIntoConstraints = false
-
-        stateView.translatesAutoresizingMaskIntoConstraints = false
-        stateView.onAction = { [weak self] in
-            self?.viewModel.retry()
-        }
 
         view.addSubview(collectionView)
         view.addSubview(stateView)
@@ -68,7 +68,7 @@ final class MainViewController: UIViewController {
     private func configureDataSource() {
         let registration = UICollectionView.CellRegistration<StudyCardCell, StudyListItemViewData> {
             cell, _, item in
-            cell.configure(with: item)
+            cell.updateViews(with: item)
         }
 
         dataSource = UICollectionViewDiffableDataSource<Section, Study.ID>(collectionView: collectionView) {
@@ -90,18 +90,19 @@ final class MainViewController: UIViewController {
     private func bindViewModel() {
         viewModel.statePublisher
             .removeDuplicates()
-            .sink { [weak self] state in
-                self?.render(state)
+            .sink { [weak self] _ in
+                self?.updateViews()
             }
             .store(in: &cancellables)
     }
 
-    private func render(_ state: MainViewState) {
-        switch state {
+    private func updateViews() {
+        switch viewModel.currentState {
         case .loading:
             collectionView.isHidden = true
-            stateView.render(.loading)
-        case let .content(items):
+            stateView.updateViews(.loading)
+        case .content:
+            let items = viewModel.items
             itemsByID = Dictionary(uniqueKeysWithValues: items.map { ($0.id, $0) })
             stateView.isHidden = true
             collectionView.isHidden = false
@@ -111,10 +112,10 @@ final class MainViewController: UIViewController {
             dataSource.apply(snapshot, animatingDifferences: view.window != nil)
         case .empty:
             collectionView.isHidden = true
-            stateView.render(.empty)
+            stateView.updateViews(.empty)
         case .failure:
             collectionView.isHidden = true
-            stateView.render(.failure)
+            stateView.updateViews(.failure)
         }
     }
 

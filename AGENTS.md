@@ -24,7 +24,8 @@ Before changing iOS code, read:
 - App-facing ViewModel initializers obtain repositories through `RepositoryFactory`; ViewControllers do not receive or forward repositories. Keep separate repository-injecting initializers for unit tests.
 - `RepositoryFactory` owns repository/client construction. Do not add mutable global overrides or a generic service locator.
 - Do not add a UseCase, Router, Coordinator, or generic DI container without a concrete second use case and an architecture decision update.
-- Lists and feeds must define loading, content, empty, failure, and retry behavior before implementation.
+- Lists and feeds define loading, content, empty, and failure behavior. Current screens request once from ViewModel init via a private fetch method; retry, refresh, and Task management are deferred until needed.
+- Store fixed views with their default styling in private let initialization closures. configureView handles hierarchy and layout together; updateViews applies display data. ViewControllers use Combine as a notification and read values from the ViewModel.
 - Collection views use stable identifiers and diffable snapshots. Selection never depends on a stale array index.
 - Naming examples in this repository are provisional. Preserve ownership and dependency rules even when names change.
 
@@ -41,7 +42,7 @@ Before changing iOS code, read:
 - Project and tests build from the outer monorepo.
 - No nested `.git`, `xcuserdata`, secret, or generated build output is tracked.
 - New DTOs do not escape Data and new concrete repositories do not leak into Presentation.
-- Async work has cancellation or stale-result protection.
+- Async work matches its request policy. Current one-request ViewModels use weak captures and need no retained Task or request-generation counter; revisit concurrency protection when adding repeated requests.
 - Accessibility labels, Dynamic Type, safe areas, and 44-point targets are verified.
 - Documentation describes the implementation that actually shipped.
 - The handoff separates verified evidence, decisions, external unknowns, and uncommitted work.

@@ -1,28 +1,18 @@
 # UI State Policy
 
-Every asynchronously loaded list or feed must model these states explicitly:
+Main models loading, content, empty, and failure explicitly. Detail models loading, content, and failure; zero topics is valid detail content.
 
-```text
-loading -> content(non-empty)
-        -> empty
-        -> failure
-failure --retry--> loading
-```
-
-## Rules
-
-- `content` cannot contain an empty collection; an empty result becomes `empty`.
-- Loading, background state, and collection content are mutually exclusive.
-- Initial load happens once per screen instance unless product policy says otherwise.
-- Retry emits loading immediately and starts exactly one new request.
-- Cancel or identity-guard the prior task so stale work cannot overwrite a newer result.
-- Preserve stable item identifiers across snapshots.
-- Select by the diffable item identifier, never a stored array index.
-- Failure copy is human-readable and exposes a recovery action when recovery is possible.
-- Empty is a valid server result, not an error.
+- MainViewModel and DetailViewModel each start one request from init through a private fetch method.
+- No public load method, retry, refresh, request generation counter, or ViewModel Task cancellation is needed in this slice.
+- Tasks capture their ViewModel weakly. Requests may finish after the screen is closed.
+- Future retry and shared ErrorView work must define overlapping-request and cancellation policy when introduced.
+- ViewModels store display values before publishing a status notification through a private CurrentValueSubject and read-only publisher.
+- ViewControllers use notifications to call updateViews(), which reads the ViewModel's current values. CurrentValueSubject replays status to late subscribers.
+- Loading, content, empty, and failure surfaces are mutually exclusive.
+- Main content requires non-empty items. Empty is a valid successful response.
+- Select by stable diffable item identifier, never a stored array index. Missing or mismatched detail identity is failure.
+- Failure ends loading and shows human-readable copy; no retry or reload controls are offered yet.
 
 ## Future stale-content policy
 
-Detail uses loading, content, and failure without retry. Its six display values live directly on the ViewModel as read-only-to-consumers properties; the private subject publishes only load status after all display fields are updated. Empty topics is valid content. Missing or mismatched study identity is failure. DetailViewModel starts one request from init via private fetchDetail(). No public load method, load flag, Task retention or cancellation is needed. Weak captures allow the ViewModel to be released while the request finishes. CurrentValueSubject replays status to late subscribers.
-
-When cached or paginated content is introduced, define whether refresh failure preserves existing content before implementation. The current mock scaffold has no cache and therefore uses mutually exclusive terminal states.
+If refresh, caching, pagination, or retry is added, decide how existing content and overlapping requests behave before implementation.

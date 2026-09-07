@@ -2,7 +2,7 @@ import Foundation
 
 enum MainViewState: Equatable {
     case loading
-    case content([StudyListItemViewData])
+    case content
     case empty
     case failure
 }

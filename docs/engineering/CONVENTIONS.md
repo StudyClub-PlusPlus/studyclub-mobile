@@ -35,7 +35,7 @@ The model flow is `DTO -> Domain model -> ViewData/ViewState`:
 
 - Repository operations use `async throws`.
 - UI-facing ViewModels are `@MainActor`.
-- A ViewModel owns and cancels its current unstructured `Task` when needed.
+- Current screens fetch once from ViewModel init via a private method. Do not add load flags, retry, Task retention, or cancellation management until the feature requires them.
 - Domain values crossing concurrency boundaries conform to `Sendable` where practical.
 - ViewModels keep mutable state in a private `CurrentValueSubject` when the current value must replay to a newly bound view.
 - ViewControllers subscribe with `.sink` during `viewDidLoad` and retain the subscription in `Set<AnyCancellable>`.
@@ -47,8 +47,8 @@ The model flow is `DTO -> Domain model -> ViewData/ViewState`:
 - Build views in code with Auto Layout; set `translatesAutoresizingMaskIntoConstraints = false` explicitly.
 - Use semantic colors, preferred fonts, safe areas, and self-sizing layouts.
 - Keep reusable visual constants in `AppTheme`.
-- Detail stores views as `private let` properties with fixed styling in initialization closures.
-- `configureView()` adds subviews and sets constraints and spacing together; `updateViews()` reads display values from the ViewModel after a Combine notification. Update all display values before publishing the notification.
+- Screens, cells, and shared views store fixed views as `private let` properties with fixed styling in initialization closures. Data-driven rows may use a local factory.
+- `configureView()` adds subviews and sets constraints and spacing together; `updateViews()` reads display values from the ViewModel after a Combine notification. Update all display values before publishing the notification. Cells and shared views also use `updateViews` for data application.
 - Give user-visible controls and content stable accessibility identifiers when UI tests need them.
 
 ## Errors and copy

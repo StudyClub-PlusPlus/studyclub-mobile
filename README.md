@@ -27,7 +27,7 @@ iOS를 먼저 만들고 Android를 나중에 만들면, 그사이에 정해지�
 - UIKit 기반 Main → Detail 화면
 - Main 화면의 mock 목록
 - Diffable Data Source와 Compositional Layout
-- loading, content, empty, failure 상태와 retry
+- loading, content, empty, failure 상태 표시
 - MVVM + Repository 구조
 - Swift Concurrency를 사용한 비동기 처리
 - Combine의 Subject를 사용한 ViewModel → View 바인딩
@@ -63,7 +63,7 @@ studyclub-mobile/
 당분간은 다음 순서로 작업합니다.
 
 1. iOS에서 기능을 작게 나누어 구현합니다.
-2. 정상 화면만 보지 않고 loading, empty, failure, retry까지 확인합니다.
+2. 정상 화면과 loading, empty, failure를 확인합니다. 재시도 UI는 공통 ErrorView 작업에서 추가합니다.
 3. Android에서도 같아야 하는 화면 흐름과 데이터 처리 방식을 문서에 남깁니다.
 4. Android를 만들 때는 iOS 코드와 문서를 참고하되 Android 방식으로 다시 구현합니다.
 5. 두 앱의 화면 흐름, 에러 처리, 선택 결과가 같은지 테스트합니다.
@@ -82,12 +82,12 @@ iOS는 다음 기준으로 구성합니다.
 
 - UIKit + Code-based Auto Layout
 - MVVM + Repository
-- Domain / Data / Presenter 상위 레이어
+- Domain / Data / Presentation 상위 레이어
 - Swift Concurrency
 - Combine Subject 기반 바인딩
 - Diffable Data Source + Compositional Layout
 - Alamofire + `URLRequestConvertible` Router
-- DTO → Domain Model → ViewState
+- DTO → Domain Model → ViewModel의 표시값, Combine은 상태 변경 알림으로 사용
 - ViewModel에서 RepositoryFactory로 Repository를 생성하고, 화면 전환 시에는 필요한 ID만 전달
 
 자세한 내용은 아래 문서에서 확인할 수 있습니다.

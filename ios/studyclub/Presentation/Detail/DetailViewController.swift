@@ -166,9 +166,9 @@ final class DetailViewController: UIViewController {
                 self.scrollView.isHidden = state != .content
                 switch state {
                 case .loading:
-                    self.stateView.render(.loading, context: .detail)
+                    self.stateView.updateViews(.loading, context: .detail)
                 case .failure:
-                    self.stateView.render(.failure, context: .detail)
+                    self.stateView.updateViews(.failure, context: .detail)
                 case .content:
                     self.stateView.isHidden = true
                     self.updateViews()
