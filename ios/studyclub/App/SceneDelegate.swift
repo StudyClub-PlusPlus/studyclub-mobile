@@ -12,7 +12,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         let repository: RepositoryProtocol = RepositoryFactory.makeStudyRepository()
         let viewModel = MainViewModel(repository: repository)
-        let mainViewController = MainViewController(viewModel: viewModel)
+        let mainViewController = MainViewController(viewModel: viewModel, repository: repository)
         let navigationController = UINavigationController(rootViewController: mainViewController)
 
         let window = UIWindow(windowScene: windowScene)

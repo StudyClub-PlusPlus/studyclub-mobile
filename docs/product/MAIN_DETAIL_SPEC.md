@@ -23,7 +23,7 @@ Main states:
 - Empty: the request succeeded with no study.
 - Failure: the request failed and the user can retry.
 
-Selecting an item opens Detail for that exact stable ID and content. The selected item is the source for the first Detail version; Detail does not refetch.
+Selecting an item opens Detail for that exact stable ID. Detail fetches independently by ID; the list payload is not its content source.
 
 ## Detail
 
@@ -35,7 +35,11 @@ Detail presents:
 - learning topics
 - standard back navigation
 
-The first version has no join action, editing, persistence, or independent network lifecycle.
+Detail loads once per screen instance and exposes loading, content, and failure with retry. Retry immediately hides content and starts one new request. Cancellation and request identity checks prevent older responses from replacing newer results. An unknown or mismatched ID is a failure; zero topics is valid content.
+
+There is no join action, editing, or persistence.
+
+The client and repository expose separate list and detail operations: `fetchStudies()` and `fetchStudy(id:)`. Mock detail lookup uses an independent request and the existing sample fields. Production detail URL, authentication and response schema are unknown: the live client explicitly throws `detailAPIUnconfigured` until those are provided. Separate StudyList/StudyDetail DTO shapes should follow the actual API contract rather than guessed fields.
 
 ## Mock scenarios
 
@@ -44,5 +48,6 @@ The first version has no join action, editing, persistence, or independent netwo
 - `failure`: every request fails
 - `failure-once`: the first request fails and retry succeeds
 - `loading`: a deterministic long-running request for state and accessibility QA
+- `detail-failure`, `detail-failure-once`, `detail-loading`: list succeeds, detail exercises its own failure, retry or loading lifecycle
 
 The iOS and Android implementations may use different UI frameworks, but state meaning, stable selection behavior, Korean copy intent, and retry policy should remain equivalent.

@@ -1,8 +1,15 @@
+import Combine
 import UIKit
 
 @MainActor
 final class DetailViewController: UIViewController {
     private let viewModel: DetailViewModel
+    private var cancellables = Set<AnyCancellable>()
+    private let stateView: ContentStateView = {
+        let view = ContentStateView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
     private let scrollView: UIScrollView = {
         let view = UIScrollView()
         view.alwaysBounceVertical = true
@@ -103,6 +110,8 @@ final class DetailViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureView()
+        bindViewModel()
+        viewModel.loadIfNeeded()
     }
 
     private func configureView() {
@@ -112,11 +121,12 @@ final class DetailViewController: UIViewController {
         view.accessibilityIdentifier = "detail.screen"
         configureHierarchy()
         configureLayout()
-        renderContent()
+        stateView.onAction = { [weak self] in self?.viewModel.retry() }
     }
 
     private func configureHierarchy() {
         view.addSubview(scrollView)
+        view.addSubview(stateView)
         scrollView.addSubview(contentView)
         contentView.addSubview(stackView)
         categoryContainer.addSubview(categoryLabel)
@@ -130,6 +140,10 @@ final class DetailViewController: UIViewController {
         stackView.setCustomSpacing(AppTheme.Spacing.xLarge, after: summaryLabel)
         stackView.setCustomSpacing(AppTheme.Spacing.xLarge, after: divider)
         NSLayoutConstraint.activate([
+            stateView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            stateView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            stateView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            stateView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             categoryLabel.topAnchor.constraint(equalTo: categoryContainer.topAnchor),
             categoryLabel.leadingAnchor.constraint(equalTo: categoryContainer.leadingAnchor),
             categoryLabel.trailingAnchor.constraint(lessThanOrEqualTo: categoryContainer.trailingAnchor),
@@ -151,6 +165,24 @@ final class DetailViewController: UIViewController {
             stackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -AppTheme.Spacing.large),
             stackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -AppTheme.Spacing.xxLarge)
         ])
+    }
+
+    private func bindViewModel() {
+        viewModel.statePublisher
+            .sink { [weak self] state in
+                guard let self else { return }
+                self.scrollView.isHidden = state != .content
+                switch state {
+                case .loading:
+                    self.stateView.render(.loading, context: .detail)
+                case .failure:
+                    self.stateView.render(.failure, context: .detail)
+                case .content:
+                    self.stateView.isHidden = true
+                    self.renderContent()
+                }
+            }
+            .store(in: &cancellables)
     }
 
     private func renderContent() {

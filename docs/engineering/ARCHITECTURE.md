@@ -42,6 +42,8 @@ Presentation owns UIKit screens, ViewModels, view state, and display formatting.
 
 ViewControllers own UIKit lifecycle and immediate navigation. They do not decode DTOs or create concrete repository implementations.
 
+Main passes the selected stable ID and its injected repository abstraction to Detail at the ViewController composition site. DetailViewModel performs its own asynchronous detail request. Its category, title, summary, member/status text, and topics are directly readable properties with private setters; a private subject publishes loading/content/failure after display values are updated together. Production detail transport remains unconfigured until a real endpoint and schema are supplied.
+
 ## Composition
 
 `RepositoryFactory` may choose mock or live dependencies based on launch configuration. It is called at an explicit composition site and its result is injected. It must not be reached from arbitrary screens or ViewModels as a global service locator.

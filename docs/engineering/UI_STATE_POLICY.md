@@ -23,4 +23,6 @@ failure --retry--> loading
 
 ## Future stale-content policy
 
+Detail uses loading, content, and failure with retry. Its six display values live directly on the ViewModel as read-only-to-consumers properties; the private subject publishes only load status after all display fields are updated. Empty topics is valid content. Missing or mismatched study identity is failure. Retry clears display fields and hides content until success; initial load runs once and stale requests cannot publish.
+
 When cached or paginated content is introduced, define whether refresh failure preserves existing content before implementation. The current mock scaffold has no cache and therefore uses mutually exclusive terminal states.

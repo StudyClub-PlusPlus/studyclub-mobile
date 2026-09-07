@@ -47,7 +47,8 @@ Use the shared `AppTheme` source rather than one-off values.
 - Standard back navigation and inline title
 - Scrollable readable column
 - Category label, large study title, member/status metadata, summary, and “이 스터디에서 다룰 내용” section
-- Content comes from the selected Domain model; Detail does not show a fake network-loading state
+- Content comes from the independently fetched Domain model for the selected ID.
+- Detail uses the shared state surface for loading and failure with detail-specific Korean copy and retry. Content and state surfaces are mutually exclusive.
 
 ## Interaction
 

@@ -8,14 +8,16 @@ final class MainViewController: UIViewController {
     }
 
     private let viewModel: MainViewModel
+    private let repository: any RepositoryProtocol
     private let collectionView: UICollectionView
     private let stateView = ContentStateView()
     private var dataSource: UICollectionViewDiffableDataSource<Section, Study.ID>!
     private var itemsByID: [Study.ID: StudyListItemViewData] = [:]
     private var cancellables = Set<AnyCancellable>()
 
-    init(viewModel: MainViewModel) {
+    init(viewModel: MainViewModel, repository: any RepositoryProtocol) {
         self.viewModel = viewModel
+        self.repository = repository
         collectionView = UICollectionView(frame: .zero, collectionViewLayout: Self.makeLayout())
         super.init(nibName: nil, bundle: nil)
     }
@@ -142,12 +144,12 @@ extension MainViewController: UICollectionViewDelegate {
         defer { collectionView.deselectItem(at: indexPath, animated: true) }
         guard
             let studyID = dataSource.itemIdentifier(for: indexPath),
-            let study = viewModel.study(for: studyID)
+            viewModel.study(for: studyID) != nil
         else {
             return
         }
 
-        let detailViewModel = DetailViewModel(study: study)
+        let detailViewModel = DetailViewModel(studyID: studyID, repository: repository)
         let detailViewController = DetailViewController(viewModel: detailViewModel)
         navigationController?.pushViewController(detailViewController, animated: true)
     }

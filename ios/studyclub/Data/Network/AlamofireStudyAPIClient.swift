@@ -23,5 +23,9 @@ final class AlamofireStudyAPIClient: StudyAPIClient, @unchecked Sendable {
             throw RepositoryError.unavailable
         }
     }
-}
 
+    func fetchStudy(id: Study.ID) async throws -> StudyDTO {
+        // The production detail endpoint and response schema are not supplied yet.
+        throw RepositoryError.detailAPIUnconfigured
+    }
+}

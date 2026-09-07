@@ -19,6 +19,9 @@ Mock behavior is selected with deterministic launch arguments:
 - `--mock-scenario failure`
 - `--mock-scenario failure-once`
 - `--mock-scenario loading`
+- `--mock-scenario detail-failure`
+- `--mock-scenario detail-failure-once`
+- `--mock-scenario detail-loading`
 
 Required smoke flows:
 
@@ -26,6 +29,8 @@ Required smoke flows:
 2. Empty state renders without cells.
 3. Failure state exposes retry, and `failure-once` resolves to content after retry.
 4. Loading remains visible while a deterministic long-running request is active.
+5. Detail failure retries to the selected ID's content, and detail loading allows back navigation.
+6. Detail screenshots are retained in XCTest result attachments.
 
 ## Verification order
 

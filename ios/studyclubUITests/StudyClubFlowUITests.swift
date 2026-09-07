@@ -54,6 +54,45 @@ final class StudyClubFlowUITests: XCTestCase {
     }
 
     @MainActor
+    func testDetailFailureRetryLoadsSelectedStudy() {
+        let app = launchApp(scenario: "detail-failure-once")
+        let selected = app.descendants(matching: .any)["main.study.algorithm"]
+        XCTAssertTrue(selected.waitForExistence(timeout: 3))
+        selected.tap()
+        XCTAssertTrue(app.otherElements["detail.state.failure"].waitForExistence(timeout: 3))
+        capture(app, name: "detail-failure")
+        let retry = app.buttons["detail.state.action"]
+        XCTAssertTrue(retry.isHittable)
+        XCTAssertGreaterThanOrEqual(retry.frame.height, 44)
+        retry.tap()
+        XCTAssertTrue(app.staticTexts["detail.title"].waitForExistence(timeout: 3))
+        XCTAssertEqual(app.staticTexts["detail.title"].label, "알고리즘 문제 풀이")
+        XCTAssertFalse(app.otherElements["detail.state.failure"].exists)
+        capture(app, name: "detail-retry-content")
+    }
+
+    @MainActor
+    func testDetailLoadingAndBackNavigation() {
+        let app = launchApp(scenario: "detail-loading")
+        let selected = app.descendants(matching: .any)["main.study.algorithm"]
+        XCTAssertTrue(selected.waitForExistence(timeout: 3))
+        selected.tap()
+        XCTAssertTrue(app.otherElements["detail.state.loading"].waitForExistence(timeout: 3))
+        XCTAssertFalse(app.staticTexts["detail.title"].exists)
+        capture(app, name: "detail-loading")
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        XCTAssertTrue(selected.waitForExistence(timeout: 3))
+    }
+
+    @MainActor
+    private func capture(_ app: XCUIApplication, name: String) {
+        let attachment = XCTAttachment(screenshot: app.screenshot())
+        attachment.name = name
+        attachment.lifetime = .keepAlways
+        add(attachment)
+    }
+
+    @MainActor
     private func launchApp(scenario: String) -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments = ["--mock-scenario", scenario]

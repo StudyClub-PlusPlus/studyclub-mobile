@@ -112,6 +112,9 @@ final class MainViewModelTests: XCTestCase {
 }
 
 private actor TestStudyRepository: RepositoryProtocol {
+    func fetchStudy(id: Study.ID) async throws -> Study {
+        throw RepositoryError.unavailable
+    }
     enum Behavior: Sendable {
         case success([Study])
         case failure

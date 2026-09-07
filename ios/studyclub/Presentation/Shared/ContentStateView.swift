@@ -1,6 +1,10 @@
 import UIKit
 
 final class ContentStateView: UIView {
+    enum Context {
+        case main
+        case detail
+    }
     enum State {
         case loading
         case empty
@@ -27,7 +31,7 @@ final class ContentStateView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func render(_ state: State) {
+    func render(_ state: State, context: Context = .main) {
         isHidden = false
         activityIndicator.stopAnimating()
         imageView.isHidden = false
@@ -57,6 +61,22 @@ final class ContentStateView: UIView {
             messageLabel.text = "연결을 확인한 뒤 다시 시도해 주세요."
             actionButton.configuration?.title = "다시 시도"
             actionButton.accessibilityLabel = "스터디 목록 다시 시도"
+        }
+        let prefix = context == .detail ? "detail" : "main"
+        actionButton.accessibilityIdentifier = "\(prefix).state.action"
+        activityIndicator.accessibilityIdentifier = "\(prefix).loading.indicator"
+        if context == .detail {
+            switch state {
+            case .loading:
+                accessibilityIdentifier = "detail.state.loading"
+                titleLabel.text = "스터디 상세를 불러오는 중이에요"
+            case .failure:
+                accessibilityIdentifier = "detail.state.failure"
+                titleLabel.text = "상세 정보를 불러오지 못했어요"
+                actionButton.accessibilityLabel = "스터디 상세 다시 시도"
+            case .empty:
+                break
+            }
         }
     }
 
