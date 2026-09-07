@@ -16,6 +16,10 @@ final class StudyClubFlowUITests: XCTestCase {
         let detailTitle = app.staticTexts["detail.title"]
         XCTAssertTrue(detailTitle.waitForExistence(timeout: 2))
         XCTAssertEqual(detailTitle.label, "알고리즘 문제 풀이")
+        let capture = XCTAttachment(screenshot: app.screenshot())
+        capture.name = "detail-content"
+        capture.lifetime = .keepAlways
+        add(capture)
     }
 
     @MainActor

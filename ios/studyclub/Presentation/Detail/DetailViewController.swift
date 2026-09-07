@@ -3,8 +3,92 @@ import UIKit
 @MainActor
 final class DetailViewController: UIViewController {
     private let viewModel: DetailViewModel
-    private let scrollView = UIScrollView()
-    private let contentView = UIView()
+    private let scrollView: UIScrollView = {
+        let view = UIScrollView()
+        view.alwaysBounceVertical = true
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    private let contentView: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    private let categoryContainer = UIView()
+    private let categoryLabel: InsetLabel = {
+        let categoryLabel = InsetLabel()
+        categoryLabel.font = .preferredFont(forTextStyle: .caption1)
+        categoryLabel.adjustsFontForContentSizeCategory = true
+        categoryLabel.textColor = AppTheme.Palette.accent
+        categoryLabel.backgroundColor = AppTheme.Palette.accent.withAlphaComponent(0.10)
+        categoryLabel.layer.cornerRadius = AppTheme.Radius.control
+        categoryLabel.layer.cornerCurve = .continuous
+        categoryLabel.clipsToBounds = true
+        categoryLabel.translatesAutoresizingMaskIntoConstraints = false
+        return categoryLabel
+    }()
+
+    private let titleLabel: UILabel = {
+        let titleLabel = UILabel()
+        titleLabel.font = .preferredFont(forTextStyle: .title1)
+        titleLabel.adjustsFontForContentSizeCategory = true
+        titleLabel.textColor = AppTheme.Palette.primaryText
+        titleLabel.numberOfLines = 0
+        titleLabel.accessibilityIdentifier = "detail.title"
+        return titleLabel
+    }()
+
+    private let metadataLabel: UILabel = {
+        let metadataLabel = UILabel()
+        metadataLabel.font = .preferredFont(forTextStyle: .subheadline)
+        metadataLabel.adjustsFontForContentSizeCategory = true
+        metadataLabel.textColor = AppTheme.Palette.secondaryText
+        metadataLabel.numberOfLines = 0
+        return metadataLabel
+    }()
+
+    private let summaryLabel: UILabel = {
+        let summaryLabel = UILabel()
+        summaryLabel.font = .preferredFont(forTextStyle: .body)
+        summaryLabel.adjustsFontForContentSizeCategory = true
+        summaryLabel.textColor = AppTheme.Palette.primaryText
+        summaryLabel.numberOfLines = 0
+        return summaryLabel
+    }()
+
+    private let divider: UIView = {
+        let divider = UIView()
+        divider.backgroundColor = AppTheme.Palette.border
+        divider.translatesAutoresizingMaskIntoConstraints = false
+        return divider
+    }()
+
+    private let topicsTitleLabel: UILabel = {
+        let topicsTitleLabel = UILabel()
+        topicsTitleLabel.text = "이 스터디에서 다룰 내용"
+        topicsTitleLabel.font = .preferredFont(forTextStyle: .headline)
+        topicsTitleLabel.adjustsFontForContentSizeCategory = true
+        topicsTitleLabel.textColor = AppTheme.Palette.primaryText
+        topicsTitleLabel.numberOfLines = 0
+        return topicsTitleLabel
+    }()
+
+    private let topicsStack: UIStackView = {
+        let topicsStack = UIStackView()
+        topicsStack.axis = .vertical
+        topicsStack.spacing = AppTheme.Spacing.medium
+
+        return topicsStack
+    }()
+
+    private let stackView: UIStackView = {
+        let stack = UIStackView()
+        stack.axis = .vertical
+        stack.alignment = .fill
+        stack.spacing = AppTheme.Spacing.regular
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        return stack
+    }()
 
     init(viewModel: DetailViewModel) {
         self.viewModel = viewModel
@@ -22,98 +106,36 @@ final class DetailViewController: UIViewController {
     }
 
     private func configureView() {
-        let state = viewModel.state
         title = "스터디 상세"
         navigationItem.largeTitleDisplayMode = .never
         view.backgroundColor = AppTheme.Palette.canvas
         view.accessibilityIdentifier = "detail.screen"
+        configureHierarchy()
+        configureLayout()
+        renderContent()
+    }
 
-        scrollView.alwaysBounceVertical = true
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
-        contentView.translatesAutoresizingMaskIntoConstraints = false
+    private func configureHierarchy() {
         view.addSubview(scrollView)
         scrollView.addSubview(contentView)
-
-        let categoryLabel = InsetLabel()
-        categoryLabel.text = state.category
-        categoryLabel.font = .preferredFont(forTextStyle: .caption1)
-        categoryLabel.adjustsFontForContentSizeCategory = true
-        categoryLabel.textColor = AppTheme.Palette.accent
-        categoryLabel.backgroundColor = AppTheme.Palette.accent.withAlphaComponent(0.10)
-        categoryLabel.layer.cornerRadius = AppTheme.Radius.control
-        categoryLabel.layer.cornerCurve = .continuous
-        categoryLabel.clipsToBounds = true
-        categoryLabel.translatesAutoresizingMaskIntoConstraints = false
-
-        let categoryContainer = UIView()
+        contentView.addSubview(stackView)
         categoryContainer.addSubview(categoryLabel)
-        NSLayoutConstraint.activate([
-            categoryLabel.topAnchor.constraint(equalTo: categoryContainer.topAnchor),
-            categoryLabel.leadingAnchor.constraint(equalTo: categoryContainer.leadingAnchor),
-            categoryLabel.trailingAnchor.constraint(lessThanOrEqualTo: categoryContainer.trailingAnchor),
-            categoryLabel.bottomAnchor.constraint(equalTo: categoryContainer.bottomAnchor)
-        ])
+        [categoryContainer, titleLabel, metadataLabel, summaryLabel,
+         divider, topicsTitleLabel, topicsStack].forEach(stackView.addArrangedSubview)
+    }
 
-        let titleLabel = UILabel()
-        titleLabel.text = state.title
-        titleLabel.font = .preferredFont(forTextStyle: .title1)
-        titleLabel.adjustsFontForContentSizeCategory = true
-        titleLabel.textColor = AppTheme.Palette.primaryText
-        titleLabel.numberOfLines = 0
-        titleLabel.accessibilityIdentifier = "detail.title"
-
-        let metadataLabel = UILabel()
-        metadataLabel.text = "\(state.memberText)  ·  \(state.statusText)"
-        metadataLabel.font = .preferredFont(forTextStyle: .subheadline)
-        metadataLabel.adjustsFontForContentSizeCategory = true
-        metadataLabel.textColor = AppTheme.Palette.secondaryText
-        metadataLabel.numberOfLines = 0
-
-        let summaryLabel = UILabel()
-        summaryLabel.text = state.summary
-        summaryLabel.font = .preferredFont(forTextStyle: .body)
-        summaryLabel.adjustsFontForContentSizeCategory = true
-        summaryLabel.textColor = AppTheme.Palette.primaryText
-        summaryLabel.numberOfLines = 0
-
-        let divider = UIView()
-        divider.backgroundColor = AppTheme.Palette.border
-        divider.translatesAutoresizingMaskIntoConstraints = false
-        divider.heightAnchor.constraint(equalToConstant: 1 / max(traitCollection.displayScale, 1)).isActive = true
-
-        let topicsTitleLabel = UILabel()
-        topicsTitleLabel.text = "이 스터디에서 다룰 내용"
-        topicsTitleLabel.font = .preferredFont(forTextStyle: .headline)
-        topicsTitleLabel.adjustsFontForContentSizeCategory = true
-        topicsTitleLabel.textColor = AppTheme.Palette.primaryText
-        topicsTitleLabel.numberOfLines = 0
-
-        let topicsStack = UIStackView()
-        topicsStack.axis = .vertical
-        topicsStack.spacing = AppTheme.Spacing.medium
-        for topic in state.topics {
-            topicsStack.addArrangedSubview(makeTopicRow(text: topic))
-        }
-
-        let stackView = UIStackView(arrangedSubviews: [
-            categoryContainer,
-            titleLabel,
-            metadataLabel,
-            summaryLabel,
-            divider,
-            topicsTitleLabel,
-            topicsStack
-        ])
-        stackView.axis = .vertical
-        stackView.alignment = .fill
-        stackView.spacing = AppTheme.Spacing.regular
+    private func configureLayout() {
         stackView.setCustomSpacing(AppTheme.Spacing.small, after: categoryContainer)
         stackView.setCustomSpacing(AppTheme.Spacing.small, after: titleLabel)
         stackView.setCustomSpacing(AppTheme.Spacing.xLarge, after: summaryLabel)
         stackView.setCustomSpacing(AppTheme.Spacing.xLarge, after: divider)
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        contentView.addSubview(stackView)
-
+        NSLayoutConstraint.activate([
+            categoryLabel.topAnchor.constraint(equalTo: categoryContainer.topAnchor),
+            categoryLabel.leadingAnchor.constraint(equalTo: categoryContainer.leadingAnchor),
+            categoryLabel.trailingAnchor.constraint(lessThanOrEqualTo: categoryContainer.trailingAnchor),
+            categoryLabel.bottomAnchor.constraint(equalTo: categoryContainer.bottomAnchor),
+            divider.heightAnchor.constraint(equalToConstant: 1 / max(traitCollection.displayScale, 1))
+        ])
         NSLayoutConstraint.activate([
             scrollView.topAnchor.constraint(equalTo: view.topAnchor),
             scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -129,6 +151,17 @@ final class DetailViewController: UIViewController {
             stackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -AppTheme.Spacing.large),
             stackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -AppTheme.Spacing.xxLarge)
         ])
+    }
+
+    private func renderContent() {
+        categoryLabel.text = viewModel.category
+        titleLabel.text = viewModel.title
+        metadataLabel.text = "\(viewModel.memberText)  ·  \(viewModel.statusText)"
+        summaryLabel.text = viewModel.summary
+        topicsStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        for topic in viewModel.topics {
+            topicsStack.addArrangedSubview(makeTopicRow(text: topic))
+        }
     }
 
     private func makeTopicRow(text: String) -> UIView {

@@ -46,6 +46,8 @@ The model flow is `DTO -> Domain model -> ViewData/ViewState`:
 - Build views in code with Auto Layout; set `translatesAutoresizingMaskIntoConstraints = false` explicitly.
 - Use semantic colors, preferred fonts, safe areas, and self-sizing layouts.
 - Keep reusable visual constants in `AppTheme`.
+- Detail stores views as `private let` properties with fixed styling in initialization closures.
+- `configureHierarchy()` adds subviews; `configureLayout()` sets constraints and spacing; `renderContent()` applies ViewModel display values.
 - Give user-visible controls and content stable accessibility identifiers when UI tests need them.
 
 ## Errors and copy
