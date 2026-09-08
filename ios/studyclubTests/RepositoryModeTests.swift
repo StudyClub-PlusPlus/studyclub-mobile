@@ -1,4 +1,3 @@
-import Combine
 import XCTest
 @testable import studyclub
 
@@ -36,27 +35,27 @@ final class RepositoryModeTests: XCTestCase {
     }
 
     @MainActor
-    func testViewModelPersistsBeforeNotifyingAndDoesNotRebuildForSameMode() {
+    func testViewModelPersistsChangesAndDoesNotRebuildForSameMode() {
         let store = UserDefaultsRepositoryModeStore(defaults: defaults)
         let viewModel = DevelopmentSettingsViewModel(
             modeStore: store, flagStore: UserDefaultsFeatureFlagStore(defaults: defaults), flags: []
         )
-        var notifications = 0
-        let observation = viewModel.statePublisher.sink {
-            notifications += 1
-            XCTAssertEqual(store.mode, viewModel.repositoryMode)
-        }
         XCTAssertFalse(viewModel.changeRepositoryMode(to: .mock))
-        XCTAssertEqual(notifications, 1)
+        XCTAssertEqual(viewModel.repositoryMode, .mock)
         XCTAssertTrue(viewModel.changeRepositoryMode(to: .real))
-        XCTAssertEqual(notifications, 2)
+        XCTAssertEqual(viewModel.repositoryMode, .real)
         XCTAssertEqual(store.mode, .real)
-        withExtendedLifetime(observation) {}
     }
     #else
     func testReleaseIgnoresPersistedDeveloperMode() {
         defaults.set("real", forKey: "development.repositoryMode")
         XCTAssertEqual(UserDefaultsRepositoryModeStore(defaults: defaults).mode, .defaultMode)
+    }
+
+    func testReleaseAppFactoryIgnoresDebugScenarioArguments() async throws {
+        let repository = RepositoryFactory.makeStudyRepository(arguments: ["--mock-scenario", "failure"])
+        let studies = try await repository.fetchStudies()
+        XCTAssertFalse(studies.isEmpty)
     }
     #endif
 

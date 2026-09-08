@@ -24,7 +24,7 @@ iOS를 먼저 만들고 Android를 나중에 만들면, 그사이에 정해지�
 
 ### iOS
 
-- UIKit 기반 Main → Detail 화면
+- UIKit 기반 Main / Setting 하단 탭과 Main → Detail 화면
 - Main 화면의 mock 목록
 - Diffable Data Source와 Compositional Layout
 - loading, content, empty, failure 상태 표시
@@ -33,8 +33,10 @@ iOS를 먼저 만들고 Android를 나중에 만들면, 그사이에 정해지�
 - Combine의 Subject를 사용한 ViewModel → View 바인딩
 - Alamofire를 사용하는 실제 API 연결용 코드
 - mock API와 단위 테스트
+- Debug 전용 SwiftUI Development Settings (`@Observable` ViewModel)
+- Mock/Real 선택 저장과 TabBar 전체 재구성, Feature Flag 기본값·override·초기화
 
-현재 앱은 실제 서버가 아니라 정해진 mock 데이터를 사용합니다.
+앱의 기본값은 정해진 Mock 데이터입니다. Debug에서 스터디 탭을 길게 누르면 개발 설정을 열 수 있습니다. Real 선택은 가능하지만 BaseURL은 주석으로 표시한 임시 `.invalid` 주소이며, 실제 서버 연동과 Detail API 설정은 아직 필요합니다. 실제 Feature Flag 목록은 비어 있고, Ready는 기본 ON·InProgress는 기본 OFF로 동작하는 기반을 준비했습니다.
 
 ### Android
 
@@ -80,11 +82,11 @@ studyclub-mobile/
 
 iOS는 다음 기준으로 구성합니다.
 
-- UIKit + Code-based Auto Layout
+- UIKit + Code-based Auto Layout (Development Settings만 SwiftUI + UIHostingController)
 - MVVM + Repository
 - Domain / Data / Presentation 상위 레이어
 - Swift Concurrency
-- Combine Subject 기반 바인딩
+- UIKit ViewModel은 Combine Subject 기반 바인딩, Development Settings ViewModel만 `@Observable`
 - Diffable Data Source + Compositional Layout
 - Alamofire + `URLRequestConvertible` Router
 - DTO → Domain Model → ViewModel의 표시값, Combine은 상태 변경 알림으로 사용
@@ -97,6 +99,8 @@ iOS는 다음 기준으로 구성합니다.
 - [화면 상태 처리 기준](docs/engineering/UI_STATE_POLICY.md)
 - [기능 추가 가이드](docs/engineering/FEATURE_GUIDE.md)
 - [테스트 기준](docs/engineering/TESTING.md)
+- [개발 설정 동작](docs/product/DEVELOPMENT_SETTINGS_SPEC.md)
+- [Feature Flag 추가·승격·삭제](docs/engineering/FEATURE_FLAGS.md)
 
 ## iOS 실행
 

@@ -1,11 +1,10 @@
 #if DEBUG
-import Combine
 import XCTest
 @testable import studyclub
 
 @MainActor
 final class DevelopmentSettingsViewModelTests: XCTestCase {
-    func testSectionsToggleAndResetPublishUpdatedValuesAndPreserveRepository() {
+    func testSectionsToggleAndResetExposeUpdatedValuesAndPreserveRepository() {
         let suite = "studyclub.unit-tests.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suite)!
         defer { defaults.removePersistentDomain(forName: suite) }
@@ -17,23 +16,25 @@ final class DevelopmentSettingsViewModelTests: XCTestCase {
         modeStore.setMode(.real)
         let flagStore = UserDefaultsFeatureFlagStore(defaults: defaults)
         let viewModel = DevelopmentSettingsViewModel(modeStore: modeStore, flagStore: flagStore, flags: flags)
-        var observedValues: [[Bool]] = []
-        let subscription = viewModel.statePublisher.sink {
+        func values() -> [Bool] {
             XCTAssertEqual(viewModel.sections.map(\.id), [.miscellaneous, .ready, .inProgress])
             XCTAssertEqual(viewModel.repositoryMode, .real)
-            observedValues.append(viewModel.sections.flatMap(\.rows).compactMap { row in
+            return viewModel.sections.flatMap(\.rows).compactMap { row in
                 if case .toggle(let value) = row.kind { return value }
                 return nil
-            })
+            }
         }
+        XCTAssertEqual(values(), [true, false])
         viewModel.setFlag(id: "ready", isEnabled: false)
+        XCTAssertEqual(values(), [false, false])
         viewModel.setFlag(id: "progress", isEnabled: true)
+        XCTAssertEqual(values(), [false, true])
         viewModel.setFlag(id: "unknown", isEnabled: true)
+        XCTAssertEqual(values(), [false, true])
         viewModel.resetFlagsToDefaults()
-        XCTAssertEqual(observedValues, [[true, false], [false, false], [false, true], [true, false]])
+        XCTAssertEqual(values(), [true, false])
         XCTAssertEqual(modeStore.mode, .real)
         XCTAssertNil(defaults.object(forKey: "development.featureFlags"))
-        withExtendedLifetime(subscription) {}
     }
 }
 #endif

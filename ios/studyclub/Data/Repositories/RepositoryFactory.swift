@@ -7,10 +7,10 @@ enum RepositoryFactory {
         #if DEBUG
         // Deterministic UI scenarios override saved developer settings for that launch only.
         let mode: RepositoryMode = arguments.contains("--mock-scenario") ? .mock : makeRepositoryModeStore().mode
-        #else
-        let mode = RepositoryMode.defaultMode
-        #endif
         return makeStudyRepository(mode: mode, arguments: arguments)
+        #else
+        return makeStudyRepository(mode: .defaultMode)
+        #endif
     }
 
     static func makeStudyRepository(mode: RepositoryMode, arguments: [String] = []) -> any RepositoryProtocol {

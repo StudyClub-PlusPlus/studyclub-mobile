@@ -1,20 +1,17 @@
 #if DEBUG
-import Combine
 import Foundation
+import Observation
 
+@Observable
 @MainActor
 final class DevelopmentSettingsViewModel {
     private let modeStore: any RepositoryModeStoring
     private let flagStore: any FeatureFlagStoring
     private let flags: [FeatureFlagDefinition]
-    private let stateSubject = CurrentValueSubject<Void, Never>(())
     private(set) var repositoryMode: RepositoryMode
+    private(set) var sections: [DevelopmentSettingSection] = []
 
-    var statePublisher: AnyPublisher<Void, Never> {
-        stateSubject.eraseToAnyPublisher()
-    }
-
-    var sections: [DevelopmentSettingSection] {
+    private func updateSections() {
         let miscellaneous = DevelopmentSettingSection(id: .miscellaneous, rows: [
             .init(id: .repository, title: "Repository", kind: .button(value: repositoryMode.title)),
             .init(id: .resetFlags, title: "Reset Flag to Default", kind: .button(value: nil))
@@ -27,7 +24,7 @@ final class DevelopmentSettingsViewModel {
                 }
             )
         }
-        return [miscellaneous] + flagSections
+        sections = [miscellaneous] + flagSections
     }
 
     convenience init() {
@@ -43,6 +40,7 @@ final class DevelopmentSettingsViewModel {
         self.flagStore = flagStore
         self.flags = flags
         repositoryMode = modeStore.mode
+        updateSections()
     }
 
     // Explicit Debug UI-test fixtures exercise real switches/persistence before the app
@@ -62,12 +60,12 @@ final class DevelopmentSettingsViewModel {
     func setFlag(id: String, isEnabled: Bool) {
         guard let flag = flags.first(where: { $0.id == id }) else { return }
         flagStore.setEnabled(isEnabled, for: flag)
-        stateSubject.send(())
+        updateSections()
     }
 
     func resetFlagsToDefaults() {
         flagStore.resetToDefaults()
-        stateSubject.send(())
+        updateSections()
     }
 
     @discardableResult
@@ -75,7 +73,7 @@ final class DevelopmentSettingsViewModel {
         guard mode != repositoryMode else { return false }
         modeStore.setMode(mode)
         repositoryMode = mode
-        stateSubject.send(())
+        updateSections()
         return true
     }
 }

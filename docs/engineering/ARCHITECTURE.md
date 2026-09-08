@@ -39,7 +39,7 @@ A DTO is a parsing contract, not an application model. It never crosses the repo
 
 ## Presentation
 
-Presentation owns UIKit screens, ViewModels, view state, and display formatting. ViewModels depend on Domain protocols. Each starts one async repository call from init through a private method, stores its display values, and exposes status notifications through a read-only Combine publisher backed by a private `CurrentValueSubject`. ViewControllers subscribe with `.sink` in `viewDidLoad`, own the resulting `AnyCancellable` values, and call `updateViews()` to read the ViewModel. Requests are not retained or cancelled by the ViewModel in the current one-request screens.
+Presentation owns screens, ViewModels, view state, and display formatting. Main, Detail, tabs and public Setting use UIKit. Development Settings is the only scoped SwiftUI/Observation exception. ViewModels depend on Domain protocols. Main and Detail each start one async repository call from init through a private method, store their display values, and expose status notifications through a read-only Combine publisher backed by a private `CurrentValueSubject`. ViewControllers subscribe with `.sink` in `viewDidLoad`, own the resulting `AnyCancellable` values, and call `updateViews()` to read the ViewModel. Requests are not retained or cancelled by the ViewModel in the current one-request screens.
 
 ViewControllers own UIKit lifecycle and immediate navigation. They do not decode DTOs or create concrete repository implementations.
 
@@ -66,7 +66,11 @@ The live client owns the explicitly temporary `https://api.example.invalid` defa
 
 ## Development settings rows
 
-The Debug-only settings list uses stable section/row identifiers and diffable snapshots. A row explicitly describes either a button (optional current value) or a toggle. Cells render display values and forward interactions; persistence and setting actions are owned outside cells. Reconfiguration replaces the toggle callback, and tapping the row also toggles so the whole self-sizing row is a touch target.
+The Debug-only DevelopmentSettingsView uses SwiftUI List/Section with stable section/row identifiers and typed Button/Toggle rows. The owning view retains its @Observable DevelopmentSettingsViewModel in @State. The model stores section display values, updates persistence before rebuilding those values, and Observation invalidates the view. No Combine publisher, @Published or @AppStorage is used on this screen. Stores and the model own persistence/reset; the SwiftUI view only forwards actions and owns presentation state.
+
+MainTabBarController presents a UIHostingController containing the development screen's NavigationStack. Close uses SwiftUI dismiss. Repository changes retain the UIKit callback chain: save in the model, dismiss the hosting controller, then SceneDelegate rebuilds the entire window root. The app TabBar and Main/Detail/public Setting are not migrated to SwiftUI. UIKit ViewModels retain their existing private-subject/read-only-publisher convention.
+
+Observation follows [Apple's model data guidance](https://developer.apple.com/documentation/swiftui/managing-model-data-in-your-app); this exception does not introduce an app-wide SwiftUI migration.
 
 ## Feature flag definitions and overrides
 

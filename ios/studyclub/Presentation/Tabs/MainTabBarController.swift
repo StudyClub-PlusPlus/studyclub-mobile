@@ -1,4 +1,7 @@
 import UIKit
+#if DEBUG
+import SwiftUI
+#endif
 
 @MainActor
 final class MainTabBarController: UITabBarController {
@@ -69,13 +72,12 @@ extension MainTabBarController: UIGestureRecognizerDelegate {
 
     @objc private func openDevelopmentSettings(_ gesture: UILongPressGestureRecognizer) {
         guard gesture.state == .began, presentedViewController == nil else { return }
-        let settings = DevelopmentSettingsViewController()
-        settings.onRepositoryChange = { [weak self] in
+        let settings = DevelopmentSettingsView(viewModel: DevelopmentSettingsViewModel()) { [weak self] in
             self?.dismiss(animated: true) { [weak self] in
                 self?.onRepositoryChange?()
             }
         }
-        present(UINavigationController(rootViewController: settings), animated: true)
+        present(UIHostingController(rootView: settings), animated: true)
     }
 }
 #endif

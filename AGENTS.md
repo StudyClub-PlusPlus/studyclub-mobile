@@ -16,9 +16,9 @@ Before changing iOS code, read:
 
 ## Stable constraints
 
-- iOS uses UIKit and programmatic Auto Layout.
+- iOS uses UIKit and programmatic Auto Layout. The Debug-only Development Settings screen is a scoped exception: SwiftUI hosted by UIHostingController.
 - The architecture is MVVM + Repository. `R` does not mean Router.
-- Swift Concurrency owns asynchronous operations. Combine is limited to ViewModel-to-View observation through a private subject and read-only publisher; do not use `@Published` for this project.
+- Swift Concurrency owns asynchronous operations. UIKit ViewModels use Combine only for ViewModel-to-View observation through a private subject and read-only publisher; do not use `@Published`. Development Settings alone uses an `@Observable` ViewModel, owned by SwiftUI `@State`; persistence stays in Store/ViewModel.
 - Source dependencies are `Presentation -> Domain` and `Data -> Domain`, with `Presentation -> Data.RepositoryFactory` allowed for repository creation. Domain imports no UI, reactive, or networking framework.
 - DTOs stay inside Data. Repository protocols return Domain models.
 - App-facing ViewModel initializers obtain repositories through `RepositoryFactory`; ViewControllers do not receive or forward repositories. Keep separate repository-injecting initializers for unit tests.

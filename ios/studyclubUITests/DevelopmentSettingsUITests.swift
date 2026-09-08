@@ -7,6 +7,43 @@ final class DevelopmentSettingsUITests: XCTestCase {
 
     #if DEBUG
     @MainActor
+    func testLargeTextAndLandscapeKeepFlagControlsUsable() {
+        let app = XCUIApplication()
+        app.launchEnvironment["STUDYCLUB_UI_TEST_SUITE"] = "studyclub.ui-tests.\(UUID().uuidString)"
+        app.launchEnvironment["STUDYCLUB_UI_TEST_FLAGS"] = "1"
+        app.launchArguments = ["--mock-scenario", "content", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]
+        app.launch()
+        app.tabBars.buttons["tab.main"].press(forDuration: 1)
+        let list = app.collectionViews["development.list"]
+        let row = app.switches["development.flag.fixture.ready"]
+        let ready = app.switches["development.flag.fixture.ready"]
+        XCTAssertTrue(list.waitForExistence(timeout: 3))
+        for _ in 0..<4 where !ready.isHittable { list.swipeUp() }
+        XCTAssertTrue(ready.isHittable)
+        XCTAssertEqual(ready.label, "검증용 Ready Flag")
+        XCTAssertGreaterThanOrEqual(row.frame.height, 44)
+        row.tap()
+        XCTAssertEqual(ready.value as? String, "0")
+        capture(app, name: "flags-fixture-accessibility-text")
+        app.buttons["development.close"].tap()
+
+        XCUIDevice.shared.orientation = .landscapeLeft
+        defer { XCUIDevice.shared.orientation = .portrait }
+        let landscapeLayout = NSPredicate { _, _ in app.frame.width > app.frame.height }
+        expectation(for: landscapeLayout, evaluatedWith: nil)
+        waitForExpectations(timeout: 5)
+        let main = app.tabBars.buttons["tab.main"]
+        XCTAssertTrue(main.waitForExistence(timeout: 3))
+        main.press(forDuration: 1)
+        XCTAssertTrue(list.waitForExistence(timeout: 3))
+        for _ in 0..<4 where !ready.isHittable { list.swipeUp() }
+        XCTAssertTrue(ready.isHittable)
+        ready.tap()
+        XCTAssertEqual(ready.value as? String, "1")
+        capture(app, name: "flags-fixture-landscape-accessibility-text")
+    }
+
+    @MainActor
     func testFlagTogglesPersistThroughRootRebuildAndResetOnlyFlags() {
         let app = XCUIApplication()
         app.launchEnvironment["STUDYCLUB_UI_TEST_SUITE"] = "studyclub.ui-tests.\(UUID().uuidString)"
@@ -23,6 +60,12 @@ final class DevelopmentSettingsUITests: XCTestCase {
         inProgress.tap()
         XCTAssertEqual(ready.value as? String, "0")
         XCTAssertEqual(inProgress.value as? String, "1")
+        // Exercise the native trailing switch as well as tapping the label/row center.
+        let switchCenter = ready.coordinate(withNormalizedOffset: CGVector(dx: 0.93, dy: 0.5))
+        switchCenter.tap()
+        XCTAssertEqual(ready.value as? String, "1")
+        switchCenter.tap()
+        XCTAssertEqual(ready.value as? String, "0")
         capture(app, name: "flags-fixture-overrides")
 
         app.terminate()
@@ -37,10 +80,10 @@ final class DevelopmentSettingsUITests: XCTestCase {
         XCTAssertTrue(ready.waitForExistence(timeout: 3))
         XCTAssertEqual(ready.value as? String, "0")
         XCTAssertEqual(inProgress.value as? String, "1")
-        app.cells["development.resetFlags.row"].tap()
+        app.buttons["development.resetFlags.row"].tap()
         XCTAssertEqual(ready.value as? String, "1")
         XCTAssertEqual(inProgress.value as? String, "0")
-        XCTAssertEqual(app.cells["development.repository.row"].value as? String, "Real")
+        XCTAssertEqual(app.buttons["development.repository.row"].value as? String, "Real")
         capture(app, name: "flags-fixture-reset-preserves-real")
 
         app.terminate()
@@ -49,7 +92,7 @@ final class DevelopmentSettingsUITests: XCTestCase {
         XCTAssertTrue(ready.waitForExistence(timeout: 3))
         XCTAssertEqual(ready.value as? String, "1")
         XCTAssertEqual(inProgress.value as? String, "0")
-        XCTAssertEqual(app.cells["development.repository.row"].value as? String, "Real")
+        XCTAssertEqual(app.buttons["development.repository.row"].value as? String, "Real")
         chooseRepository("Mock", in: app)
     }
 
@@ -59,11 +102,11 @@ final class DevelopmentSettingsUITests: XCTestCase {
         app.launchArguments = ["--mock-scenario", "content"]
         app.launch()
         app.tabBars.buttons["tab.main"].press(forDuration: 1)
-        XCTAssertTrue(app.cells["development.resetFlags.row"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["development.resetFlags.row"].waitForExistence(timeout: 3))
         XCTAssertTrue(app.staticTexts["Ready"].exists)
         XCTAssertTrue(app.staticTexts["InProgress"].exists)
         XCTAssertEqual(app.switches.count, 0)
-        app.cells["development.resetFlags.row"].tap()
+        app.buttons["development.resetFlags.row"].tap()
         capture(app, name: "development-empty-flag-catalog")
     }
 
@@ -90,7 +133,7 @@ final class DevelopmentSettingsUITests: XCTestCase {
         app.launch()
         XCTAssertTrue(app.otherElements["main.state.failure"].waitForExistence(timeout: 15))
         app.tabBars.buttons["tab.main"].press(forDuration: 1)
-        let row = app.cells["development.repository.row"]
+        let row = app.buttons["development.repository.row"]
         XCTAssertTrue(row.waitForExistence(timeout: 2))
         XCTAssertEqual(row.value as? String, "Real")
         capture(app, name: "repository-persisted-real")
@@ -111,7 +154,7 @@ final class DevelopmentSettingsUITests: XCTestCase {
 
     @MainActor
     private func chooseRepository(_ mode: String, in app: XCUIApplication) {
-        let row = app.cells["development.repository.row"]
+        let row = app.buttons["development.repository.row"]
         XCTAssertTrue(row.waitForExistence(timeout: 3))
         row.tap()
         app.alerts["Repository"].buttons[mode].tap()
@@ -119,7 +162,7 @@ final class DevelopmentSettingsUITests: XCTestCase {
 
     @MainActor
     private func capture(_ app: XCUIApplication, name: String) {
-        let attachment = XCTAttachment(screenshot: app.screenshot())
+        let attachment = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
         attachment.name = name
         attachment.lifetime = .keepAlways
         add(attachment)

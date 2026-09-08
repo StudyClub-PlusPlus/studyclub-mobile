@@ -6,7 +6,7 @@ The app has Main (“스터디”) and Setting (“설정”) tabs, each with it
 
 ## Debug entry
 
-Only Debug builds offer Development Settings, by holding the Main tab button for 0.7 seconds. It opens a modal navigation stack with Close. Ordinary taps and holding Setting do not open it. A native tab gesture may select Main while the long press is recognized. Entry and screen code are excluded from Release.
+Only Debug builds offer Development Settings, by holding the Main tab button for 0.7 seconds. It opens a UIHostingController containing a SwiftUI NavigationStack and Close button. Only this development screen uses SwiftUI and an @Observable ViewModel; the public app remains UIKit. Ordinary taps and holding Setting do not open it. A native tab gesture may select Main while the long press is recognized. Entry and screen code are excluded from Release.
 
 ## Repository
 

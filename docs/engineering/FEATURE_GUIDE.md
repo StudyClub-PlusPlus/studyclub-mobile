@@ -11,3 +11,5 @@
 9. Build, test, run the Simulator flow, and review fresh visual evidence.
 
 Before introducing a new abstraction, name the repeated problem it solves and at least two concrete consumers. Otherwise keep the implementation explicit.
+
+Development Settings is the approved SwiftUI/Observation exception; app features otherwise keep UIKit. For an unfinished trunk-based feature, follow [Feature flag workflow](FEATURE_FLAGS.md) and test both defaults and overrides at the actual behavior boundary.

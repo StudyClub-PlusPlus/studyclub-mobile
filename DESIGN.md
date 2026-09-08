@@ -2,7 +2,7 @@
 
 ## Brief
 
-The first StudyClub surface should look like a calm, native reading list rather than a decorative prototype. The visual direction combines Apple-native UIKit behavior with restrained editorial spacing. It uses live UIKit components and reusable tokens; no screenshot, illustration, or generated image stands in for interface elements.
+The first StudyClub surface should look like a calm, native reading list rather than a decorative prototype. The visual direction combines Apple-native UIKit behavior with restrained editorial spacing. It uses native components and reusable tokens; no screenshot, illustration, or generated image stands in for interface elements.
 
 ## Design references
 
@@ -91,4 +91,4 @@ Check safe areas, card alignment, Korean wrapping, dark-mode semantics, Dynamic 
 
 ## Development Settings
 
-Debug-only modal with a native navigation title and Close button. Use an inset-grouped native list with “기타”, “Ready”, “InProgress” headers. Repository shows the current mode below its label and opens a mode picker. Reset Flag to Default is a button row. Flag rows use a wrapping name on the left and a labeled switch on the right; the full row is also tappable. Ready defaults ON and InProgress defaults OFF. Empty flag sections keep their headers. Reset updates switches in place and announces completion to accessibility. Repository changes close the modal and return to a freshly constructed Main tab.
+Debug-only SwiftUI modal hosted by UIHostingController, with its own NavigationStack title and Close button. Use an inset-grouped SwiftUI List with “기타”, “Ready”, “InProgress” headers. Repository shows the current mode below its label and opens a mode picker. Reset Flag to Default is a button row. Flag rows use a wrapping name on the left and a labeled switch on the right; the full row is also tappable. Ready defaults ON and InProgress defaults OFF. Empty flag sections keep their headers. Reset updates switches in place and announces completion to accessibility. Repository changes close the modal and return to a freshly constructed Main tab.
