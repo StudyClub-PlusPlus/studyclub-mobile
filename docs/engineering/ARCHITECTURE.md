@@ -12,7 +12,7 @@ Data -> Domain
 Domain -> Foundation only
 ```
 
-`SceneDelegate` creates the initial ViewModel and ViewController. Each ViewModel obtains its repository through `RepositoryFactory` in its app-facing initializer. Screens may assemble their immediate next screen when the flow is as small as Main → Detail.
+`SceneDelegate` installs `MainTabBarController` as the window root. It assembles independent navigation stacks for Main and Setting. Each ViewModel obtains its repository through `RepositoryFactory` in its app-facing initializer. Screens may assemble their immediate next screen when the flow is as small as Main → Detail.
 
 ## Domain
 

@@ -28,6 +28,9 @@ Use the shared `AppTheme` source rather than one-off values.
 
 ## Main anatomy
 
+- The app root has two native tabs: “스터디” and “설정”, each with its own navigation stack. Tab switching retains the Main → Detail stack.
+- Setting contains a large “설정” title and an empty native list until settings content is specified.
+
 - Large navigation title: “스터디”
 - Optional one-line introduction above the first card through section boundary spacing, not a hero panel
 - One-column adaptive card list with readable content margins

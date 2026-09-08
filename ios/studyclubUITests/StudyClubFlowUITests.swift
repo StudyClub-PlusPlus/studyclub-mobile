@@ -6,6 +6,25 @@ final class StudyClubFlowUITests: XCTestCase {
     }
 
     @MainActor
+    func testTabsPreserveMainNavigationAndSettingHasAnEmptyList() {
+        let app = launchApp(scenario: "content")
+        let selectedStudy = app.descendants(matching: .any)["main.study.algorithm"]
+        XCTAssertTrue(selectedStudy.waitForExistence(timeout: 3))
+        selectedStudy.tap()
+        XCTAssertTrue(app.staticTexts["detail.title"].waitForExistence(timeout: 3))
+
+        app.tabBars.buttons["tab.setting"].tap()
+        let list = app.collectionViews["setting.list"]
+        XCTAssertTrue(list.waitForExistence(timeout: 2))
+        XCTAssertEqual(list.cells.count, 0)
+        capture(app, name: "setting-empty")
+
+        app.tabBars.buttons["tab.main"].tap()
+        XCTAssertTrue(app.staticTexts["detail.title"].waitForExistence(timeout: 2))
+        XCTAssertEqual(app.staticTexts["detail.title"].label, "알고리즘 문제 풀이")
+    }
+
+    @MainActor
     func testContentOpensTheSelectedStudyDetail() {
         let app = launchApp(scenario: "content")
         let selectedStudy = app.descendants(matching: .any)["main.study.algorithm"]
