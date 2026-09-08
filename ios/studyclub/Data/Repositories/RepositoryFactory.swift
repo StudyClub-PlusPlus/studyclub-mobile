@@ -29,6 +29,10 @@ enum RepositoryFactory {
         UserDefaultsRepositoryModeStore(defaults: makeDevelopmentDefaults())
     }
 
+    static func makeFeatureFlagStore() -> any FeatureFlagStoring {
+        UserDefaultsFeatureFlagStore(defaults: makeDevelopmentDefaults())
+    }
+
     private static func makeDevelopmentDefaults() -> UserDefaults {
         #if DEBUG
         // UI tests use an isolated persistent suite; ordinary app launches use standard defaults.
