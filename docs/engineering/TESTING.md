@@ -50,3 +50,5 @@ Do not report a build, test, or visual pass from output produced before the last
 - Run XCTest serially with `-parallel-testing-enabled NO` on the selected named device. UI tests verify relaunch within the same isolated preference suite. Screenshots are retained in result attachments.
 
 Focused Release verification should run RepositoryModeTests, FeatureFlagStoreTests and DevelopmentSettingsUITests/testOnlyMainTabLongPressOpensDevelopmentSettings using `-configuration Release -enableCodeCoverage NO ENABLE_TESTABILITY=YES -parallel-testing-enabled NO`. Testability is enabled only for the unit-test build; additionally build the ordinary Release app without that override. Release app launches ignore mock-scenario arguments; scenario-driven UI flows are Debug checks.
+
+Custom accessibility and large-text QA are deferred at this product stage. UI tests locate native controls by visible text and check content and functional interactions, without app-defined accessibility identifiers.

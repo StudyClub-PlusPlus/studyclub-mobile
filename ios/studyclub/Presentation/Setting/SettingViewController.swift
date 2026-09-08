@@ -7,7 +7,6 @@ final class SettingViewController: UIViewController {
         let layout = UICollectionViewCompositionalLayout.list(using: configuration)
         let view = UICollectionView(frame: .zero, collectionViewLayout: layout)
         view.backgroundColor = .clear
-        view.accessibilityIdentifier = "setting.list"
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()

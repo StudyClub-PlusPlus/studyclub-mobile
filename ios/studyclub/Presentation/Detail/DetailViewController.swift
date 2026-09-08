@@ -25,7 +25,6 @@ final class DetailViewController: UIViewController {
     private let categoryLabel: InsetLabel = {
         let categoryLabel = InsetLabel()
         categoryLabel.font = .preferredFont(forTextStyle: .caption1)
-        categoryLabel.adjustsFontForContentSizeCategory = true
         categoryLabel.textColor = AppTheme.Palette.accent
         categoryLabel.backgroundColor = AppTheme.Palette.accent.withAlphaComponent(0.10)
         categoryLabel.layer.cornerRadius = AppTheme.Radius.control
@@ -38,17 +37,14 @@ final class DetailViewController: UIViewController {
     private let titleLabel: UILabel = {
         let titleLabel = UILabel()
         titleLabel.font = .preferredFont(forTextStyle: .title1)
-        titleLabel.adjustsFontForContentSizeCategory = true
         titleLabel.textColor = AppTheme.Palette.primaryText
         titleLabel.numberOfLines = 0
-        titleLabel.accessibilityIdentifier = "detail.title"
         return titleLabel
     }()
 
     private let metadataLabel: UILabel = {
         let metadataLabel = UILabel()
         metadataLabel.font = .preferredFont(forTextStyle: .subheadline)
-        metadataLabel.adjustsFontForContentSizeCategory = true
         metadataLabel.textColor = AppTheme.Palette.secondaryText
         metadataLabel.numberOfLines = 0
         return metadataLabel
@@ -57,7 +53,6 @@ final class DetailViewController: UIViewController {
     private let summaryLabel: UILabel = {
         let summaryLabel = UILabel()
         summaryLabel.font = .preferredFont(forTextStyle: .body)
-        summaryLabel.adjustsFontForContentSizeCategory = true
         summaryLabel.textColor = AppTheme.Palette.primaryText
         summaryLabel.numberOfLines = 0
         return summaryLabel
@@ -74,7 +69,6 @@ final class DetailViewController: UIViewController {
         let topicsTitleLabel = UILabel()
         topicsTitleLabel.text = "이 스터디에서 다룰 내용"
         topicsTitleLabel.font = .preferredFont(forTextStyle: .headline)
-        topicsTitleLabel.adjustsFontForContentSizeCategory = true
         topicsTitleLabel.textColor = AppTheme.Palette.primaryText
         topicsTitleLabel.numberOfLines = 0
         return topicsTitleLabel
@@ -117,7 +111,6 @@ final class DetailViewController: UIViewController {
         title = "스터디 상세"
         navigationItem.largeTitleDisplayMode = .never
         view.backgroundColor = AppTheme.Palette.canvas
-        view.accessibilityIdentifier = "detail.screen"
 
         view.addSubview(scrollView)
         NSLayoutConstraint.activate([
@@ -210,12 +203,10 @@ final class DetailViewController: UIViewController {
         let imageView = UIImageView(image: UIImage(systemName: "checkmark.circle.fill"))
         imageView.tintColor = AppTheme.Palette.accent
         imageView.setContentHuggingPriority(.required, for: .horizontal)
-        imageView.isAccessibilityElement = false
 
         let label = UILabel()
         label.text = text
         label.font = .preferredFont(forTextStyle: .body)
-        label.adjustsFontForContentSizeCategory = true
         label.textColor = AppTheme.Palette.primaryText
         label.numberOfLines = 0
 

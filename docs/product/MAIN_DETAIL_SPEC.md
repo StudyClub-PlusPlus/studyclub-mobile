@@ -48,7 +48,7 @@ The client and repository expose separate list and detail operations: `fetchStud
 - `content`: a realistic list with multiple distinct items
 - `empty`: an empty successful response
 - `failure`: every request fails
-- `loading`: a deterministic long-running request for state and accessibility QA
+- `loading`: a deterministic long-running request for state QA
 - `detail-failure`, `detail-loading`: list succeeds, detail exercises its own failure or loading lifecycle
 
 The iOS and Android implementations may use different UI frameworks, but state meaning, stable selection behavior, Korean copy intent, and retry policy should remain equivalent.

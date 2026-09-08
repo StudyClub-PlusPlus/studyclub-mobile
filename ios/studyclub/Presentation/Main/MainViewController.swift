@@ -12,7 +12,6 @@ final class MainViewController: UIViewController {
         let view = UICollectionView(frame: .zero, collectionViewLayout: MainViewController.makeLayout())
         view.backgroundColor = .clear
         view.alwaysBounceVertical = true
-        view.accessibilityIdentifier = "main.collection"
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()

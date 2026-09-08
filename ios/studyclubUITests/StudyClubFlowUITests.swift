@@ -8,32 +8,32 @@ final class StudyClubFlowUITests: XCTestCase {
     @MainActor
     func testTabsPreserveMainNavigationAndSettingHasAnEmptyList() {
         let app = launchApp(scenario: "content")
-        let selectedStudy = app.descendants(matching: .any)["main.study.algorithm"]
+        let selectedStudy = app.collectionViews.cells.containing(.staticText, identifier: "알고리즘 문제 풀이").firstMatch
         XCTAssertTrue(selectedStudy.waitForExistence(timeout: 3))
         selectedStudy.tap()
-        XCTAssertTrue(app.staticTexts["detail.title"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.scrollViews.staticTexts["알고리즘 문제 풀이"].waitForExistence(timeout: 3))
 
-        app.tabBars.buttons["tab.setting"].tap()
-        let list = app.collectionViews["setting.list"]
+        app.tabBars.buttons["설정"].tap()
+        let list = app.collectionViews.firstMatch
         XCTAssertTrue(list.waitForExistence(timeout: 2))
         XCTAssertEqual(list.cells.count, 0)
         capture(app, name: "setting-empty")
 
-        app.tabBars.buttons["tab.main"].tap()
-        XCTAssertTrue(app.staticTexts["detail.title"].waitForExistence(timeout: 2))
-        XCTAssertEqual(app.staticTexts["detail.title"].label, "알고리즘 문제 풀이")
+        app.tabBars.buttons["스터디"].tap()
+        XCTAssertTrue(app.scrollViews.staticTexts["알고리즘 문제 풀이"].waitForExistence(timeout: 2))
+        XCTAssertEqual(app.scrollViews.staticTexts["알고리즘 문제 풀이"].label, "알고리즘 문제 풀이")
     }
 
     @MainActor
     func testContentOpensTheSelectedStudyDetail() {
         let app = launchApp(scenario: "content")
-        let selectedStudy = app.descendants(matching: .any)["main.study.algorithm"]
+        let selectedStudy = app.collectionViews.cells.containing(.staticText, identifier: "알고리즘 문제 풀이").firstMatch
 
         XCTAssertTrue(selectedStudy.waitForExistence(timeout: 3))
         capture(app, name: "main-content")
         selectedStudy.tap()
 
-        let detailTitle = app.staticTexts["detail.title"]
+        let detailTitle = app.scrollViews.staticTexts["알고리즘 문제 풀이"]
         XCTAssertTrue(detailTitle.waitForExistence(timeout: 2))
         XCTAssertEqual(detailTitle.label, "알고리즘 문제 풀이")
         let capture = XCTAttachment(screenshot: app.screenshot())
@@ -46,19 +46,19 @@ final class StudyClubFlowUITests: XCTestCase {
     func testEmptyStateIsDistinctFromFailure() {
         let app = launchApp(scenario: "empty")
 
-        XCTAssertTrue(app.otherElements["main.state.empty"].waitForExistence(timeout: 3))
-        XCTAssertFalse(app.otherElements["main.state.failure"].exists)
-        XCTAssertFalse(app.buttons["main.state.action"].exists)
+        XCTAssertTrue(app.staticTexts["아직 열린 스터디가 없어요"].waitForExistence(timeout: 3))
+        XCTAssertFalse(app.staticTexts["목록을 불러오지 못했어요"].exists)
+        XCTAssertFalse(app.buttons["다시 시도"].exists)
         capture(app, name: "main-empty")
-        XCTAssertFalse(app.collectionViews["main.collection"].isHittable)
+        XCTAssertFalse(app.collectionViews.firstMatch.isHittable)
     }
 
     @MainActor
     func testFailureHasNoRetryAction() {
         let app = launchApp(scenario: "failure")
-        XCTAssertTrue(app.otherElements["main.state.failure"].waitForExistence(timeout: 3))
-        XCTAssertFalse(app.buttons["main.state.action"].exists)
-        XCTAssertFalse(app.collectionViews["main.collection"].isHittable)
+        XCTAssertTrue(app.staticTexts["목록을 불러오지 못했어요"].waitForExistence(timeout: 3))
+        XCTAssertFalse(app.buttons["다시 시도"].exists)
+        XCTAssertFalse(app.collectionViews.firstMatch.isHittable)
         capture(app, name: "main-failure")
     }
 
@@ -66,21 +66,21 @@ final class StudyClubFlowUITests: XCTestCase {
     func testLoadingStateIsVisible() {
         let app = launchApp(scenario: "loading")
 
-        XCTAssertTrue(app.otherElements["main.state.loading"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.staticTexts["스터디를 불러오는 중이에요"].waitForExistence(timeout: 2))
         capture(app, name: "main-loading")
-        XCTAssertFalse(app.collectionViews["main.collection"].isHittable)
+        XCTAssertFalse(app.collectionViews.firstMatch.isHittable)
     }
 
     @MainActor
     func testDetailFailureAllowsBackNavigationWithoutRetry() {
         let app = launchApp(scenario: "detail-failure")
-        let selected = app.descendants(matching: .any)["main.study.algorithm"]
+        let selected = app.collectionViews.cells.containing(.staticText, identifier: "알고리즘 문제 풀이").firstMatch
         XCTAssertTrue(selected.waitForExistence(timeout: 3))
         selected.tap()
-        XCTAssertTrue(app.otherElements["detail.state.failure"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["상세 정보를 불러오지 못했어요"].waitForExistence(timeout: 3))
         capture(app, name: "detail-failure")
-        XCTAssertFalse(app.buttons["detail.state.action"].exists)
-        XCTAssertFalse(app.staticTexts["detail.title"].exists)
+        XCTAssertFalse(app.buttons["다시 시도"].exists)
+        XCTAssertFalse(app.scrollViews.staticTexts["알고리즘 문제 풀이"].exists)
         app.navigationBars.buttons.element(boundBy: 0).tap()
         XCTAssertTrue(selected.waitForExistence(timeout: 3))
     }
@@ -88,11 +88,11 @@ final class StudyClubFlowUITests: XCTestCase {
     @MainActor
     func testDetailLoadingAndBackNavigation() {
         let app = launchApp(scenario: "detail-loading")
-        let selected = app.descendants(matching: .any)["main.study.algorithm"]
+        let selected = app.collectionViews.cells.containing(.staticText, identifier: "알고리즘 문제 풀이").firstMatch
         XCTAssertTrue(selected.waitForExistence(timeout: 3))
         selected.tap()
-        XCTAssertTrue(app.otherElements["detail.state.loading"].waitForExistence(timeout: 3))
-        XCTAssertFalse(app.staticTexts["detail.title"].exists)
+        XCTAssertTrue(app.staticTexts["스터디 상세를 불러오는 중이에요"].waitForExistence(timeout: 3))
+        XCTAssertFalse(app.scrollViews.staticTexts["알고리즘 문제 풀이"].exists)
         capture(app, name: "detail-loading")
         app.navigationBars.buttons.element(boundBy: 0).tap()
         XCTAssertTrue(selected.waitForExistence(timeout: 3))

@@ -16,14 +16,6 @@ struct DevelopmentSettingRow {
     let id: ID
     let title: String
     let kind: Kind
-
-    var accessibilityIdentifier: String {
-        switch id {
-        case .repository: "development.repository"
-        case .resetFlags: "development.resetFlags"
-        case .featureFlag(let id): "development.flag.\(id)"
-        }
-    }
 }
 
 struct DevelopmentSettingSection {

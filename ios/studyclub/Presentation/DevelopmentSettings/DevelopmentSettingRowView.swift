@@ -22,16 +22,12 @@ struct DevelopmentSettingRowView: View {
                         Image(systemName: "chevron.right")
                             .font(.footnote.weight(.semibold))
                             .foregroundStyle(.tertiary)
-                            .accessibilityHidden(true)
                     }
                 }
                 .frame(minHeight: 44, alignment: .leading)
                 .contentShape(Rectangle())
             }
             .foregroundStyle(.primary)
-            .accessibilityLabel(row.title)
-            .accessibilityValue(value ?? "")
-            .accessibilityIdentifier(row.accessibilityIdentifier + ".row")
         case .toggle(let isOn):
             Toggle(isOn: Binding(get: { isOn }, set: onToggle)) {
                 Text(row.title)
@@ -39,8 +35,6 @@ struct DevelopmentSettingRowView: View {
                     .contentShape(Rectangle())
                     .onTapGesture { onToggle(!isOn) }
             }
-            .accessibilityLabel(row.title)
-            .accessibilityIdentifier(row.accessibilityIdentifier)
         }
     }
 }

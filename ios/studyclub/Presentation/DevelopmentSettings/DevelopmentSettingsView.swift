@@ -28,13 +28,11 @@ struct DevelopmentSettingsView: View {
                 }
             }
             .listStyle(.insetGrouped)
-            .accessibilityIdentifier("development.list")
             .navigationTitle("Development Settings")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("닫기", action: { dismiss() })
-                        .accessibilityIdentifier("development.close")
                 }
             }
             .alert("Repository", isPresented: $showsRepositoryPicker) {
@@ -55,7 +53,6 @@ struct DevelopmentSettingsView: View {
             showsRepositoryPicker = true
         case .resetFlags:
             viewModel.resetFlagsToDefaults()
-            AccessibilityNotification.Announcement("Flag를 기본값으로 되돌렸습니다.").post()
         case .featureFlag:
             break
         }

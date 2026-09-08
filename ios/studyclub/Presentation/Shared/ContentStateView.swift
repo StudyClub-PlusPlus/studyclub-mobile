@@ -15,14 +15,12 @@ final class ContentStateView: UIView {
         let view = UIActivityIndicatorView(style: .medium)
         view.hidesWhenStopped = true
         view.color = AppTheme.Palette.accent
-        view.accessibilityIdentifier = "main.loading.indicator"
         return view
     }()
     private let imageView = {
         let view = UIImageView()
         view.contentMode = .scaleAspectFit
         view.preferredSymbolConfiguration = UIImage.SymbolConfiguration(pointSize: 32, weight: .regular)
-        view.isAccessibilityElement = false
         return view
     }()
     private let titleLabel = {
@@ -31,7 +29,6 @@ final class ContentStateView: UIView {
         view.textColor = AppTheme.Palette.primaryText
         view.textAlignment = .center
         view.numberOfLines = 0
-        view.adjustsFontForContentSizeCategory = true
         return view
     }()
     private let messageLabel = {
@@ -40,7 +37,6 @@ final class ContentStateView: UIView {
         view.textColor = AppTheme.Palette.secondaryText
         view.textAlignment = .center
         view.numberOfLines = 0
-        view.adjustsFontForContentSizeCategory = true
         return view
     }()
     private let scrollView = {
@@ -81,33 +77,26 @@ final class ContentStateView: UIView {
 
         switch state {
         case .loading:
-            accessibilityIdentifier = "main.state.loading"
             activityIndicator.startAnimating()
             imageView.isHidden = true
             titleLabel.text = "스터디를 불러오는 중이에요"
             messageLabel.text = "잠시만 기다려 주세요."
         case .empty:
-            accessibilityIdentifier = "main.state.empty"
             imageView.image = UIImage(systemName: "books.vertical")
             imageView.tintColor = AppTheme.Palette.secondaryText
             titleLabel.text = "아직 열린 스터디가 없어요"
             messageLabel.text = "등록된 스터디가 없어요."
         case .failure:
-            accessibilityIdentifier = "main.state.failure"
             imageView.image = UIImage(systemName: "exclamationmark.circle")
             imageView.tintColor = AppTheme.Palette.error
             titleLabel.text = "목록을 불러오지 못했어요"
             messageLabel.text = "지금은 목록을 확인할 수 없어요."
         }
-        let prefix = context == .detail ? "detail" : "main"
-        activityIndicator.accessibilityIdentifier = "\(prefix).loading.indicator"
         if context == .detail {
             switch state {
             case .loading:
-                accessibilityIdentifier = "detail.state.loading"
                 titleLabel.text = "스터디 상세를 불러오는 중이에요"
             case .failure:
-                accessibilityIdentifier = "detail.state.failure"
                 titleLabel.text = "상세 정보를 불러오지 못했어요"
                 messageLabel.text = "이전 화면으로 돌아가 주세요."
             case .empty:

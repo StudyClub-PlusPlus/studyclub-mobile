@@ -7,32 +7,29 @@ final class DevelopmentSettingsUITests: XCTestCase {
 
     #if DEBUG
     @MainActor
-    func testLargeTextAndLandscapeKeepFlagControlsUsable() {
+    func testLandscapeKeepsFlagControlsUsable() {
         let app = XCUIApplication()
         app.launchEnvironment["STUDYCLUB_UI_TEST_SUITE"] = "studyclub.ui-tests.\(UUID().uuidString)"
         app.launchEnvironment["STUDYCLUB_UI_TEST_FLAGS"] = "1"
-        app.launchArguments = ["--mock-scenario", "content", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]
+        app.launchArguments = ["--mock-scenario", "content"]
         app.launch()
-        app.tabBars.buttons["tab.main"].press(forDuration: 1)
-        let list = app.collectionViews["development.list"]
-        let row = app.switches["development.flag.fixture.ready"]
-        let ready = app.switches["development.flag.fixture.ready"]
+        app.tabBars.buttons["스터디"].press(forDuration: 1)
+        let list = app.collectionViews.firstMatch
+        let ready = app.switches["검증용 Ready Flag"]
         XCTAssertTrue(list.waitForExistence(timeout: 3))
         for _ in 0..<4 where !ready.isHittable { list.swipeUp() }
         XCTAssertTrue(ready.isHittable)
-        XCTAssertEqual(ready.label, "검증용 Ready Flag")
-        XCTAssertGreaterThanOrEqual(row.frame.height, 44)
-        row.tap()
+        ready.tap()
         XCTAssertEqual(ready.value as? String, "0")
-        capture(app, name: "flags-fixture-accessibility-text")
-        app.buttons["development.close"].tap()
+        capture(app, name: "flags-fixture-portrait")
+        app.buttons["닫기"].tap()
 
         XCUIDevice.shared.orientation = .landscapeLeft
         defer { XCUIDevice.shared.orientation = .portrait }
         let landscapeLayout = NSPredicate { _, _ in app.frame.width > app.frame.height }
         expectation(for: landscapeLayout, evaluatedWith: nil)
         waitForExpectations(timeout: 5)
-        let main = app.tabBars.buttons["tab.main"]
+        let main = app.tabBars.buttons["스터디"]
         XCTAssertTrue(main.waitForExistence(timeout: 3))
         main.press(forDuration: 1)
         XCTAssertTrue(list.waitForExistence(timeout: 3))
@@ -40,7 +37,7 @@ final class DevelopmentSettingsUITests: XCTestCase {
         XCTAssertTrue(ready.isHittable)
         ready.tap()
         XCTAssertEqual(ready.value as? String, "1")
-        capture(app, name: "flags-fixture-landscape-accessibility-text")
+        capture(app, name: "flags-fixture-landscape")
     }
 
     @MainActor
@@ -49,9 +46,9 @@ final class DevelopmentSettingsUITests: XCTestCase {
         app.launchEnvironment["STUDYCLUB_UI_TEST_SUITE"] = "studyclub.ui-tests.\(UUID().uuidString)"
         app.launchEnvironment["STUDYCLUB_UI_TEST_FLAGS"] = "1"
         app.launch()
-        app.tabBars.buttons["tab.main"].press(forDuration: 1)
-        let ready = app.switches["development.flag.fixture.ready"]
-        let inProgress = app.switches["development.flag.fixture.in-progress"]
+        app.tabBars.buttons["스터디"].press(forDuration: 1)
+        let ready = app.switches["검증용 Ready Flag"]
+        let inProgress = app.switches["검증용 InProgress Flag"]
         XCTAssertTrue(ready.waitForExistence(timeout: 3))
         XCTAssertEqual(ready.value as? String, "1")
         XCTAssertEqual(inProgress.value as? String, "0")
@@ -70,29 +67,29 @@ final class DevelopmentSettingsUITests: XCTestCase {
 
         app.terminate()
         app.launch()
-        app.tabBars.buttons["tab.main"].press(forDuration: 1)
+        app.tabBars.buttons["스터디"].press(forDuration: 1)
         XCTAssertTrue(ready.waitForExistence(timeout: 3))
         XCTAssertEqual(ready.value as? String, "0")
         XCTAssertEqual(inProgress.value as? String, "1")
         chooseRepository("Real", in: app)
-        XCTAssertTrue(app.otherElements["main.state.failure"].waitForExistence(timeout: 15))
-        app.tabBars.buttons["tab.main"].press(forDuration: 1)
+        XCTAssertTrue(app.staticTexts["목록을 불러오지 못했어요"].waitForExistence(timeout: 15))
+        app.tabBars.buttons["스터디"].press(forDuration: 1)
         XCTAssertTrue(ready.waitForExistence(timeout: 3))
         XCTAssertEqual(ready.value as? String, "0")
         XCTAssertEqual(inProgress.value as? String, "1")
-        app.buttons["development.resetFlags.row"].tap()
+        app.buttons["Reset Flag to Default"].tap()
         XCTAssertEqual(ready.value as? String, "1")
         XCTAssertEqual(inProgress.value as? String, "0")
-        XCTAssertEqual(app.buttons["development.repository.row"].value as? String, "Real")
+        XCTAssertTrue(app.buttons.containing(.staticText, identifier: "Repository").firstMatch.staticTexts["Real"].exists)
         capture(app, name: "flags-fixture-reset-preserves-real")
 
         app.terminate()
         app.launch()
-        app.tabBars.buttons["tab.main"].press(forDuration: 1)
+        app.tabBars.buttons["스터디"].press(forDuration: 1)
         XCTAssertTrue(ready.waitForExistence(timeout: 3))
         XCTAssertEqual(ready.value as? String, "1")
         XCTAssertEqual(inProgress.value as? String, "0")
-        XCTAssertEqual(app.buttons["development.repository.row"].value as? String, "Real")
+        XCTAssertTrue(app.buttons.containing(.staticText, identifier: "Repository").firstMatch.staticTexts["Real"].exists)
         chooseRepository("Mock", in: app)
     }
 
@@ -101,12 +98,12 @@ final class DevelopmentSettingsUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = ["--mock-scenario", "content"]
         app.launch()
-        app.tabBars.buttons["tab.main"].press(forDuration: 1)
-        XCTAssertTrue(app.buttons["development.resetFlags.row"].waitForExistence(timeout: 3))
+        app.tabBars.buttons["스터디"].press(forDuration: 1)
+        XCTAssertTrue(app.buttons["Reset Flag to Default"].waitForExistence(timeout: 3))
         XCTAssertTrue(app.staticTexts["Ready"].exists)
         XCTAssertTrue(app.staticTexts["InProgress"].exists)
         XCTAssertEqual(app.switches.count, 0)
-        app.buttons["development.resetFlags.row"].tap()
+        app.buttons["Reset Flag to Default"].tap()
         capture(app, name: "development-empty-flag-catalog")
     }
 
@@ -115,37 +112,37 @@ final class DevelopmentSettingsUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchEnvironment["STUDYCLUB_UI_TEST_SUITE"] = "studyclub.ui-tests.\(UUID().uuidString)"
         app.launch()
-        let study = app.descendants(matching: .any)["main.study.algorithm"]
+        let study = app.collectionViews.cells.containing(.staticText, identifier: "알고리즘 문제 풀이").firstMatch
         XCTAssertTrue(study.waitForExistence(timeout: 3))
         study.tap()
-        XCTAssertTrue(app.staticTexts["detail.title"].waitForExistence(timeout: 3))
-        app.tabBars.buttons["tab.setting"].tap()
-        app.tabBars.buttons["tab.main"].press(forDuration: 1)
+        XCTAssertTrue(app.scrollViews.staticTexts["알고리즘 문제 풀이"].waitForExistence(timeout: 3))
+        app.tabBars.buttons["설정"].tap()
+        app.tabBars.buttons["스터디"].press(forDuration: 1)
         chooseRepository("Real", in: app)
 
-        XCTAssertTrue(app.otherElements["main.state.failure"].waitForExistence(timeout: 15))
-        XCTAssertTrue(app.tabBars.buttons["tab.main"].isSelected)
-        XCTAssertFalse(app.staticTexts["detail.title"].exists)
+        XCTAssertTrue(app.staticTexts["목록을 불러오지 못했어요"].waitForExistence(timeout: 15))
+        XCTAssertTrue(app.tabBars.buttons["스터디"].isSelected)
+        XCTAssertFalse(app.scrollViews.staticTexts["알고리즘 문제 풀이"].exists)
         XCTAssertFalse(app.navigationBars["Development Settings"].exists)
         capture(app, name: "real-main-failure-after-root-rebuild")
 
         app.terminate()
         app.launch()
-        XCTAssertTrue(app.otherElements["main.state.failure"].waitForExistence(timeout: 15))
-        app.tabBars.buttons["tab.main"].press(forDuration: 1)
-        let row = app.buttons["development.repository.row"]
+        XCTAssertTrue(app.staticTexts["목록을 불러오지 못했어요"].waitForExistence(timeout: 15))
+        app.tabBars.buttons["스터디"].press(forDuration: 1)
+        let row = app.buttons.containing(.staticText, identifier: "Repository").firstMatch
         XCTAssertTrue(row.waitForExistence(timeout: 2))
-        XCTAssertEqual(row.value as? String, "Real")
+        XCTAssertTrue(row.staticTexts["Real"].exists)
         capture(app, name: "repository-persisted-real")
 
         chooseRepository("Real", in: app)
         XCTAssertTrue(app.navigationBars["Development Settings"].exists)
         chooseRepository("Mock", in: app)
         XCTAssertTrue(study.waitForExistence(timeout: 3))
-        XCTAssertTrue(app.tabBars.buttons["tab.main"].isSelected)
+        XCTAssertTrue(app.tabBars.buttons["스터디"].isSelected)
         study.tap()
-        XCTAssertTrue(app.staticTexts["detail.title"].waitForExistence(timeout: 3))
-        XCTAssertEqual(app.staticTexts["detail.title"].label, "알고리즘 문제 풀이")
+        XCTAssertTrue(app.scrollViews.staticTexts["알고리즘 문제 풀이"].waitForExistence(timeout: 3))
+        XCTAssertEqual(app.scrollViews.staticTexts["알고리즘 문제 풀이"].label, "알고리즘 문제 풀이")
 
         app.terminate()
         app.launch()
@@ -154,7 +151,7 @@ final class DevelopmentSettingsUITests: XCTestCase {
 
     @MainActor
     private func chooseRepository(_ mode: String, in app: XCUIApplication) {
-        let row = app.buttons["development.repository.row"]
+        let row = app.buttons.containing(.staticText, identifier: "Repository").firstMatch
         XCTAssertTrue(row.waitForExistence(timeout: 3))
         row.tap()
         app.alerts["Repository"].buttons[mode].tap()
@@ -174,8 +171,8 @@ final class DevelopmentSettingsUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = ["--mock-scenario", "content"]
         app.launch()
-        let mainTab = app.tabBars.buttons["tab.main"]
-        let settingTab = app.tabBars.buttons["tab.setting"]
+        let mainTab = app.tabBars.buttons["스터디"]
+        let settingTab = app.tabBars.buttons["설정"]
         XCTAssertTrue(mainTab.waitForExistence(timeout: 3))
         settingTab.tap()
         mainTab.tap()
@@ -189,7 +186,7 @@ final class DevelopmentSettingsUITests: XCTestCase {
         attachment.name = "development-entry"
         attachment.lifetime = .keepAlways
         add(attachment)
-        app.buttons["development.close"].tap()
+        app.buttons["닫기"].tap()
         XCTAssertTrue(mainTab.waitForExistence(timeout: 2))
         mainTab.press(forDuration: 1)
         XCTAssertTrue(app.navigationBars["Development Settings"].waitForExistence(timeout: 2))

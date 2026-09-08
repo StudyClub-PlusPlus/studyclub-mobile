@@ -4,7 +4,6 @@ final class StudyCardCell: UICollectionViewCell {
     private let categoryLabel = {
         let view = InsetLabel()
         view.font = .preferredFont(forTextStyle: .caption1)
-        view.adjustsFontForContentSizeCategory = true
         view.textColor = AppTheme.Palette.accent
         view.backgroundColor = AppTheme.Palette.accent.withAlphaComponent(0.10)
         view.layer.cornerRadius = AppTheme.Radius.control
@@ -16,7 +15,6 @@ final class StudyCardCell: UICollectionViewCell {
     private let statusLabel = {
         let view = UILabel()
         view.font = .preferredFont(forTextStyle: .caption1)
-        view.adjustsFontForContentSizeCategory = true
         view.textColor = AppTheme.Palette.secondaryText
         view.numberOfLines = 0
         return view
@@ -24,7 +22,6 @@ final class StudyCardCell: UICollectionViewCell {
     private let titleLabel = {
         let view = UILabel()
         view.font = .preferredFont(forTextStyle: .headline)
-        view.adjustsFontForContentSizeCategory = true
         view.textColor = AppTheme.Palette.primaryText
         view.numberOfLines = 0
         return view
@@ -32,7 +29,6 @@ final class StudyCardCell: UICollectionViewCell {
     private let summaryLabel = {
         let view = UILabel()
         view.font = .preferredFont(forTextStyle: .subheadline)
-        view.adjustsFontForContentSizeCategory = true
         view.textColor = AppTheme.Palette.secondaryText
         view.numberOfLines = 0
         return view
@@ -41,13 +37,11 @@ final class StudyCardCell: UICollectionViewCell {
         let view = UIImageView(image: UIImage(systemName: "person.2"))
         view.tintColor = AppTheme.Palette.secondaryText
         view.setContentHuggingPriority(.required, for: .horizontal)
-        view.isAccessibilityElement = false
         return view
     }()
     private let memberLabel = {
         let view = UILabel()
         view.font = .preferredFont(forTextStyle: .caption1)
-        view.adjustsFontForContentSizeCategory = true
         view.textColor = AppTheme.Palette.secondaryText
         return view
     }()
@@ -55,7 +49,6 @@ final class StudyCardCell: UICollectionViewCell {
         let view = UIImageView(image: UIImage(systemName: "chevron.right"))
         view.tintColor = AppTheme.Palette.secondaryText
         view.setContentHuggingPriority(.required, for: .horizontal)
-        view.isAccessibilityElement = false
         return view
     }()
     private let footerSpacer = UIView()
@@ -103,28 +96,18 @@ final class StudyCardCell: UICollectionViewCell {
             .cgColor
     }
 
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        updateHeaderLayout()
-    }
-
     func updateViews(with item: StudyCardCellViewModel) {
         categoryLabel.text = item.category
         statusLabel.text = item.statusText
         titleLabel.text = item.title
         summaryLabel.text = item.summary
         memberLabel.text = item.memberText
-        accessibilityIdentifier = "main.study.\(item.id)"
-        accessibilityLabel = "\(item.title), \(item.category), \(item.memberText), \(item.statusText). \(item.summary)"
     }
 
     private func configureView() {
         contentView.layer.cornerRadius = AppTheme.Radius.card
         contentView.layer.cornerCurve = .continuous
         contentView.layer.borderWidth = 1 / max(traitCollection.displayScale, 1)
-
-        isAccessibilityElement = true
-        accessibilityTraits = .button
 
         contentView.addSubview(contentStack)
         [headerStack, titleLabel, summaryLabel, footerStack].forEach(contentStack.addArrangedSubview)
@@ -151,15 +134,5 @@ final class StudyCardCell: UICollectionViewCell {
 
         footerStack.addArrangedSubview(disclosureImageView)
         disclosureImageView.widthAnchor.constraint(equalToConstant: 14).isActive = true
-    }
-
-    private func updateHeaderLayout() {
-        let usesAccessibilityLayout = traitCollection.preferredContentSizeCategory.isAccessibilityCategory
-        let desiredAxis: NSLayoutConstraint.Axis = usesAccessibilityLayout ? .vertical : .horizontal
-        guard headerStack.axis != desiredAxis else { return }
-
-        headerStack.axis = desiredAxis
-        headerStack.alignment = usesAccessibilityLayout ? .leading : .center
-        headerSpacer.isHidden = usesAccessibilityLayout
     }
 }

@@ -44,6 +44,6 @@ Before changing iOS code, read:
 - No nested `.git`, `xcuserdata`, secret, or generated build output is tracked.
 - New DTOs do not escape Data and new concrete repositories do not leak into Presentation.
 - Async work matches its request policy. Current one-request ViewModels use weak captures and need no retained Task or request-generation counter; revisit concurrency protection when adding repeated requests.
-- Accessibility labels, Dynamic Type, safe areas, and 44-point targets are verified.
+- Verify safe areas and normal-size interaction. Custom accessibility support and dedicated accessibility QA are deferred at the current product stage. Do not add accessibilityIdentifier; UI tests locate native controls by visible text.
 - Documentation describes the implementation that actually shipped.
 - The handoff separates verified evidence, decisions, external unknowns, and uncommitted work.

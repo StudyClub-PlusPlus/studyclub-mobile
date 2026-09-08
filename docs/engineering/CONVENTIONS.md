@@ -51,7 +51,7 @@ The model flow is `DTO -> Domain model -> ViewModel display values`:
 - Screens, cells, and shared views store fixed views as `private let` properties with fixed styling in initialization closures. Data-driven rows may use a local factory.
 - `configureView()` adds subviews and sets constraints and spacing together; `updateViews()` reads display values from the ViewModel after a Combine notification. Update all display values before publishing the notification. Cells and shared views also use `updateViews` for data application.
 - Organize `configureView()` by view: add the view, configure its relationships or arranged subviews and custom spacing, then activate its constraints before moving to the next view. Keep a child's explicit size constraints next to its addition. Preserve stacking order and ensure a common ancestor exists before activating cross-view constraints.
-- Give user-visible controls and content stable accessibility identifiers when UI tests need them.
+- Custom accessibility support is deferred, including accessibility identifiers. UI tests locate native controls by visible text.
 
 ## Errors and copy
 
