@@ -57,3 +57,7 @@ The current default factory creates a fresh mock repository/client per ViewModel
 - Add a Coordinator or Router when navigation becomes a multi-step flow with reusable branching or ownership problems.
 - Add a DI container only when explicit manual composition becomes measurably error-prone.
 - Revisit feature-first folders when top-level layers make one feature expensive to locate or own.
+
+## Development settings rows
+
+The Debug-only settings list uses stable section/row identifiers and diffable snapshots. A row explicitly describes either a button (optional current value) or a toggle. Cells render display values and forward interactions; persistence and setting actions are owned outside cells. Reconfiguration replaces the toggle callback, and tapping the row also toggles so the whole self-sizing row is a touch target.
