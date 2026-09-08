@@ -1,8 +1,12 @@
 #if DEBUG
+import Combine
 import UIKit
 
 @MainActor
 final class DevelopmentSettingsViewController: UIViewController {
+    var onRepositoryChange: (() -> Void)?
+    private let viewModel: DevelopmentSettingsViewModel
+    private var cancellables = Set<AnyCancellable>()
     private let listView: UICollectionView = {
         var configuration = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
         configuration.headerMode = .supplementary
@@ -16,11 +20,25 @@ final class DevelopmentSettingsViewController: UIViewController {
     private var dataSource: UICollectionViewDiffableDataSource<DevelopmentSettingSection.ID, DevelopmentSettingRow.ID>!
     private var rowsByID: [DevelopmentSettingRow.ID: DevelopmentSettingRow] = [:]
 
+    convenience init() {
+        self.init(viewModel: DevelopmentSettingsViewModel())
+    }
+
+    init(viewModel: DevelopmentSettingsViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         configureView()
         configureDataSource()
-        updateViews(sections: [.init(id: .miscellaneous, rows: [])])
+        bindViewModel()
     }
 
     private func configureView() {
@@ -68,7 +86,14 @@ final class DevelopmentSettingsViewController: UIViewController {
         }
     }
 
-    private func updateViews(sections: [DevelopmentSettingSection]) {
+    private func bindViewModel() {
+        viewModel.statePublisher.sink { [weak self] _ in
+            self?.updateViews()
+        }.store(in: &cancellables)
+    }
+
+    private func updateViews() {
+        let sections = viewModel.sections
         let rows = sections.flatMap(\.rows)
         rowsByID = Dictionary(uniqueKeysWithValues: rows.map { ($0.id, $0) })
         var snapshot = NSDiffableDataSourceSnapshot<DevelopmentSettingSection.ID, DevelopmentSettingRow.ID>()
@@ -82,7 +107,20 @@ final class DevelopmentSettingsViewController: UIViewController {
     }
 
     private func buttonSelected(id: DevelopmentSettingRow.ID) {
-        // Actions are connected as development settings are added.
+        guard id == .repository else { return }
+        let alert = UIAlertController(
+            title: "Repository",
+            message: "변경하면 모든 탭을 새로 만들고 스터디 목록으로 돌아갑니다.",
+            preferredStyle: .alert
+        )
+        for mode in RepositoryMode.allCases {
+            alert.addAction(UIAlertAction(title: mode.title, style: .default) { [weak self] _ in
+                guard let self, self.viewModel.changeRepositoryMode(to: mode) else { return }
+                self.onRepositoryChange?()
+            })
+        }
+        alert.addAction(UIAlertAction(title: "취소", style: .cancel))
+        present(alert, animated: true)
     }
 
     private func toggleChanged(id: DevelopmentSettingRow.ID, isOn: Bool) {

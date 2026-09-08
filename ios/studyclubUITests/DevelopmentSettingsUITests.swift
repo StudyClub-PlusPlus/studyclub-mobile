@@ -5,6 +5,66 @@ final class DevelopmentSettingsUITests: XCTestCase {
         continueAfterFailure = false
     }
 
+    #if DEBUG
+    @MainActor
+    func testRepositoryChangeRebuildsAllTabsAndPersistsAcrossLaunches() {
+        let app = XCUIApplication()
+        app.launchEnvironment["STUDYCLUB_UI_TEST_SUITE"] = "studyclub.ui-tests.\(UUID().uuidString)"
+        app.launch()
+        let study = app.descendants(matching: .any)["main.study.algorithm"]
+        XCTAssertTrue(study.waitForExistence(timeout: 3))
+        study.tap()
+        XCTAssertTrue(app.staticTexts["detail.title"].waitForExistence(timeout: 3))
+        app.tabBars.buttons["tab.setting"].tap()
+        app.tabBars.buttons["tab.main"].press(forDuration: 1)
+        chooseRepository("Real", in: app)
+
+        XCTAssertTrue(app.otherElements["main.state.failure"].waitForExistence(timeout: 15))
+        XCTAssertTrue(app.tabBars.buttons["tab.main"].isSelected)
+        XCTAssertFalse(app.staticTexts["detail.title"].exists)
+        XCTAssertFalse(app.navigationBars["Development Settings"].exists)
+        capture(app, name: "real-main-failure-after-root-rebuild")
+
+        app.terminate()
+        app.launch()
+        XCTAssertTrue(app.otherElements["main.state.failure"].waitForExistence(timeout: 15))
+        app.tabBars.buttons["tab.main"].press(forDuration: 1)
+        let row = app.cells["development.repository.row"]
+        XCTAssertTrue(row.waitForExistence(timeout: 2))
+        XCTAssertEqual(row.value as? String, "Real")
+        capture(app, name: "repository-persisted-real")
+
+        chooseRepository("Real", in: app)
+        XCTAssertTrue(app.navigationBars["Development Settings"].exists)
+        chooseRepository("Mock", in: app)
+        XCTAssertTrue(study.waitForExistence(timeout: 3))
+        XCTAssertTrue(app.tabBars.buttons["tab.main"].isSelected)
+        study.tap()
+        XCTAssertTrue(app.staticTexts["detail.title"].waitForExistence(timeout: 3))
+        XCTAssertEqual(app.staticTexts["detail.title"].label, "알고리즘 문제 풀이")
+
+        app.terminate()
+        app.launch()
+        XCTAssertTrue(study.waitForExistence(timeout: 3))
+    }
+
+    @MainActor
+    private func chooseRepository(_ mode: String, in app: XCUIApplication) {
+        let row = app.cells["development.repository.row"]
+        XCTAssertTrue(row.waitForExistence(timeout: 3))
+        row.tap()
+        app.alerts["Repository"].buttons[mode].tap()
+    }
+
+    @MainActor
+    private func capture(_ app: XCUIApplication, name: String) {
+        let attachment = XCTAttachment(screenshot: app.screenshot())
+        attachment.name = name
+        attachment.lifetime = .keepAlways
+        add(attachment)
+    }
+    #endif
+
     @MainActor
     func testOnlyMainTabLongPressOpensDevelopmentSettings() {
         let app = XCUIApplication()

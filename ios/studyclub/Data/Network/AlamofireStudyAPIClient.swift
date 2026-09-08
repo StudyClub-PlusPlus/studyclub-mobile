@@ -5,7 +5,9 @@ final class AlamofireStudyAPIClient: StudyAPIClient, @unchecked Sendable {
     private let baseURL: URL
     private let session: Session
 
-    init(baseURL: URL, session: Session = .default) {
+    // Temporary placeholder: the real API base URL has not been supplied.
+    // Replace before live integration. The reserved .invalid domain cannot reach a real service.
+    init(baseURL: URL = URL(string: "https://api.example.invalid")!, session: Session = .default) {
         self.baseURL = baseURL
         self.session = session
     }
