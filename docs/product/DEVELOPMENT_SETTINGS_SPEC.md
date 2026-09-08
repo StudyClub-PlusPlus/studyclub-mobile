@@ -17,3 +17,5 @@ The default is Mock. Release ignores the saved developer override and uses the e
 ## Feature flags
 
 Ready defaults ON. InProgress defaults OFF. Developer overrides persist across app launches and are keyed by a stable feature ID, not display name or stage. Overrides affect Debug only; Release uses the definition's stage default. Moving to Ready is an explicit release decision because its default becomes ON. Actual feature definitions have not yet been supplied; the app catalog is empty.
+
+The miscellaneous list precedes Ready and InProgress. It supports button and toggle row types. “Reset Flag to Default” removes all feature flag overrides, immediately re-renders both flag sections, and preserves Repository and unrelated preferences. Each flag row has its name on the left and a switch on the right; tapping the row also toggles it. The two section headers remain visible when the catalog is empty.

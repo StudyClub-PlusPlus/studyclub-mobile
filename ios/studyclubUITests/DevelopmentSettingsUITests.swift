@@ -7,6 +7,67 @@ final class DevelopmentSettingsUITests: XCTestCase {
 
     #if DEBUG
     @MainActor
+    func testFlagTogglesPersistThroughRootRebuildAndResetOnlyFlags() {
+        let app = XCUIApplication()
+        app.launchEnvironment["STUDYCLUB_UI_TEST_SUITE"] = "studyclub.ui-tests.\(UUID().uuidString)"
+        app.launchEnvironment["STUDYCLUB_UI_TEST_FLAGS"] = "1"
+        app.launch()
+        app.tabBars.buttons["tab.main"].press(forDuration: 1)
+        let ready = app.switches["development.flag.fixture.ready"]
+        let inProgress = app.switches["development.flag.fixture.in-progress"]
+        XCTAssertTrue(ready.waitForExistence(timeout: 3))
+        XCTAssertEqual(ready.value as? String, "1")
+        XCTAssertEqual(inProgress.value as? String, "0")
+        capture(app, name: "flags-fixture-defaults")
+        ready.tap()
+        inProgress.tap()
+        XCTAssertEqual(ready.value as? String, "0")
+        XCTAssertEqual(inProgress.value as? String, "1")
+        capture(app, name: "flags-fixture-overrides")
+
+        app.terminate()
+        app.launch()
+        app.tabBars.buttons["tab.main"].press(forDuration: 1)
+        XCTAssertTrue(ready.waitForExistence(timeout: 3))
+        XCTAssertEqual(ready.value as? String, "0")
+        XCTAssertEqual(inProgress.value as? String, "1")
+        chooseRepository("Real", in: app)
+        XCTAssertTrue(app.otherElements["main.state.failure"].waitForExistence(timeout: 15))
+        app.tabBars.buttons["tab.main"].press(forDuration: 1)
+        XCTAssertTrue(ready.waitForExistence(timeout: 3))
+        XCTAssertEqual(ready.value as? String, "0")
+        XCTAssertEqual(inProgress.value as? String, "1")
+        app.cells["development.resetFlags.row"].tap()
+        XCTAssertEqual(ready.value as? String, "1")
+        XCTAssertEqual(inProgress.value as? String, "0")
+        XCTAssertEqual(app.cells["development.repository.row"].value as? String, "Real")
+        capture(app, name: "flags-fixture-reset-preserves-real")
+
+        app.terminate()
+        app.launch()
+        app.tabBars.buttons["tab.main"].press(forDuration: 1)
+        XCTAssertTrue(ready.waitForExistence(timeout: 3))
+        XCTAssertEqual(ready.value as? String, "1")
+        XCTAssertEqual(inProgress.value as? String, "0")
+        XCTAssertEqual(app.cells["development.repository.row"].value as? String, "Real")
+        chooseRepository("Mock", in: app)
+    }
+
+    @MainActor
+    func testNormalLaunchShowsEmptyFlagSectionsAndResetButton() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--mock-scenario", "content"]
+        app.launch()
+        app.tabBars.buttons["tab.main"].press(forDuration: 1)
+        XCTAssertTrue(app.cells["development.resetFlags.row"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["Ready"].exists)
+        XCTAssertTrue(app.staticTexts["InProgress"].exists)
+        XCTAssertEqual(app.switches.count, 0)
+        app.cells["development.resetFlags.row"].tap()
+        capture(app, name: "development-empty-flag-catalog")
+    }
+
+    @MainActor
     func testRepositoryChangeRebuildsAllTabsAndPersistsAcrossLaunches() {
         let app = XCUIApplication()
         app.launchEnvironment["STUDYCLUB_UI_TEST_SUITE"] = "studyclub.ui-tests.\(UUID().uuidString)"

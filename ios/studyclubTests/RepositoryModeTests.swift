@@ -38,7 +38,9 @@ final class RepositoryModeTests: XCTestCase {
     @MainActor
     func testViewModelPersistsBeforeNotifyingAndDoesNotRebuildForSameMode() {
         let store = UserDefaultsRepositoryModeStore(defaults: defaults)
-        let viewModel = DevelopmentSettingsViewModel(modeStore: store)
+        let viewModel = DevelopmentSettingsViewModel(
+            modeStore: store, flagStore: UserDefaultsFeatureFlagStore(defaults: defaults), flags: []
+        )
         var notifications = 0
         let observation = viewModel.statePublisher.sink {
             notifications += 1

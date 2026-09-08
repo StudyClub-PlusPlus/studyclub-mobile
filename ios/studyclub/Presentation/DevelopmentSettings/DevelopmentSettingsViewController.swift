@@ -46,7 +46,7 @@ final class DevelopmentSettingsViewController: UIViewController {
         view.backgroundColor = AppTheme.Palette.canvas
         view.accessibilityIdentifier = "development.screen"
         navigationItem.rightBarButtonItem = UIBarButtonItem(
-            title: "닫기", style: .done, target: self, action: #selector(close)
+            title: "닫기", style: .prominent, target: self, action: #selector(close)
         )
         navigationItem.rightBarButtonItem?.accessibilityIdentifier = "development.close"
 
@@ -107,6 +107,11 @@ final class DevelopmentSettingsViewController: UIViewController {
     }
 
     private func buttonSelected(id: DevelopmentSettingRow.ID) {
+        if id == .resetFlags {
+            viewModel.resetFlagsToDefaults()
+            UIAccessibility.post(notification: .announcement, argument: "Flag를 기본값으로 되돌렸습니다.")
+            return
+        }
         guard id == .repository else { return }
         let alert = UIAlertController(
             title: "Repository",
@@ -124,7 +129,8 @@ final class DevelopmentSettingsViewController: UIViewController {
     }
 
     private func toggleChanged(id: DevelopmentSettingRow.ID, isOn: Bool) {
-        // Toggle persistence is connected with the feature flag store.
+        guard case .featureFlag(let flagID) = id else { return }
+        viewModel.setFlag(id: flagID, isEnabled: isOn)
     }
 
     @objc private func close() {

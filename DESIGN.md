@@ -88,3 +88,7 @@ Check safe areas, card alignment, Korean wrapping, dark-mode semantics, Dynamic 
 - No bespoke imagery or remote image loading in the architecture scaffold.
 - No iPad-specific multi-column composition yet; the one-column layout remains readable in regular width.
 - Full VoiceOver interaction is a manual follow-up if the available Simulator automation cannot exercise the screen reader; labels and traits are still source-reviewed now.
+
+## Development Settings
+
+Debug-only modal with a native navigation title and Close button. Use an inset-grouped native list with “기타”, “Ready”, “InProgress” headers. Repository shows the current mode below its label and opens a mode picker. Reset Flag to Default is a button row. Flag rows use a wrapping name on the left and a labeled switch on the right; the full row is also tappable. Ready defaults ON and InProgress defaults OFF. Empty flag sections keep their headers. Reset updates switches in place and announces completion to accessibility. Repository changes close the modal and return to a freshly constructed Main tab.
