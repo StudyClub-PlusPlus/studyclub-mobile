@@ -55,6 +55,8 @@ Use the shared `AppTheme` source rather than one-off values.
 
 ## Interaction
 
+- In Debug builds only, holding the Main tab item for 0.7 seconds opens Development Settings in a modal navigation stack with a Close button. Normal taps and holding Setting do not open it. Release compiles out the gesture and screen.
+
 - Main and Detail each start one request when their ViewModel is initialized.
 - Tapping any visible card pushes exactly that item’s Detail.
 - Use standard navigation transitions and system highlight behavior. Do not add decorative entrance animations.
