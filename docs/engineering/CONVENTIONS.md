@@ -1,5 +1,16 @@
 # Engineering Conventions
 
+## Issues, commits, and pull requests
+
+- Prefix commit messages with the Notion task issue number: `[92] feat: 스터디 목록 빈 상태 화면 추가`.
+- Use the same issue-number prefix in the PR title and include the actual Notion issue URL in the PR body. The Notion issue number and GitHub PR number are separate identifiers.
+- Keep work branches short-lived and PRs small enough to review and integrate into trunk. One issue may have multiple PRs; link them back to that issue.
+- Follow [Feature flag workflow](FEATURE_FLAGS.md) for unfinished features, including behavior and side-effect guards and ON/OFF verification.
+- State the PR's completed scope, relevant flag/default, verification evidence, and shared-code impact. PR merge, issue completion, and enabling a feature by default are separate events.
+- Preserve issues completed within an agreed Mock scope. Link later API integration or design changes as follow-up issues.
+
+See the [PR template](../../.github/pull_request_template.md) and [AI handoff](AI_HANDOFF.md).
+
 ## Naming status
 
 Current names are defaults, not a permanent style law. A rename is allowed when it improves clarity, but layer ownership must remain unchanged.

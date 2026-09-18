@@ -2,6 +2,12 @@
 
 This document is platform-neutral and should be used as the later Android implementation reference.
 
+## Product direction
+
+The evolving product direction and user decisions are recorded in [MOBILE_PRD.md](MOBILE_PRD.md). Exploration is the primary experience, with a guest list entry and a separate planned search/results flow. Web and app own service entry, discovery, application, and management; Discord is the study activity venue.
+
+The sections below describe the existing Main/Detail implementation contract. Planned behavior in the mobile PRD does not change the completion scope of existing Mock work.
+
 ## Main
 
 Main shows the currently available study groups as a vertically scrolling list.

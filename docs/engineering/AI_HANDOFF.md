@@ -2,6 +2,8 @@
 
 Use this contract when an AI-assisted task changes the repository. Keep it short, factual, and reproducible.
 
+For issue-based work, include the Notion issue number and URL, and any existing PR link. Follow the commit/PR issue-number prefix in [Engineering Conventions](CONVENTIONS.md). Do not invent a missing issue or PR number.
+
 ## Required handoff
 
 1. **Outcome** — what now works, in user-facing terms.
@@ -23,6 +25,7 @@ Use this contract when an AI-assisted task changes the repository. Keep it short
 ## Minimal template
 
 ```text
+Notion issue / PR:
 Outcome:
 Scope / non-goals:
 Architecture decisions:
