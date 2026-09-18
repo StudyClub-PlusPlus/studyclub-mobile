@@ -2,14 +2,34 @@
 
 ## Issues, commits, and pull requests
 
-- Prefix commit messages with the Notion task issue number: `[92] feat: 스터디 목록 빈 상태 화면 추가`.
-- Use the same issue-number prefix in the PR title and include the actual Notion issue URL in the PR body. The Notion issue number and GitHub PR number are separate identifiers.
+- Start issue work from the latest agreed `main` commit on `<owner>/sc-<issue-number>` (for example, `junsu/sc-92`). Inspect local changes and fetch the remote first. If `main` is behind, fast-forward it; if it diverges, resolve the base before branching. Never discard or include unrelated local changes.
+- Prefix every commit message with `[sc-<issue-number>]`, followed by its type and summary: `[sc-92] feat: 스터디 목록 engineering flag 추가`. Documentation and test commits use the same prefix. Use lowercase `sc-`; the earlier numeric-only form such as `[92]` is superseded for new commits.
+- Use the same prefix in the PR title and include the actual Notion issue URL in the PR body. The Notion issue number and GitHub PR number are separate identifiers.
 - Keep work branches short-lived and PRs small enough to review and integrate into trunk. One issue may have multiple PRs; link them back to that issue.
 - Follow [Feature flag workflow](FEATURE_FLAGS.md) for unfinished features, including behavior and side-effect guards and ON/OFF verification.
 - State the PR's completed scope, relevant flag/default, verification evidence, and shared-code impact. PR merge, issue completion, and enabling a feature by default are separate events.
 - Preserve issues completed within an agreed Mock scope. Link later API integration or design changes as follow-up issues.
 
 See the [PR template](../../.github/pull_request_template.md) and [AI handoff](AI_HANDOFF.md).
+
+### Issue kickoff and push
+
+1. Confirm the Notion issue and agreed scope, then create the issue branch from `main`.
+2. For unfinished feature work, register an engineering flag in the existing `FeatureFlag` catalog with a stable ID and `.inProgress` (default OFF). Record the issue, current scope and activation boundary in [Feature flag workflow](FEATURE_FLAGS.md). A flag-only kickoff may register the flag before behavior exists; every later unfinished behavior and side effect must be guarded before integration.
+3. Run the checks relevant to the change, inspect the diff, and stage only the intended files. Commit with the issue prefix.
+4. When the requested scope includes push, push the issue branch and set its upstream on the first push. Verify the remote branch points to the local commit and report the branch, commit and remaining local changes. A successful local commit alone is not a completed push. Do not force-push or push the work directly to `main`.
+
+For sc-92, after confirming a clean checkout and an up-to-date `main`:
+
+```bash
+git switch -c junsu/sc-92 main
+# Make the scoped changes, verify them, and stage the intended files.
+git commit -m "[sc-92] feat: 스터디 목록 engineering flag 추가"
+git push -u origin junsu/sc-92
+git rev-parse HEAD
+git ls-remote --heads origin refs/heads/junsu/sc-92
+git status --short --branch
+```
 
 ## Naming status
 

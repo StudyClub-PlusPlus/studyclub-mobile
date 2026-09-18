@@ -36,7 +36,7 @@ iOS를 먼저 만들고 Android를 나중에 만들면, 그사이에 정해지�
 - Debug 전용 SwiftUI Development Settings (`@Observable` ViewModel)
 - Mock/Real 선택 저장과 TabBar 전체 재구성, Feature Flag 기본값·override·초기화
 
-앱의 기본값은 정해진 Mock 데이터입니다. Debug에서 스터디 탭을 길게 누르면 개발 설정을 열 수 있습니다. Real 선택은 가능하지만 BaseURL은 주석으로 표시한 임시 `.invalid` 주소이며, 실제 서버 연동과 Detail API 설정은 아직 필요합니다. 실제 Feature Flag 목록은 비어 있고, Ready는 기본 ON·InProgress는 기본 OFF로 동작하는 기반을 준비했습니다.
+앱의 기본값은 정해진 Mock 데이터입니다. Debug에서 스터디 탭을 길게 누르면 개발 설정을 열 수 있습니다. Real 선택은 가능하지만 BaseURL은 주석으로 표시한 임시 `.invalid` 주소이며, 실제 서버 연동과 Detail API 설정은 아직 필요합니다. sc-92 작업용 `studyList` 플래그는 InProgress·기본 OFF로 등록되어 있습니다. 아직 목록 동작에는 연결하지 않았으며, Ready는 기본 ON·InProgress는 기본 OFF로 동작합니다.
 
 ### Android
 

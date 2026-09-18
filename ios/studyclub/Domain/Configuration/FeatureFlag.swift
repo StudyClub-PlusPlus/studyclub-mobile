@@ -13,12 +13,15 @@ struct FeatureFlagDefinition: Hashable, Sendable {
     var defaultValue: Bool { stage.defaultValue }
 }
 
-/// Register actual features here once specified. Test fixtures are not app feature flags.
+/// Stable app feature catalog. Test fixtures are not app feature flags.
 enum FeatureFlag: CaseIterable {
-    static let allCases: [FeatureFlag] = []
+    case studyList
 
     var definition: FeatureFlagDefinition {
-        switch self {}
+        switch self {
+        case .studyList:
+            .init(id: "study-list", name: "스터디 목록", stage: .inProgress)
+        }
     }
 }
 

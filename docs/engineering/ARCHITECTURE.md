@@ -74,6 +74,6 @@ Observation follows [Apple's model data guidance](https://developer.apple.com/do
 
 ## Feature flag definitions and overrides
 
-Domain defines FeatureFlag, FeatureFlagDefinition and FeatureFlagStage. The enum is intentionally empty until actual features are supplied. Definitions have a stable storage ID, display name and stage. Ready defaults ON; InProgress defaults OFF. Data's UserDefaultsFeatureFlagStore implements the Domain store contract, and RepositoryFactory constructs it. Reads resolve a per-ID developer override before the stage default in Debug. Release always returns the stage default and compiles out mutation/reset methods.
+Domain defines FeatureFlag, FeatureFlagDefinition and FeatureFlagStage. The catalog includes the sc-92 `studyList` flag, registered as InProgress; its product behavior is not connected yet. Definitions have a stable storage ID, display name and stage. Ready defaults ON; InProgress defaults OFF. Data's UserDefaultsFeatureFlagStore implements the Domain store contract, and RepositoryFactory constructs it. Reads resolve a per-ID developer override before the stage default in Debug. Release always returns the stage default and compiles out mutation/reset methods.
 
 Overrides are read fresh, so changes apply to the next lookup without restarting the app. Moving a definition between stages or renaming it does not change its ID. Reset removes the entire flag override key (including retired IDs) without touching repository mode or other preferences. It does not copy current defaults into storage.

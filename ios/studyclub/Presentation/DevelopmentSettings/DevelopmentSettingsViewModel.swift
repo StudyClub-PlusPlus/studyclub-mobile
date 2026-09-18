@@ -43,8 +43,8 @@ final class DevelopmentSettingsViewModel {
         updateSections()
     }
 
-    // Explicit Debug UI-test fixtures exercise real switches/persistence before the app
-    // has a feature inventory. They never gate product behavior or appear on normal launches.
+    // Explicit Debug UI-test fixtures exercise both stages independently of the app catalog.
+    // They never gate product behavior or appear on normal launches.
     private static var appFlagDefinitions: [FeatureFlagDefinition] {
         let environment = ProcessInfo.processInfo.environment
         if environment["STUDYCLUB_UI_TEST_SUITE"]?.hasPrefix("studyclub.ui-tests.") == true,

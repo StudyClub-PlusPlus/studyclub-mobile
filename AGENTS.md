@@ -32,6 +32,7 @@ Before changing iOS code, read:
 
 ## Change policy
 
+- Follow `docs/engineering/CONVENTIONS.md` for issue branches (`<owner>/sc-<number>`), commit/PR prefixes (`[sc-<number>]`), engineering flags, and push verification.
 - Add the smallest feature slice that satisfies the current product contract.
 - Keep production API details explicit; do not invent endpoints, auth, or response fields.
 - Update relevant docs in the same change when architecture, state policy, or product behavior changes.

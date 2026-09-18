@@ -23,6 +23,7 @@ final class FeatureFlagStoreTests: XCTestCase {
         let store = UserDefaultsFeatureFlagStore(defaults: defaults)
         XCTAssertTrue(store.isEnabled(ready))
         XCTAssertFalse(store.isEnabled(inProgress))
+        XCTAssertFalse(store.isEnabled(FeatureFlag.studyList.definition))
     }
 
     func testMalformedOverrideUsesDefaultWithoutPoisoningOtherFlags() {
@@ -77,10 +78,12 @@ final class FeatureFlagStoreTests: XCTestCase {
     }
     #else
     func testReleaseIgnoresEveryPersistedFlagOverride() {
-        defaults.set([ready.id: false, inProgress.id: true], forKey: "development.featureFlags")
+        let studyList = FeatureFlag.studyList.definition
+        defaults.set([ready.id: false, inProgress.id: true, studyList.id: true], forKey: "development.featureFlags")
         let store = UserDefaultsFeatureFlagStore(defaults: defaults)
         XCTAssertTrue(store.isEnabled(ready))
         XCTAssertFalse(store.isEnabled(inProgress))
+        XCTAssertFalse(store.isEnabled(studyList))
     }
     #endif
 }

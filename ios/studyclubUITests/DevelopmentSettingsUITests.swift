@@ -94,17 +94,48 @@ final class DevelopmentSettingsUITests: XCTestCase {
     }
 
     @MainActor
-    func testNormalLaunchShowsEmptyFlagSectionsAndResetButton() {
+    func testStudyListFlagDefaultsOffPersistsAndResets() {
         let app = XCUIApplication()
+        app.launchEnvironment["STUDYCLUB_UI_TEST_SUITE"] = "studyclub.ui-tests.\(UUID().uuidString)"
         app.launchArguments = ["--mock-scenario", "content"]
         app.launch()
+        let study = app.collectionViews.cells.containing(.staticText, identifier: "알고리즘 문제 풀이").firstMatch
+        XCTAssertTrue(study.waitForExistence(timeout: 3))
         app.tabBars.buttons["스터디"].press(forDuration: 1)
         XCTAssertTrue(app.buttons["Reset Flag to Default"].waitForExistence(timeout: 3))
         XCTAssertTrue(app.staticTexts["Ready"].exists)
         XCTAssertTrue(app.staticTexts["InProgress"].exists)
-        XCTAssertEqual(app.switches.count, 0)
+        let studyList = app.switches["스터디 목록"]
+        XCTAssertTrue(studyList.waitForExistence(timeout: 3))
+        XCTAssertEqual(studyList.value as? String, "0")
+        capture(app, name: "study-list-flag-default-off")
+
+        studyList.tap()
+        XCTAssertEqual(studyList.value as? String, "1")
+        capture(app, name: "study-list-flag-on")
+        app.buttons["닫기"].tap()
+        XCTAssertTrue(study.waitForExistence(timeout: 3))
+        study.tap()
+        XCTAssertTrue(app.scrollViews.staticTexts["알고리즘 문제 풀이"].waitForExistence(timeout: 3))
+
+        app.terminate()
+        app.launch()
+        app.tabBars.buttons["스터디"].press(forDuration: 1)
+        XCTAssertTrue(studyList.waitForExistence(timeout: 3))
+        XCTAssertEqual(studyList.value as? String, "1")
         app.buttons["Reset Flag to Default"].tap()
-        capture(app, name: "development-empty-flag-catalog")
+        XCTAssertEqual(studyList.value as? String, "0")
+        capture(app, name: "study-list-flag-reset-off")
+
+        app.terminate()
+        app.launch()
+        app.tabBars.buttons["스터디"].press(forDuration: 1)
+        XCTAssertTrue(studyList.waitForExistence(timeout: 3))
+        XCTAssertEqual(studyList.value as? String, "0")
+        app.buttons["닫기"].tap()
+        XCTAssertTrue(study.waitForExistence(timeout: 3))
+        study.tap()
+        XCTAssertTrue(app.scrollViews.staticTexts["알고리즘 문제 풀이"].waitForExistence(timeout: 3))
     }
 
     @MainActor
