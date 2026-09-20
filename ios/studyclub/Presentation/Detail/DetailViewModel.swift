@@ -11,10 +11,11 @@ final class DetailViewModel {
 
     private(set) var category = ""
     private(set) var title = ""
-    private(set) var summary = ""
-    private(set) var memberText = ""
-    private(set) var statusText = ""
-    private(set) var topics: [String] = []
+    private(set) var descriptionText = ""
+    private(set) var metadataText = ""
+    private(set) var recruitStatusText = ""
+    private(set) var curriculum = ""
+    private(set) var scheduleText = ""
 
     private let stateSubject = CurrentValueSubject<LoadState, Never>(.loading)
     var statePublisher: AnyPublisher<LoadState, Never> {
@@ -42,17 +43,43 @@ final class DetailViewModel {
             do {
                 let study = try await repository.fetchStudy(id: studyID)
                 guard let self else { return }
-                guard study.id == studyID else { throw RepositoryError.invalidData }
+                guard study.id == studyID || study.slug == studyID else {
+                    throw RepositoryError.invalidData
+                }
                 self.category = study.category
                 self.title = study.title
-                self.summary = study.summary
-                self.memberText = "멤버 \(study.currentMembers)/\(study.maximumMembers)"
-                self.statusText = study.status.displayText
-                self.topics = study.topics
+                self.descriptionText = study.description
+                self.metadataText = Self.metadataText(for: study)
+                self.recruitStatusText = study.recruitStatus
+                self.curriculum = study.curriculum
+                self.scheduleText = Self.scheduleText(for: study)
                 self.stateSubject.send(.content)
             } catch {
                 self?.stateSubject.send(.failure)
             }
+        }
+    }
+
+    private static func metadataText(for study: StudyDetail) -> String {
+        var values = [study.studyKind, study.deliveryFormat]
+        if let capacity = study.capacity {
+            values.append("정원 \(capacity)명")
+        }
+        return values.joined(separator: "  ·  ")
+    }
+
+    private static func scheduleText(for study: StudyDetail) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ko_KR")
+        formatter.dateFormat = "yyyy. M. d."
+
+        switch (study.startAt, study.endAt) {
+        case let (start?, end?):
+            return "\(formatter.string(from: start)) - \(formatter.string(from: end))"
+        case let (start?, nil):
+            return formatter.string(from: start)
+        default:
+            return ""
         }
     }
 }

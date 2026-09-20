@@ -43,7 +43,7 @@ Presentation owns screens, ViewModels, view state, and display formatting. Main,
 
 ViewControllers own UIKit lifecycle and immediate navigation. They do not decode DTOs or create concrete repository implementations.
 
-Main passes only the selected stable ID to DetailViewModel, which obtains its own repository through the factory and starts one asynchronous detail request from init. Its category, title, summary, member/status text, and topics are directly readable properties with private setters; a private subject publishes loading/content/failure after display values are updated together. Production detail transport remains unconfigured until a real endpoint and schema are supplied.
+Main passes only the selected stable ID to DetailViewModel, which obtains its own repository through the factory and starts one asynchronous detail request from init. Detail uses a dedicated `StudyDetailDTO -> StudyDetail` mapping because the backend list and detail contracts differ. Its category, title, description, metadata, recruitment status, schedule, and curriculum are directly readable properties with private setters; a private subject publishes loading/content/failure after display values are updated together. The live client calls the public web API `GET /api/studies/{studyId}` using Stage in Debug and Production in Release.
 
 ## Composition
 
@@ -55,7 +55,7 @@ Repository mode has a Domain contract and a UserDefaults implementation in Data,
 
 `--mock-scenario` remains a Debug launch-only override for deterministic existing UI tests. Debug UI tests can set `STUDYCLUB_UI_TEST_SUITE` to a `studyclub.ui-tests.`-prefixed suite to verify persistence without changing ordinary app preferences. Release ignores both developer mode and the test suite environment. Explicit test repository injection remains separate.
 
-The live client owns the explicitly temporary `https://api.example.invalid` default BaseURL. Selecting Real constructs the live transport; it does not make live integration ready. The existing list request fails until configured, and Detail still throws `detailAPIUnconfigured`.
+Selecting Real constructs the live transport. The client targets `https://api.stage.studyclub-plusplus.com/api/` in Debug and `https://api.studyclub-plusplus.com/api/` in Release. Detail is connected to the real backend contract; list API integration remains owned by its separate issue.
 
 ## Deferred abstractions
 

@@ -5,14 +5,12 @@ final class DefaultStudyRepositoryTests: XCTestCase {
     func testDetailReturnsRequestedDomainModelWithoutListFetch() async throws {
         let repository = Repository(client: MockStudyAPIClient(scenario: .content, delayNanoseconds: 0))
         let detail = try await repository.fetchStudy(id: "algorithm")
-        XCTAssertEqual(detail.id, "algorithm")
+        XCTAssertEqual(detail.slug, "algorithm")
         XCTAssertEqual(detail.title, "알고리즘 문제 풀이")
     }
 
     func testDetailRejectsMismatchedIdentity() async {
-        let dto = StudyDTO(id: "wrong", category: "iOS", title: "제목", summary: "요약",
-                           currentMembers: 1, maximumMembers: 4, status: "recruiting", topics: nil)
-        let repository = Repository(client: DuplicateStudyAPIClient(studies: [dto]))
+        let repository = Repository(client: MismatchedDetailStudyAPIClient())
         do {
             _ = try await repository.fetchStudy(id: "selected")
             XCTFail("Expected invalid data")
@@ -117,7 +115,7 @@ final class DefaultStudyRepositoryTests: XCTestCase {
 }
 
 private struct FailingStudyAPIClient: StudyAPIClient {
-    func fetchStudy(id: Study.ID) async throws -> StudyDTO {
+    func fetchStudy(id: Study.ID) async throws -> StudyDetailDTO {
         throw TransportError()
     }
     struct TransportError: Error {}
@@ -128,12 +126,36 @@ private struct FailingStudyAPIClient: StudyAPIClient {
 }
 
 private struct DuplicateStudyAPIClient: StudyAPIClient {
-    func fetchStudy(id: Study.ID) async throws -> StudyDTO {
-        studies[0]
+    func fetchStudy(id: Study.ID) async throws -> StudyDetailDTO {
+        throw RepositoryError.unavailable
     }
     let studies: [StudyDTO]
 
     func fetchStudies() async throws -> [StudyDTO] {
         studies
     }
+}
+
+private struct MismatchedDetailStudyAPIClient: StudyAPIClient {
+    func fetchStudy(id: Study.ID) async throws -> StudyDetailDTO {
+        StudyDetailDTO(
+            id: 999,
+            slug: "wrong",
+            title: "제목",
+            description: "설명",
+            category: "MOBILE",
+            studyKind: "STUDY",
+            thumbnailURL: nil,
+            deliveryFormat: "ONLINE",
+            status: "OPEN",
+            recruitStatus: "RECRUITING",
+            curriculum: nil,
+            capacity: 4,
+            recruitDeadlineAt: nil,
+            startAt: nil,
+            endAt: nil
+        )
+    }
+
+    func fetchStudies() async throws -> [StudyDTO] { [] }
 }

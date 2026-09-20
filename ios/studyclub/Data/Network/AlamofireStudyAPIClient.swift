@@ -5,11 +5,17 @@ final class AlamofireStudyAPIClient: StudyAPIClient, @unchecked Sendable {
     private let baseURL: URL
     private let session: Session
 
-    // Temporary placeholder: the real API base URL has not been supplied.
-    // Replace before live integration. The reserved .invalid domain cannot reach a real service.
-    init(baseURL: URL = URL(string: "https://api.example.invalid")!, session: Session = .default) {
+    init(baseURL: URL = AlamofireStudyAPIClient.defaultBaseURL, session: Session = .default) {
         self.baseURL = baseURL
         self.session = session
+    }
+
+    private static var defaultBaseURL: URL {
+        #if DEBUG
+        URL(string: "https://api.stage.studyclub-plusplus.com/api/")!
+        #else
+        URL(string: "https://api.studyclub-plusplus.com/api/")!
+        #endif
     }
 
     func fetchStudies() async throws -> [StudyDTO] {
@@ -26,8 +32,17 @@ final class AlamofireStudyAPIClient: StudyAPIClient, @unchecked Sendable {
         }
     }
 
-    func fetchStudy(id: Study.ID) async throws -> StudyDTO {
-        // The production detail endpoint and response schema are not supplied yet.
-        throw RepositoryError.detailAPIUnconfigured
+    func fetchStudy(id: Study.ID) async throws -> StudyDetailDTO {
+        do {
+            return try await session
+                .request(StudyRouter.study(baseURL: baseURL, id: id))
+                .validate()
+                .serializingDecodable(StudyDetailDTO.self)
+                .value
+        } catch is CancellationError {
+            throw CancellationError()
+        } catch {
+            throw RepositoryError.unavailable
+        }
     }
 }

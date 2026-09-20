@@ -38,16 +38,19 @@ Selecting an item opens Detail for that exact stable ID. Detail fetches independ
 Detail presents:
 
 - category and title
-- current/max member count and status
-- full summary
-- learning topics
+- study kind, delivery format, capacity, and recruitment status
+- study schedule when supplied
+- full description
+- curriculum when supplied
 - standard back navigation
 
 Detail starts loading when its ViewModel is initialized and exposes loading, content, and failure without retry. Failure ends loading and shows a short instruction to return to the previous screen. Retry and common ErrorView work are deferred. Detail does not manage request cancellation or request generations: a request may finish after navigating back. An unknown or mismatched ID is a failure; zero topics is valid content.
 
 There is no join action, editing, or persistence.
 
-The client and repository expose separate list and detail operations: `fetchStudies()` and `fetchStudy(id:)`. Mock detail lookup uses an independent request and the existing sample fields. Production detail URL, authentication and response schema are unknown: the live client explicitly throws `detailAPIUnconfigured` until those are provided. Separate StudyList/StudyDetail DTO shapes should follow the actual API contract rather than guessed fields.
+The client and repository expose separate list and detail operations: `fetchStudies()` and `fetchStudy(id:)`. Mock detail lookup uses an independent request. Live detail uses the public web API `GET /api/studies/{studyId}` without authentication. Debug targets Stage and Release targets Production. `StudyDetailDTO` stays in Data and maps to the separate `StudyDetail` Domain model; the list DTO is not reused because the server contracts differ.
+
+The current backend detail response does not include the current applicant count, so Detail displays capacity without inventing a current-member value. Thumbnail loading and application actions are outside this issue.
 
 ## Mock scenarios
 

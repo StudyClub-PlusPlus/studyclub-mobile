@@ -14,10 +14,11 @@ final class DetailViewModelTests: XCTestCase {
             if state == .content {
                 XCTAssertEqual(model.title, "상세 응답")
                 XCTAssertEqual(model.category, "iOS")
-                XCTAssertEqual(model.summary, "전체 설명")
-                XCTAssertEqual(model.memberText, "멤버 2/8")
-                XCTAssertEqual(model.statusText, "모집 중")
-                XCTAssertEqual(model.topics, [])
+                XCTAssertEqual(model.descriptionText, "전체 설명")
+                XCTAssertEqual(model.metadataText, "스터디  ·  온라인  ·  정원 8명")
+                XCTAssertEqual(model.recruitStatusText, "모집 중")
+                XCTAssertEqual(model.curriculum, "")
+                XCTAssertEqual(model.scheduleText, "2026. 10. 15. - 2026. 12. 15.")
                 content.fulfill()
             }
         }
@@ -78,11 +79,25 @@ private actor DetailRepositoryDouble: RepositoryProtocol {
         return []
     }
 
-    func fetchStudy(id: Study.ID) async throws -> Study {
+    func fetchStudy(id: Study.ID) async throws -> StudyDetail {
         requestedIDs.append(id)
         if shouldFail { throw RepositoryError.unavailable }
-        return Study(id: id, category: "iOS", title: "상세 응답",
-                     summary: "전체 설명", currentMembers: 2, maximumMembers: 8,
-                     status: .recruiting, topics: [])
+        return StudyDetail(
+            id: id,
+            slug: "selected",
+            title: "상세 응답",
+            description: "전체 설명",
+            category: "iOS",
+            studyKind: "스터디",
+            thumbnailURL: nil,
+            deliveryFormat: "온라인",
+            status: "OPEN",
+            recruitStatus: "모집 중",
+            curriculum: "",
+            capacity: 8,
+            recruitDeadlineAt: nil,
+            startAt: try! Date("2026-10-15T00:00:00Z", strategy: .iso8601),
+            endAt: try! Date("2026-12-15T00:00:00Z", strategy: .iso8601)
+        )
     }
 }

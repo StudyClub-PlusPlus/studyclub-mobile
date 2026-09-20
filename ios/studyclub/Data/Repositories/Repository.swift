@@ -7,11 +7,11 @@ struct Repository: RepositoryProtocol {
         self.client = client
     }
 
-    func fetchStudy(id: Study.ID) async throws -> Study {
+    func fetchStudy(id: Study.ID) async throws -> StudyDetail {
         do {
             let study = try await client.fetchStudy(id: id).toDomain()
             try Task.checkCancellation()
-            guard study.id == id else { throw RepositoryError.invalidData }
+            guard study.id == id || study.slug == id else { throw RepositoryError.invalidData }
             return study
         } catch is CancellationError {
             throw CancellationError()
