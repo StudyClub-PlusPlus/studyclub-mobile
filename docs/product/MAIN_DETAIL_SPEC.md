@@ -44,11 +44,11 @@ Detail presents:
 - curriculum when supplied
 - standard back navigation
 
-Detail starts loading when its ViewModel is initialized and exposes loading, content, and failure without retry. Failure ends loading and shows a short instruction to return to the previous screen. Retry and common ErrorView work are deferred. Detail does not manage request cancellation or request generations: a request may finish after navigating back. An unknown or mismatched ID is a failure; zero topics is valid content.
+Detail starts loading when its ViewModel is initialized and exposes loading, content, empty, and failure without retry. A missing or mismatched study is empty and shows “스터디를 찾을 수 없어요”. Network and server errors are failure and show a short instruction to return to the previous screen. Nullable cohort, schedule, and description fields do not make the state empty; the remaining detail content is shown. Retry and common ErrorView work are deferred. Detail does not manage request cancellation or request generations: a request may finish after navigating back.
 
 There is no join action, editing, or persistence.
 
-The client and repository expose separate list and detail operations: `fetchStudies()` and `fetchStudy(id:)`. Mock detail lookup uses an independent request. Live detail uses the public web API `GET /api/studies/{studyId}` without authentication. Debug targets Stage and Release targets Production. `StudyDetailDTO` stays in Data and maps to the separate `StudyDetail` Domain model; the list DTO is not reused because the server contracts differ.
+The client and repository expose separate list and detail operations: `fetchStudies()` and `fetchStudy(id:)`. Mock detail lookup uses an independent request. Live detail uses the public web API `GET /api/studies/{studyId}` without authentication. The `study.detail-api` Feature Flag defaults OFF and preserves the Mock path; when enabled, Debug targets Stage and Release targets Production. A 404 is mapped to the empty state. `StudyDetailDTO` stays in Data and maps to the separate `StudyDetail` Domain model; the list DTO is not reused because the server contracts differ.
 
 The current backend detail response does not include the current applicant count, so Detail displays capacity without inventing a current-member value. Thumbnail loading and application actions are outside this issue.
 

@@ -25,6 +25,8 @@ final class AlamofireStudyAPIClient: StudyAPIClient, @unchecked Sendable {
                 .validate()
                 .serializingDecodable([StudyDTO].self)
                 .value
+        } catch let error as AFError where error.responseCode == 404 {
+            throw RepositoryError.notFound
         } catch is CancellationError {
             throw CancellationError()
         } catch {
@@ -39,6 +41,8 @@ final class AlamofireStudyAPIClient: StudyAPIClient, @unchecked Sendable {
                 .validate()
                 .serializingDecodable(StudyDetailDTO.self)
                 .value
+        } catch let error as AFError where error.responseCode == 404 {
+            throw RepositoryError.notFound
         } catch is CancellationError {
             throw CancellationError()
         } catch {

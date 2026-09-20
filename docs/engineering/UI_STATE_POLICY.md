@@ -1,6 +1,6 @@
 # UI State Policy
 
-Main models loading, content, empty, and failure explicitly. Detail models loading, content, and failure; zero topics is valid detail content.
+Main models loading, content, empty, and failure explicitly. Detail models loading, content, empty, and failure; a missing study is empty, while nullable cohort, schedule, and description fields are valid content.
 
 - MainViewModel and DetailViewModel each start one request from init through a private fetch method.
 - No public load method, retry, refresh, request generation counter, or ViewModel Task cancellation is needed in this slice.

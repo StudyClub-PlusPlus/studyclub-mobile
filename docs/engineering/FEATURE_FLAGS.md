@@ -2,7 +2,7 @@
 
 ## Current foundation
 
-The app catalog in `ios/studyclub/Domain/Configuration/FeatureFlag.swift` is intentionally empty. Ready defaults ON; InProgress defaults OFF. Debug resolves saved overrides first. Release ignores overrides and compiles out developer entry and mutation methods.
+The app catalog in `ios/studyclub/Domain/Configuration/FeatureFlag.swift` contains unfinished feature flags. Ready defaults ON; InProgress defaults OFF. Debug resolves saved overrides first. Release ignores overrides and compiles out developer entry and mutation methods.
 
 ## Add a feature
 

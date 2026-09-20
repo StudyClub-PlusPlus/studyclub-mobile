@@ -7,5 +7,6 @@ protocol RepositoryProtocol: Sendable {
 
 enum RepositoryError: Error, Equatable, Sendable {
     case unavailable
+    case notFound
     case invalidData
 }

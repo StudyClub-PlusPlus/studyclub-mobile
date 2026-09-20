@@ -7,6 +7,7 @@ enum MockStudyScenario: String, Sendable {
     case loading
     case detailFailure = "detail-failure"
     case detailLoading = "detail-loading"
+    case detailEmpty = "detail-empty"
 }
 
 actor MockStudyAPIClient: StudyAPIClient {
@@ -23,7 +24,7 @@ actor MockStudyAPIClient: StudyAPIClient {
         try Task.checkCancellation()
 
         switch scenario {
-        case .content, .detailFailure, .detailLoading:
+        case .content, .detailFailure, .detailLoading, .detailEmpty:
             return Self.samples
         case .empty:
             return []
@@ -41,12 +42,14 @@ actor MockStudyAPIClient: StudyAPIClient {
         switch scenario {
         case .failure, .detailFailure:
             throw RepositoryError.unavailable
+        case .detailEmpty:
+            throw RepositoryError.notFound
         case .loading, .detailLoading:
             try await Task.sleep(nanoseconds: .max)
             throw CancellationError()
         default:
             guard let study = Self.detailSamples[id] else {
-                throw RepositoryError.invalidData
+                throw RepositoryError.notFound
             }
             return study
         }

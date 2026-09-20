@@ -6,6 +6,7 @@ final class DetailViewModel {
     enum LoadState: Equatable {
         case loading
         case content
+        case empty
         case failure
     }
 
@@ -27,7 +28,7 @@ final class DetailViewModel {
     private let repository: any RepositoryProtocol
 
     convenience init(studyID: Study.ID) {
-        self.init(studyID: studyID, repository: RepositoryFactory.makeStudyRepository())
+        self.init(studyID: studyID, repository: RepositoryFactory.makeDetailRepository())
     }
 
     init(studyID: Study.ID, repository: any RepositoryProtocol) {
@@ -44,7 +45,8 @@ final class DetailViewModel {
                 let study = try await repository.fetchStudy(id: studyID)
                 guard let self else { return }
                 guard study.id == studyID || study.slug == studyID else {
-                    throw RepositoryError.invalidData
+                    self.stateSubject.send(.empty)
+                    return
                 }
                 self.category = study.category
                 self.title = study.title
@@ -54,6 +56,10 @@ final class DetailViewModel {
                 self.curriculum = study.curriculum
                 self.scheduleText = Self.scheduleText(for: study)
                 self.stateSubject.send(.content)
+            } catch is CancellationError {
+                return
+            } catch let error as RepositoryError where error == .notFound || error == .invalidData {
+                self?.stateSubject.send(.empty)
             } catch {
                 self?.stateSubject.send(.failure)
             }

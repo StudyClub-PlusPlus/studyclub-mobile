@@ -86,6 +86,18 @@ final class StudyClubFlowUITests: XCTestCase {
     }
 
     @MainActor
+    func testDetailEmptyShowsNotFoundMessage() {
+        let app = launchApp(scenario: "detail-empty")
+        let selected = app.collectionViews.cells.containing(.staticText, identifier: "알고리즘 문제 풀이").firstMatch
+        XCTAssertTrue(selected.waitForExistence(timeout: 3))
+        selected.tap()
+        XCTAssertTrue(app.staticTexts["스터디를 찾을 수 없어요"].waitForExistence(timeout: 3))
+        capture(app, name: "detail-empty")
+        XCTAssertFalse(app.buttons["다시 시도"].exists)
+        XCTAssertFalse(app.scrollViews.staticTexts["알고리즘 문제 풀이"].exists)
+    }
+
+    @MainActor
     func testDetailLoadingAndBackNavigation() {
         let app = launchApp(scenario: "detail-loading")
         let selected = app.collectionViews.cells.containing(.staticText, identifier: "알고리즘 문제 풀이").firstMatch

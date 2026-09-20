@@ -58,12 +58,12 @@ final class DetailViewController: UIViewController {
         return scheduleLabel
     }()
 
-    private let summaryLabel: UILabel = {
-        let summaryLabel = UILabel()
-        summaryLabel.font = .preferredFont(forTextStyle: .body)
-        summaryLabel.textColor = AppTheme.Palette.primaryText
-        summaryLabel.numberOfLines = 0
-        return summaryLabel
+    private let descriptionLabel: UILabel = {
+        let descriptionLabel = UILabel()
+        descriptionLabel.font = .preferredFont(forTextStyle: .body)
+        descriptionLabel.textColor = AppTheme.Palette.primaryText
+        descriptionLabel.numberOfLines = 0
+        return descriptionLabel
     }()
 
     private let divider: UIView = {
@@ -164,8 +164,8 @@ final class DetailViewController: UIViewController {
 
         stackView.addArrangedSubview(scheduleLabel)
 
-        stackView.addArrangedSubview(summaryLabel)
-        stackView.setCustomSpacing(AppTheme.Spacing.xLarge, after: summaryLabel)
+        stackView.addArrangedSubview(descriptionLabel)
+        stackView.setCustomSpacing(AppTheme.Spacing.xLarge, after: descriptionLabel)
 
         stackView.addArrangedSubview(divider)
         stackView.setCustomSpacing(AppTheme.Spacing.xLarge, after: divider)
@@ -191,6 +191,8 @@ final class DetailViewController: UIViewController {
                     self.stateView.updateViews(.loading, context: .detail)
                 case .failure:
                     self.stateView.updateViews(.failure, context: .detail)
+                case .empty:
+                    self.stateView.updateViews(.empty, context: .detail)
                 case .content:
                     self.stateView.isHidden = true
                     self.updateViews()
@@ -205,8 +207,8 @@ final class DetailViewController: UIViewController {
         metadataLabel.text = "\(viewModel.metadataText)  ·  \(viewModel.recruitStatusText)"
         scheduleLabel.text = viewModel.scheduleText
         scheduleLabel.isHidden = viewModel.scheduleText.isEmpty
-        summaryLabel.text = viewModel.descriptionText
-        summaryLabel.isHidden = viewModel.descriptionText.isEmpty
+        descriptionLabel.text = viewModel.descriptionText
+        descriptionLabel.isHidden = viewModel.descriptionText.isEmpty
         curriculumTitleLabel.isHidden = viewModel.curriculum.isEmpty
         curriculumLabel.text = viewModel.curriculum
         curriculumLabel.isHidden = viewModel.curriculum.isEmpty

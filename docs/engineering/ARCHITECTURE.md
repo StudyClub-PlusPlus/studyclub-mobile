@@ -43,7 +43,7 @@ Presentation owns screens, ViewModels, view state, and display formatting. Main,
 
 ViewControllers own UIKit lifecycle and immediate navigation. They do not decode DTOs or create concrete repository implementations.
 
-Main passes only the selected stable ID to DetailViewModel, which obtains its own repository through the factory and starts one asynchronous detail request from init. Detail uses a dedicated `StudyDetailDTO -> StudyDetail` mapping because the backend list and detail contracts differ. Its category, title, description, metadata, recruitment status, schedule, and curriculum are directly readable properties with private setters; a private subject publishes loading/content/failure after display values are updated together. The live client calls the public web API `GET /api/studies/{studyId}` using Stage in Debug and Production in Release.
+Main passes only the selected stable ID to DetailViewModel, which obtains its own repository through the factory and starts one asynchronous detail request from init. Detail uses a dedicated `StudyDetailDTO -> StudyDetail` mapping because the backend list and detail contracts differ. Its category, title, description, metadata, recruitment status, schedule, and curriculum are directly readable properties with private setters; a private subject publishes loading/content/empty/failure after display values are updated together. The `study.detail-api` flag is read when DetailViewModel is created: OFF keeps the existing Mock repository, and ON uses the configured Repository mode. A missing study is empty, while nullable detail fields remain valid content. The live client calls the public web API `GET /api/studies/{studyId}` using Stage in Debug and Production in Release.
 
 ## Composition
 
@@ -74,6 +74,6 @@ Observation follows [Apple's model data guidance](https://developer.apple.com/do
 
 ## Feature flag definitions and overrides
 
-Domain defines FeatureFlag, FeatureFlagDefinition and FeatureFlagStage. The enum is intentionally empty until actual features are supplied. Definitions have a stable storage ID, display name and stage. Ready defaults ON; InProgress defaults OFF. Data's UserDefaultsFeatureFlagStore implements the Domain store contract, and RepositoryFactory constructs it. Reads resolve a per-ID developer override before the stage default in Debug. Release always returns the stage default and compiles out mutation/reset methods.
+Domain defines FeatureFlag, FeatureFlagDefinition and FeatureFlagStage. Definitions have a stable storage ID, display name and stage. Ready defaults ON; InProgress defaults OFF. Data's UserDefaultsFeatureFlagStore implements the Domain store contract, and RepositoryFactory constructs it. Reads resolve a per-ID developer override before the stage default in Debug. Release always returns the stage default and compiles out mutation/reset methods.
 
 Overrides are read fresh, so changes apply to the next lookup without restarting the app. Moving a definition between stages or renaming it does not change its ID. Reset removes the entire flag override key (including retired IDs) without touching repository mode or other preferences. It does not copy current defaults into storage.

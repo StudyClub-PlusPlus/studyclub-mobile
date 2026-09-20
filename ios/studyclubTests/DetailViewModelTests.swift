@@ -44,6 +44,18 @@ final class DetailViewModelTests: XCTestCase {
         withExtendedLifetime(subscription) {}
     }
 
+    func testNotFoundShowsEmptyState() async {
+        let repository = DetailRepositoryDouble(error: .notFound)
+        let model = DetailViewModel(studyID: "missing", repository: repository)
+        let empty = expectation(description: "empty")
+        let subscription = model.statePublisher.sink { state in
+            if state == .empty { empty.fulfill() }
+        }
+        await fulfillment(of: [empty], timeout: 2)
+        XCTAssertEqual(model.currentState, .empty)
+        withExtendedLifetime(subscription) {}
+    }
+
     func testSubscriberReceivesContentAfterRequestHasAlreadyFinished() async {
         let repository = DetailRepositoryDouble()
         let model = DetailViewModel(studyID: "selected", repository: repository)
@@ -68,10 +80,10 @@ final class DetailViewModelTests: XCTestCase {
 
 private actor DetailRepositoryDouble: RepositoryProtocol {
     private(set) var requestedIDs: [Study.ID] = []
-    let shouldFail: Bool
+    let error: RepositoryError?
 
-    init(shouldFail: Bool = false) {
-        self.shouldFail = shouldFail
+    init(shouldFail: Bool = false, error: RepositoryError? = nil) {
+        self.error = error ?? (shouldFail ? .unavailable : nil)
     }
 
     func fetchStudies() async throws -> [Study] {
@@ -81,7 +93,7 @@ private actor DetailRepositoryDouble: RepositoryProtocol {
 
     func fetchStudy(id: Study.ID) async throws -> StudyDetail {
         requestedIDs.append(id)
-        if shouldFail { throw RepositoryError.unavailable }
+        if let error { throw error }
         return StudyDetail(
             id: id,
             slug: "selected",

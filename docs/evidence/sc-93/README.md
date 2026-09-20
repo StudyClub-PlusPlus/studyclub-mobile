@@ -12,6 +12,7 @@
 - `detail-content.png`: selected study detail content
 - `detail-loading.png`: detail loading state
 - `detail-failure.png`: detail failure state without retry
+- `detail-empty.png`: missing study state with “스터디를 찾을 수 없어요”
 
 ## Verification
 
