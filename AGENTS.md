@@ -32,6 +32,7 @@ Before changing iOS code, read:
 
 ## Change policy
 
+- Before implementation, verify the matching Notion issue and work branch. If the request has no ticket, clarify only missing task details, create or reuse the issue, and prepare its branch first. Use `notion-ticket-branch` when installed; otherwise follow the same workflow in `docs/engineering/CONVENTIONS.md`. Reuse details and ticket-creation authorization already provided by the user.
 - Add the smallest feature slice that satisfies the current product contract.
 - Keep production API details explicit; do not invent endpoints, auth, or response fields.
 - Update relevant docs in the same change when architecture, state policy, or product behavior changes.
@@ -44,6 +45,6 @@ Before changing iOS code, read:
 - No nested `.git`, `xcuserdata`, secret, or generated build output is tracked.
 - New DTOs do not escape Data and new concrete repositories do not leak into Presentation.
 - Async work matches its request policy. Current one-request ViewModels use weak captures and need no retained Task or request-generation counter; revisit concurrency protection when adding repeated requests.
-- Verify safe areas and normal-size interaction. Custom accessibility support and dedicated accessibility QA are deferred at the current product stage. Do not add accessibilityIdentifier; UI tests locate native controls by visible text.
+- Verify safe areas and normal-size interaction manually on Simulator. Automated UI tests are not maintained at this stage; preserve unit tests. Custom accessibility support and dedicated accessibility QA are deferred. Do not add accessibilityIdentifier.
 - Documentation describes the implementation that actually shipped.
 - The handoff separates verified evidence, decisions, external unknowns, and uncommitted work.

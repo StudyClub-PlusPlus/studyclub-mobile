@@ -19,6 +19,6 @@ Reset Flag to Default removes the entire `development.featureFlags` override dic
 
 ## Verification
 
-Use an isolated UserDefaults suite for unit tests. UI tests explicitly enable fixture definitions in Debug via the documented test environment; these are excluded from the normal catalog and never gate product behavior. Verify both switches and full-row taps, app relaunch, Repo root recreation, reset preservation, large text, landscape, and Release isolation. Use serial XCTest on the selected Simulator.
+Use injected definitions and isolated UserDefaults suites for unit tests. The app uses only the real catalog; there are no launch-time flag fixtures. When a real flag is added or its UI changes, manually verify switches and full-row taps, app relaunch, Repository root recreation, reset preservation and landscape layout on Simulator. Unit tests verify Release isolation. Custom accessibility and large-text QA remain deferred. Use serial XCTest on the selected Simulator.
 
 Actual feature behavior still needs its own ON/OFF tests when its case is introduced; foundation tests do not prove an unfinished feature is ready to ship.

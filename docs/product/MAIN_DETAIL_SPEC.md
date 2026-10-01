@@ -54,6 +54,8 @@ The current backend detail response does not include the current applicant count
 
 ## Mock scenarios
 
+These scenarios are explicit inputs for injected Mock clients in unit tests. Ordinary app launches use `content` in Mock mode; no launch-argument scenario override is maintained.
+
 - `content`: a realistic list with multiple distinct items
 - `empty`: an empty successful response
 - `failure`: every request fails

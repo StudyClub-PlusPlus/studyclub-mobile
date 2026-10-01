@@ -31,7 +31,7 @@ final class DevelopmentSettingsViewModel {
         self.init(
             modeStore: RepositoryFactory.makeRepositoryModeStore(),
             flagStore: RepositoryFactory.makeFeatureFlagStore(),
-            flags: Self.appFlagDefinitions
+            flags: FeatureFlag.allCases.map(\.definition)
         )
     }
 
@@ -41,20 +41,6 @@ final class DevelopmentSettingsViewModel {
         self.flags = flags
         repositoryMode = modeStore.mode
         updateSections()
-    }
-
-    // Explicit Debug UI-test fixtures exercise real switches/persistence before the app
-    // has a feature inventory. They never gate product behavior or appear on normal launches.
-    private static var appFlagDefinitions: [FeatureFlagDefinition] {
-        let environment = ProcessInfo.processInfo.environment
-        if environment["STUDYCLUB_UI_TEST_SUITE"]?.hasPrefix("studyclub.ui-tests.") == true,
-           environment["STUDYCLUB_UI_TEST_FLAGS"] == "1" {
-            return [
-                .init(id: "fixture.ready", name: "검증용 Ready Flag", stage: .ready),
-                .init(id: "fixture.in-progress", name: "검증용 InProgress Flag", stage: .inProgress)
-            ]
-        }
-        return FeatureFlag.allCases.map(\.definition)
     }
 
     func setFlag(id: String, isEnabled: Bool) {

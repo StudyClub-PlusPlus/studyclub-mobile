@@ -53,7 +53,7 @@ The factory creates a fresh repository/client per ViewModel; it does not share a
 
 Repository mode has a Domain contract and a UserDefaults implementation in Data, constructed through RepositoryFactory. Presentation depends only on the store contract plus factory creation. There is no mutable global override. Release ignores saved development settings and retains the explicit `.mock` app default until the real API contract is supplied.
 
-`--mock-scenario` remains a Debug launch-only override for deterministic existing UI tests. Debug UI tests can set `STUDYCLUB_UI_TEST_SUITE` to a `studyclub.ui-tests.`-prefixed suite to verify persistence without changing ordinary app preferences. Release ignores both developer mode and the test suite environment. Explicit test repository injection remains separate.
+App launches use the persisted Repository mode in Debug and the explicit app default in Release. Development stores use standard UserDefaults. Unit tests inject isolated stores, repositories or typed Mock scenarios directly; there are no UI-test launch arguments, environment overrides or app-only flag fixtures.
 
 Selecting Real constructs the live transport. The client targets `https://api.studyclub-plusplus.com/api/` in both Debug and Release. Detail is connected to the real backend contract; list API integration remains owned by its separate issue.
 

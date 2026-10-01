@@ -63,7 +63,7 @@ Use the shared `AppTheme` source rather than one-off values.
 
 ## Current accessibility scope
 
-Custom accessibility labels, traits, announcements, special large-text layouts, and dedicated accessibility QA are deferred. Preserve native control behavior and existing system fonts. Do not add accessibility identifiers; UI tests locate native controls by visible text.
+Custom accessibility labels, traits, announcements, special large-text layouts, and dedicated accessibility QA are deferred. Preserve native control behavior and existing system fonts. Do not add accessibility identifiers; verify native controls manually on Simulator.
 
 ## Visual QA contract
 

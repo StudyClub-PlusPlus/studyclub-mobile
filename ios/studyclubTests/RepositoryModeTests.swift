@@ -52,8 +52,8 @@ final class RepositoryModeTests: XCTestCase {
         XCTAssertEqual(UserDefaultsRepositoryModeStore(defaults: defaults).mode, .defaultMode)
     }
 
-    func testReleaseAppFactoryIgnoresDebugScenarioArguments() async throws {
-        let repository = RepositoryFactory.makeStudyRepository(arguments: ["--mock-scenario", "failure"])
+    func testReleaseAppFactoryUsesDefaultMockRepository() async throws {
+        let repository = RepositoryFactory.makeStudyRepository()
         let studies = try await repository.fetchStudies()
         XCTAssertFalse(studies.isEmpty)
     }
@@ -72,7 +72,7 @@ final class RepositoryModeTests: XCTestCase {
     }
 
     func testExplicitMockScenarioRemainsDeterministic() async throws {
-        let repository = RepositoryFactory.makeStudyRepository(mode: .mock, arguments: ["--mock-scenario", "empty"])
+        let repository = RepositoryFactory.makeStudyRepository(mode: .mock, scenario: .empty)
         let studies = try await repository.fetchStudies()
         XCTAssertTrue(studies.isEmpty)
     }
