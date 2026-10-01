@@ -8,7 +8,7 @@ struct DevelopmentSettingRow {
     }
 
     enum Kind {
-        case button(value: String?)
+        case button
         case toggle(isOn: Bool)
     }
 

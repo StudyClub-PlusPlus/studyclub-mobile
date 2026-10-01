@@ -19,7 +19,7 @@ Domain -> Foundation only
 Domain owns stable application meaning:
 
 - Domain models such as `Study`
-- repository protocols such as `StudyRepository`
+- repository protocols such as `RepositoryProtocol` and their Domain errors, under `Domain/Repositories`
 - errors only when they describe domain meaning
 
 Domain never imports UIKit, Combine, or Alamofire.

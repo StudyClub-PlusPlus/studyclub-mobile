@@ -1,7 +1,7 @@
 import Alamofire
 import Foundation
 
-final class AlamofireStudyAPIClient: StudyAPIClient, @unchecked Sendable {
+final class AlamofireStudyAPIClient: StudyAPIClient {
     private let baseURL: URL
     private let session: Session
 

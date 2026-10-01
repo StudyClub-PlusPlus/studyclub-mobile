@@ -11,7 +11,7 @@ final class DevelopmentSettingsViewModel {
 
     private func updateSections() {
         let miscellaneous = DevelopmentSettingSection(id: .miscellaneous, rows: [
-            .init(id: .resetFlags, title: "Reset Flag to Default", kind: .button(value: nil))
+            .init(id: .resetFlags, title: "Reset Flag to Default", kind: .button)
         ])
         let flagSections = FeatureFlagStage.allCases.map { stage in
             DevelopmentSettingSection(
