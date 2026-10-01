@@ -5,10 +5,6 @@ import SwiftUI
 
 @MainActor
 final class MainTabBarController: UITabBarController {
-    #if DEBUG
-    var onRepositoryChange: (() -> Void)?
-    #endif
-
     override func viewDidLoad() {
         super.viewDidLoad()
         configureView()
@@ -70,11 +66,7 @@ extension MainTabBarController: UIGestureRecognizerDelegate {
 
     @objc private func openDevelopmentSettings(_ gesture: UILongPressGestureRecognizer) {
         guard gesture.state == .began, presentedViewController == nil else { return }
-        let settings = DevelopmentSettingsView(viewModel: DevelopmentSettingsViewModel()) { [weak self] in
-            self?.dismiss(animated: true) { [weak self] in
-                self?.onRepositoryChange?()
-            }
-        }
+        let settings = DevelopmentSettingsView(viewModel: DevelopmentSettingsViewModel())
         present(UIHostingController(rootView: settings), animated: true)
     }
 }

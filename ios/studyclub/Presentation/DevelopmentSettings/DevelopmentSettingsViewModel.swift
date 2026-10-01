@@ -5,15 +5,12 @@ import Observation
 @Observable
 @MainActor
 final class DevelopmentSettingsViewModel {
-    private let modeStore: any RepositoryModeStoring
     private let flagStore: any FeatureFlagStoring
     private let flags: [FeatureFlagDefinition]
-    private(set) var repositoryMode: RepositoryMode
     private(set) var sections: [DevelopmentSettingSection] = []
 
     private func updateSections() {
         let miscellaneous = DevelopmentSettingSection(id: .miscellaneous, rows: [
-            .init(id: .repository, title: "Repository", kind: .button(value: repositoryMode.title)),
             .init(id: .resetFlags, title: "Reset Flag to Default", kind: .button(value: nil))
         ])
         let flagSections = FeatureFlagStage.allCases.map { stage in
@@ -29,17 +26,14 @@ final class DevelopmentSettingsViewModel {
 
     convenience init() {
         self.init(
-            modeStore: RepositoryFactory.makeRepositoryModeStore(),
             flagStore: RepositoryFactory.makeFeatureFlagStore(),
             flags: FeatureFlag.allCases.map(\.definition)
         )
     }
 
-    init(modeStore: any RepositoryModeStoring, flagStore: any FeatureFlagStoring, flags: [FeatureFlagDefinition]) {
-        self.modeStore = modeStore
+    init(flagStore: any FeatureFlagStoring, flags: [FeatureFlagDefinition]) {
         self.flagStore = flagStore
         self.flags = flags
-        repositoryMode = modeStore.mode
         updateSections()
     }
 
@@ -52,15 +46,6 @@ final class DevelopmentSettingsViewModel {
     func resetFlagsToDefaults() {
         flagStore.resetToDefaults()
         updateSections()
-    }
-
-    @discardableResult
-    func changeRepositoryMode(to mode: RepositoryMode) -> Bool {
-        guard mode != repositoryMode else { return false }
-        modeStore.setMode(mode)
-        repositoryMode = mode
-        updateSections()
-        return true
     }
 }
 #endif

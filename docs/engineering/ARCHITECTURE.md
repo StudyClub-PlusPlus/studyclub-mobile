@@ -31,7 +31,7 @@ Data owns external representations and adapters:
 - DTO decoding models
 - DTO-to-Domain mappers
 - API client and request router
-- mock and live transports
+- Alamofire transport
 - concrete repositories
 - composition factories
 
@@ -49,9 +49,9 @@ Main passes only the selected stable ID to DetailViewModel, which obtains its ow
 
 `RepositoryFactory` owns repository/client construction. App-facing ViewModel convenience initializers call it, while separate repository-accepting initializers allow deterministic unit tests. Repository operations still use protocols and return Domain models; DTOs and concrete repository construction stay inside Data. This deliberately permits a Presentation-to-Data dependency only for factory access, replacing the earlier composition-root-only rule to avoid forwarding repositories through screens.
 
-The factory creates a fresh repository/client per ViewModel; it does not share a singleton or cache. Debug reads the persisted Repository mode at each creation. Changing the mode saves it, dismisses Development Settings, and notifies SceneDelegate through callbacks to replace the window root with a fresh TabBar and navigation stacks. Existing ViewModels are not mutated or forwarded. In-flight requests may finish against discarded screens, under the existing weak-capture request policy.
+The factory creates a fresh repository with an Alamofire client per ViewModel in both Debug and Release; it does not share a singleton or cache. App Mock clients, transport scenarios, Repository mode preferences and root-recreation callbacks are not maintained.
 
-Repository mode has a Domain contract and a UserDefaults implementation in Data, constructed through RepositoryFactory. Presentation depends only on the store contract plus factory creation. There is no mutable global override. Release ignores saved development settings and retains the explicit `.mock` app default until the real API contract is supplied.
+Development stores use standard UserDefaults. ViewModel tests inject Mock repositories returning Domain models. Concrete Repository tests inject small test-local API inputs to check repository rules; these inputs are not shipped in the app. There are no UI-test launch arguments, environment overrides or app-only flag fixtures.
 
 App launches use the persisted Repository mode in Debug and the explicit app default in Release. Development stores use standard UserDefaults. Unit tests inject isolated stores, repositories or typed Mock scenarios directly; there are no UI-test launch arguments, environment overrides or app-only flag fixtures.
 
@@ -68,7 +68,7 @@ Selecting Real constructs the live transport. The client targets `https://api.st
 
 The Debug-only DevelopmentSettingsView uses SwiftUI List/Section with stable section/row identifiers and typed Button/Toggle rows. The owning view retains its @Observable DevelopmentSettingsViewModel in @State. The model stores section display values, updates persistence before rebuilding those values, and Observation invalidates the view. No Combine publisher, @Published or @AppStorage is used on this screen. Stores and the model own persistence/reset; the SwiftUI view only forwards actions and owns presentation state.
 
-MainTabBarController presents a UIHostingController containing the development screen's NavigationStack. Close uses SwiftUI dismiss. Repository changes retain the UIKit callback chain: save in the model, dismiss the hosting controller, then SceneDelegate rebuilds the entire window root. The app TabBar and Main/Detail/public Setting are not migrated to SwiftUI. UIKit ViewModels retain their existing private-subject/read-only-publisher convention.
+MainTabBarController presents a UIHostingController containing the development screen's NavigationStack. Close uses SwiftUI dismiss. Flag changes update settings in place and do not recreate the window root. The app TabBar and Main/Detail/public Setting are not migrated to SwiftUI. UIKit ViewModels retain their existing private-subject/read-only-publisher convention.
 
 Observation follows [Apple's model data guidance](https://developer.apple.com/documentation/swiftui/managing-model-data-in-your-app); this exception does not introduce an app-wide SwiftUI migration.
 

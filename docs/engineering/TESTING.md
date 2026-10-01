@@ -8,13 +8,15 @@
 - Display values are ready before notification and available to late subscribers
 - display formatting that contains non-trivial policy
 
-Test doubles are injected through protocols. ViewModel and repository tests supply their own dependencies; focused RepositoryFactory tests exercise factory selection explicitly. Mock scenarios remain typed inputs to MockStudyAPIClient or the explicit factory overload. App launch arguments and environment variables do not select test scenarios or preference suites.
+Test doubles are injected through protocols. ViewModel loading/content/empty/failure tests use Mock repositories returning Domain models. Concrete Repository tests use small test-local API inputs for mapping and repository-owned rules such as duplicate IDs, detail identity, error translation and cancellation. There is no app Mock client or scenario selector.
+
+Do not add a separate unit suite for thin Alamofire request wrappers at this stage. API integration work must verify the actual endpoint, response and DTO decoding during development before commit, then check the app path. `Decodable` conformance or unit-test success does not prove compatibility with the server. Logging supports diagnosis after a failure; it does not replace that integration check. Revisit Client tests if custom request, auth, retry or serialization policy becomes substantial.
 
 ## Manual Simulator checks
 
 Automated UI tests and their Xcode target are not maintained at this product stage. UI changes still require a walkthrough and fresh screenshots of every changed state. Unit-test results do not prove rendered layout or interaction.
 
-For Main/Detail changes, verify stable-ID selection, matching Detail content, back navigation, safe areas and normal-size interaction. Cover loading, empty and failure presentation when those states change. The default Mock app shows content; deterministic alternate states require an explicitly injected local QA setup, kept out of the shipped source. Label such captures as controlled QA evidence and restore the ordinary setup afterward.
+For Main/Detail changes, verify stable-ID selection, matching Detail content, back navigation, safe areas and normal-size interaction. Cover loading, empty and failure presentation when those states change. Ordinary app launches use Alamofire; the current integration gap is documented in [API integration status](API_INTEGRATION.md). If a changed state needs a controlled local QA setup, keep it out of shipped source, label the evidence and restore the ordinary setup afterward.
 
 ## Verification order
 
@@ -27,11 +29,10 @@ Do not report a build, test, or visual pass from output produced before the last
 
 ## Development settings verification
 
-- RepositoryModeTests cover missing/invalid preferences, store recreation, model/store consistency, no-op selection, explicit Mock scenarios, and actual Real-client selection without falling back to Mock.
-- FeatureFlagStoreTests cover Ready/InProgress defaults, per-flag overrides, persistence, rename/stage promotion, malformed entries, reset idempotence and preservation of Repository/unrelated preferences. Release variants prove saved developer overrides are ignored.
+- FeatureFlagStoreTests cover Ready/InProgress defaults, per-flag overrides, persistence, rename/stage promotion, malformed entries, reset idempotence and preservation of unrelated preferences. Release variants prove saved developer overrides are ignored.
 - DevelopmentSettingsViewModelTests inject definitions to check section ordering and updated toggle/reset state. The app catalog contains only actual product definitions and is currently empty.
-- For relevant changes, manually verify Main tab long press, rejected normal taps/Setting long press, SwiftUI hosting updates, root recreation from Detail, Mock/Real round trip and relaunch persistence. Verify flag switches and reset when actual definitions are present; unit-test fixtures do not appear in app launches.
+- For relevant changes, manually verify Main tab long press, rejected normal taps/Setting long press, SwiftUI hosting updates and Close. Verify flag switches, reset and relaunch persistence when actual definitions are present; unit-test fixtures do not appear in app launches.
 
-Focused Release unit verification should run RepositoryModeTests and FeatureFlagStoreTests with `-configuration Release -enableCodeCoverage NO ENABLE_TESTABILITY=YES -parallel-testing-enabled NO`. Testability is enabled only for this test build; also build the ordinary Release app without that override. Manually verify that Release has no Development Settings entry when this boundary changes.
+Focused Release unit verification should run FeatureFlagStoreTests with `-configuration Release -enableCodeCoverage NO ENABLE_TESTABILITY=YES -parallel-testing-enabled NO`. Testability is enabled only for this test build; also build the ordinary Release app without that override. Manually verify that Release has no Development Settings entry when this boundary changes.
 
 Custom accessibility and large-text QA are deferred at this product stage. Do not add app-defined accessibility identifiers for testing.

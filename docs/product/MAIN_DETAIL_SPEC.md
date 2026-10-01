@@ -52,15 +52,9 @@ The client and repository expose separate list and detail operations: `fetchStud
 
 The current backend detail response does not include the current applicant count, so Detail displays capacity without inventing a current-member value. Thumbnail loading and application actions are outside this issue.
 
-## Mock scenarios
+## State verification
 
-These scenarios are explicit inputs for injected Mock clients in unit tests. Ordinary app launches use `content` in Mock mode; no launch-argument scenario override is maintained.
-
-- `content`: a realistic list with multiple distinct items
-- `empty`: an empty successful response
-- `failure`: every request fails
-- `loading`: a deterministic long-running request for state QA
-- `detail-failure`, `detail-loading`: list succeeds, detail exercises its own failure or loading lifecycle
+ViewModel unit tests inject Mock repositories returning Domain models to exercise content, empty and failure. They verify loading before completion and consistent display values after completion. Concrete Repository tests separately verify its own identity, mapping, error and cancellation rules with test-local inputs. Test scenarios do not enter app code.
 
 The iOS and Android implementations may use different UI frameworks, but state meaning, stable selection behavior, Korean copy intent, and retry policy should remain equivalent.
 

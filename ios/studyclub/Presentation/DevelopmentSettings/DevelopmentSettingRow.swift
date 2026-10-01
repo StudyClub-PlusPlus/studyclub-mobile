@@ -3,7 +3,6 @@ import Foundation
 
 struct DevelopmentSettingRow {
     enum ID: Hashable {
-        case repository
         case resetFlags
         case featureFlag(String)
     }

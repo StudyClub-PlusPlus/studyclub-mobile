@@ -2,15 +2,22 @@ import XCTest
 @testable import studyclub
 
 final class DefaultStudyRepositoryTests: XCTestCase {
-    func testDetailReturnsRequestedDomainModelWithoutListFetch() async throws {
-        let repository = Repository(client: MockStudyAPIClient(scenario: .content, delayNanoseconds: 0))
-        let detail = try await repository.fetchStudy(id: "2")
-        XCTAssertEqual(detail.id, "2")
-        XCTAssertEqual(detail.title, "알고리즘 문제 풀이")
+    private var study: StudyDTO {
+        StudyDTO(id: "selected", category: "iOS", title: "스터디", summary: "요약",
+                 currentMembers: 1, maximumMembers: 4, status: "recruiting", topics: nil)
+    }
+
+    func testDetailReturnsRequestedDomainModel() async throws {
+        let repository = Repository(client: FixedStudyAPIInput(studies: [study]))
+        let detail = try await repository.fetchStudy(id: "selected")
+        XCTAssertEqual(detail.id, "selected")
+        XCTAssertEqual(detail.title, "스터디")
     }
 
     func testDetailRejectsMismatchedIdentity() async {
-        let repository = Repository(client: MismatchedDetailStudyAPIClient())
+        let dto = StudyDTO(id: "wrong", category: "iOS", title: "제목", summary: "요약",
+                           currentMembers: 1, maximumMembers: 4, status: "recruiting", topics: nil)
+        let repository = Repository(client: FixedStudyAPIInput(studies: [dto]))
         do {
             _ = try await repository.fetchStudy(id: "selected")
             XCTFail("Expected invalid data")
@@ -20,8 +27,8 @@ final class DefaultStudyRepositoryTests: XCTestCase {
     }
 
     func testDetailPreservesCancellation() async {
-        let repository = Repository(client: MockStudyAPIClient(scenario: .detailLoading, delayNanoseconds: 0))
-        let task = Task { try await repository.fetchStudy(id: "2") }
+        let repository = Repository(client: CancellableStudyAPIInput())
+        let task = Task { try await repository.fetchStudy(id: "selected") }
         task.cancel()
         do {
             _ = try await task.value
@@ -43,17 +50,17 @@ final class DefaultStudyRepositoryTests: XCTestCase {
     }
 
     func testRepositoryReturnsDomainModels() async throws {
-        let client = MockStudyAPIClient(scenario: .content, delayNanoseconds: 0)
+        let client = FixedStudyAPIInput(studies: [study])
         let repository = Repository(client: client)
 
         let studies = try await repository.fetchStudies()
 
-        XCTAssertEqual(studies.count, 4)
-        XCTAssertEqual(studies.first?.id, "1")
+        XCTAssertEqual(studies.count, 1)
+        XCTAssertEqual(studies.first?.id, "selected")
     }
 
     func testRepositoryPreservesEmptySuccess() async throws {
-        let client = MockStudyAPIClient(scenario: .empty, delayNanoseconds: 0)
+        let client = FixedStudyAPIInput(studies: [])
         let repository = Repository(client: client)
 
         let studies = try await repository.fetchStudies()
@@ -84,7 +91,7 @@ final class DefaultStudyRepositoryTests: XCTestCase {
             topics: nil
         )
         let repository = Repository(
-            client: DuplicateStudyAPIClient(studies: [duplicate, duplicate])
+            client: FixedStudyAPIInput(studies: [duplicate, duplicate])
         )
 
         do {
@@ -96,7 +103,7 @@ final class DefaultStudyRepositoryTests: XCTestCase {
     }
 
     func testRepositoryPreservesCancellation() async {
-        let client = MockStudyAPIClient(scenario: .loading, delayNanoseconds: 0)
+        let client = CancellableStudyAPIInput()
         let repository = Repository(client: client)
         let task = Task { try await repository.fetchStudies() }
 
@@ -125,9 +132,10 @@ private struct FailingStudyAPIClient: StudyAPIClient {
     }
 }
 
-private struct DuplicateStudyAPIClient: StudyAPIClient {
-    func fetchStudy(id: Study.ID) async throws -> StudyDetailDTO {
-        throw RepositoryError.unavailable
+private struct FixedStudyAPIInput: StudyAPIClient {
+    func fetchStudy(id: Study.ID) async throws -> StudyDTO {
+        guard let study = studies.first else { throw RepositoryError.invalidData }
+        return study
     }
     let studies: [StudyDTO]
 
@@ -136,25 +144,14 @@ private struct DuplicateStudyAPIClient: StudyAPIClient {
     }
 }
 
-private struct MismatchedDetailStudyAPIClient: StudyAPIClient {
-    func fetchStudy(id: Study.ID) async throws -> StudyDetailDTO {
-        StudyDetailDTO(
-            id: 999,
-            title: "제목",
-            description: "설명",
-            category: .software,
-            studyKind: .study,
-            thumbnailURL: nil,
-            deliveryFormat: .online,
-            status: .open,
-            recruitStatus: .recruiting,
-            curriculum: nil,
-            capacity: 4,
-            recruitDeadlineAt: nil,
-            startAt: nil,
-            endAt: nil
-        )
+private struct CancellableStudyAPIInput: StudyAPIClient {
+    func fetchStudy(id: Study.ID) async throws -> StudyDTO {
+        try await Task.sleep(nanoseconds: 60_000_000_000)
+        throw RepositoryError.unavailable
     }
 
-    func fetchStudies() async throws -> [StudyDTO] { [] }
+    func fetchStudies() async throws -> [StudyDTO] {
+        try await Task.sleep(nanoseconds: 60_000_000_000)
+        return []
+    }
 }

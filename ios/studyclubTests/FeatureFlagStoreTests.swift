@@ -58,10 +58,8 @@ final class FeatureFlagStoreTests: XCTestCase {
         XCTAssertTrue(store.isEnabled(promoted))
     }
 
-    func testResetRemovesAllOverridesButPreservesRepositoryAndUnrelatedSettings() {
+    func testResetRemovesAllOverridesButPreservesUnrelatedSettings() {
         let store = UserDefaultsFeatureFlagStore(defaults: defaults)
-        let modeStore = UserDefaultsRepositoryModeStore(defaults: defaults)
-        modeStore.setMode(.real)
         defaults.set("keep", forKey: "unrelated")
         defaults.set(["retired.flag": true], forKey: "development.featureFlags")
         store.setEnabled(false, for: ready)
@@ -72,7 +70,6 @@ final class FeatureFlagStoreTests: XCTestCase {
         XCTAssertNil(defaults.object(forKey: "development.featureFlags"))
         XCTAssertTrue(store.isEnabled(ready))
         XCTAssertFalse(store.isEnabled(inProgress))
-        XCTAssertEqual(modeStore.mode, .real)
         XCTAssertEqual(defaults.string(forKey: "unrelated"), "keep")
     }
     #else

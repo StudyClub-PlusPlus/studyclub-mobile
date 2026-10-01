@@ -76,4 +76,4 @@ The model flow is `DTO -> Domain model -> ViewModel display values`:
 
 ## Scoped SwiftUI exception: Development Settings
 
-Only the Debug-only Development Settings screen uses SwiftUI List, Section, Button and Toggle, presented from UIKit via UIHostingController. Its @Observable @MainActor ViewModel is owned with @State by the root SwiftUI view. Use explicit bindings that call model actions; keep UserDefaults, repository selection and flag reset in Store/ViewModel. Do not use @Published, Combine or @AppStorage for this screen. Other screens continue using UIKit, programmatic layout and private-subject/read-only-publisher observation.
+Only the Debug-only Development Settings screen uses SwiftUI List, Section, Button and Toggle, presented from UIKit via UIHostingController. Its @Observable @MainActor ViewModel is owned with @State by the root SwiftUI view. Use explicit bindings that call model actions; keep UserDefaults and flag reset in Store/ViewModel. Do not use @Published, Combine or @AppStorage for this screen. Other screens continue using UIKit, programmatic layout and private-subject/read-only-publisher observation.
