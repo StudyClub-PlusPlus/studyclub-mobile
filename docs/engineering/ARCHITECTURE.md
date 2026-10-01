@@ -30,8 +30,9 @@ Data owns external representations and adapters:
 
 - DTO decoding models
 - DTO-to-Domain mappers
-- API client and request router
+- concrete `StudyAPIClient` and request router
 - Alamofire transport
+- pure response-validation and error-classification functions
 - concrete repositories
 - composition factories
 
@@ -49,9 +50,9 @@ Main passes only the selected stable ID to DetailViewModel, which obtains its ow
 
 `RepositoryFactory` owns repository/client construction. App-facing ViewModel convenience initializers call it, while separate repository-accepting initializers allow deterministic unit tests. Repository operations still use protocols and return Domain models; DTOs and concrete repository construction stay inside Data. This deliberately permits a Presentation-to-Data dependency only for factory access, replacing the earlier composition-root-only rule to avoid forwarding repositories through screens.
 
-The factory creates a fresh repository with an Alamofire client per ViewModel in both Debug and Release; it does not share a singleton or cache. App Mock clients, transport scenarios, Repository mode preferences and root-recreation callbacks are not maintained.
+The factory creates a fresh repository with a concrete Alamofire-backed `StudyAPIClient` per ViewModel in both Debug and Release; it does not share a singleton or cache. The client forwards request/DTO results and original errors; Repository maps errors at the Domain boundary. There is no API Client protocol or per-operation closure injection. App Mock clients, transport scenarios, Repository mode preferences and root-recreation callbacks are not maintained.
 
-Development stores use standard UserDefaults. ViewModel tests inject Mock repositories returning Domain models. Concrete Repository tests inject small test-local API inputs to check repository rules; these inputs are not shipped in the app. There are no UI-test launch arguments, environment overrides or app-only flag fixtures.
+Development stores use standard UserDefaults. ViewModel tests inject Mock repositories returning Domain models. DTO-to-Study conversion stays in the existing Mapper. Data response-validation functions check unique list IDs and matching requested detail identity; a Data error-classification function preserves cancellation (including Alamofire cancellation), preserves Domain errors and translates other failures. These pure rules are tested directly. Repository connects the concrete client, mapping and validation without an isolated unit suite or API input doubles. Developers verify that connection during API integration. There are no UI-test launch arguments, environment overrides or app-only flag fixtures.
 
 App launches use the persisted Repository mode in Debug and the explicit app default in Release. Development stores use standard UserDefaults. Unit tests inject isolated stores, repositories or typed Mock scenarios directly; there are no UI-test launch arguments, environment overrides or app-only flag fixtures.
 

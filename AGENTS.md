@@ -36,7 +36,7 @@ Before changing iOS code, read:
 - Add the smallest feature slice that satisfies the current product contract.
 - Keep production API details explicit; do not invent endpoints, auth, or response fields.
 - Update relevant docs in the same change when architecture, state policy, or product behavior changes.
-- Add or update tests for mapper, repository, ViewModel state transitions, selection, and user-visible failure paths.
+- Add or update tests for DTO-to-Domain mapping, response validation, error classification, ViewModel state transitions, selection, and user-visible failure paths. Extract meaningful rules for direct tests; thin Client/Repository wrappers need no isolated unit suite. Add Repository tests when it owns substantial orchestration policy.
 - UI changes require a Simulator walkthrough and fresh visual evidence for every changed state.
 
 ## Completion checklist

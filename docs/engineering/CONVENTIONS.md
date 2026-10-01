@@ -44,7 +44,7 @@ The model flow is `DTO -> Domain model -> ViewModel display values`:
 - App-facing ViewModel initializers obtain repositories through `RepositoryFactory`. ViewControllers do not receive or forward repositories.
 - Keep a separate initializer accepting a repository protocol for deterministic unit tests.
 - No dependency factory in a default initializer argument.
-- Tests supply their own repository or client test double.
+- ViewModel tests supply their own repository test double. Test meaningful conversion, response validation and error classification directly; do not add a Client abstraction solely to preserve an isolated Repository test harness.
 - Factories may build object graphs but do not expose mutable global state.
 
 ## Concurrency and binding

@@ -3,14 +3,15 @@
 ## Unit tests
 
 - DTO-to-Domain mapping, including optional/default handling and invalid member counts
-- repository success, empty, error propagation, cancellation behavior, and duplicate identifier rejection
+- pure response validation: empty/unique lists, duplicate identifier rejection and requested detail identity
+- pure error classification: cancellation preservation, Domain error preservation and transport/unexpected failure translation
 - ViewModel initialization triggers one request; loading-to-content/empty/failure transitions
 - Display values are ready before notification and available to late subscribers
 - display formatting that contains non-trivial policy
 
-Test doubles are injected through protocols. ViewModel loading/content/empty/failure tests use Mock repositories returning Domain models. Concrete Repository tests use small test-local API inputs for mapping and repository-owned rules such as duplicate IDs, detail identity, error translation and cancellation. There is no app Mock client or scenario selector.
+ViewModel loading/content/empty/failure tests inject Mock repositories through the Domain repository protocol. Conversion, response validation and error classification are tested directly with values/errors; these rules are extracted from Repository so tests need neither a Client protocol nor per-operation closure injection. Thin Repository/API Client wrappers do not have isolated unit suites. API integration developers verify their actual connection. Add Repository tests when it owns meaningful orchestration such as cache, pagination or retry policy. There is no app Mock client or scenario selector.
 
-Do not add a separate unit suite for thin Alamofire request wrappers at this stage. API integration work must verify the actual endpoint, response and DTO decoding during development before commit, then check the app path. `Decodable` conformance or unit-test success does not prove compatibility with the server. Logging supports diagnosis after a failure; it does not replace that integration check. Revisit Client tests if custom request, auth, retry or serialization policy becomes substantial.
+JSON-to-DTO decoding is excluded from the current unit-test scope; parsing tests here mean DTO-to-Study conversion. Do not add a separate unit suite for thin Alamofire request wrappers at this stage. API integration work must verify the actual endpoint, response and DTO decoding during development before commit, then check the app path. `Decodable` conformance or unit-test success does not prove compatibility with the server. Logging supports diagnosis after a failure; it does not replace that integration check. Revisit Client tests if custom request, auth, retry or serialization policy becomes substantial.
 
 ## Manual Simulator checks
 

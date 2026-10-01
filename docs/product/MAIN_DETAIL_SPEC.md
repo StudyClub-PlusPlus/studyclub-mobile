@@ -54,7 +54,7 @@ The current backend detail response does not include the current applicant count
 
 ## State verification
 
-ViewModel unit tests inject Mock repositories returning Domain models to exercise content, empty and failure. They verify loading before completion and consistent display values after completion. Concrete Repository tests separately verify its own identity, mapping, error and cancellation rules with test-local inputs. Test scenarios do not enter app code.
+ViewModel unit tests inject Mock repositories returning Domain models to exercise content, empty and failure. They verify loading before completion and consistent display values after completion. DTO-to-Study mapping, response identity validation and error/cancellation classification are tested directly as extracted rules. The concrete Repository connects these rules; its API integration is verified by the developer during integration work. Test scenarios do not enter app code.
 
 The iOS and Android implementations may use different UI frameworks, but state meaning, stable selection behavior, Korean copy intent, and retry policy should remain equivalent.
 

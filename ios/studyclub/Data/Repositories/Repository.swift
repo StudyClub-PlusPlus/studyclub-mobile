@@ -1,9 +1,9 @@
 import Foundation
 
 struct Repository: RepositoryProtocol {
-    private let client: any StudyAPIClient
+    private let client: StudyAPIClient
 
-    init(client: any StudyAPIClient) {
+    init(client: StudyAPIClient) {
         self.client = client
     }
 
@@ -11,32 +11,20 @@ struct Repository: RepositoryProtocol {
         do {
             let study = try await client.fetchStudy(id: id).toDomain()
             try Task.checkCancellation()
-            guard study.id == id else { throw RepositoryError.invalidData }
+            try validateStudyID(study, expectedID: id)
             return study
-        } catch is DecodingError {
-            throw RepositoryError.invalidData
-        } catch is CancellationError {
-            throw CancellationError()
-        } catch let error as RepositoryError {
-            throw error
         } catch {
-            throw RepositoryError.unavailable
+            throw mapRepositoryError(error)
         }
     }
 
     func fetchStudies() async throws -> [Study] {
         do {
             let studies = try await client.fetchStudies().map { try $0.toDomain() }
-            guard Set(studies.map(\.id)).count == studies.count else {
-                throw RepositoryError.invalidData
-            }
+            try validateUniqueStudyIDs(studies)
             return studies
-        } catch is CancellationError {
-            throw CancellationError()
-        } catch let error as RepositoryError {
-            throw error
         } catch {
-            throw RepositoryError.unavailable
+            throw mapRepositoryError(error)
         }
     }
 }

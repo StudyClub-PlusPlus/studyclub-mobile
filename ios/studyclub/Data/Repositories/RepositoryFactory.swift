@@ -1,6 +1,6 @@
 enum RepositoryFactory {
     static func makeStudyRepository() -> any RepositoryProtocol {
-        Repository(client: AlamofireStudyAPIClient())
+        Repository(client: StudyAPIClient())
     }
 
     static func makeDetailRepository() -> any RepositoryProtocol {
