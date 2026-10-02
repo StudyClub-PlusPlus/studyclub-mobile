@@ -1,11 +1,7 @@
 import Foundation
 
 struct Repository: RepositoryProtocol {
-    private let client: StudyAPIClient
-
-    init(client: StudyAPIClient) {
-        self.client = client
-    }
+    private let client = StudyAPIClient()
 
     func fetchStudy(id: Study.ID) async throws -> StudyDetail {
         do {
