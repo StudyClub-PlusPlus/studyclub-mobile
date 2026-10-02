@@ -23,7 +23,7 @@ enum FeatureFlag: CaseIterable {
             FeatureFlagDefinition(
                 id: "study.detail-api",
                 name: "스터디 상세 API 연동",
-                stage: .inProgress
+                stage: .ready
             )
         }
     }

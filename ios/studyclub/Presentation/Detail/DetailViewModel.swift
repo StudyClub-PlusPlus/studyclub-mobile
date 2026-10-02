@@ -52,7 +52,7 @@ final class DetailViewModel {
                 self.title = study.title
                 self.descriptionText = study.description
                 self.metadataText = Self.metadataText(for: study)
-                self.recruitStatusText = study.recruitStatus.displayText
+                self.recruitStatusText = study.recruitStatus?.displayText ?? ""
                 self.curriculum = study.curriculum
                 self.scheduleText = Self.scheduleText(for: study)
                 self.stateSubject.send(.content)

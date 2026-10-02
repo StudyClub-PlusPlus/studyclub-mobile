@@ -9,7 +9,7 @@ final class StudyDetailMapperTests: XCTestCase {
           "slug": "backend-study",
           "title": "백엔드 스터디",
           "description": "설명",
-          "category": "BACKEND",
+          "category": "SOFTWARE",
           "studyKind": "STUDY",
           "thumbnailUrl": "https://example.com/thumbnail.png",
           "deliveryFormat": "ONLINE",
@@ -33,7 +33,7 @@ final class StudyDetailMapperTests: XCTestCase {
     func testRejectsUnknownDetailCodeValuesDuringDecoding() throws {
         let values: [String: Any] = [
             "id": 42, "slug": "study", "title": "스터디",
-            "category": "BACKEND", "studyKind": "STUDY",
+            "category": "SOFTWARE", "studyKind": "STUDY",
             "deliveryFormat": "ONLINE", "status": "OPEN", "recruitStatus": "RECRUITING"
         ]
         for field in ["category", "studyKind", "deliveryFormat", "status", "recruitStatus"] {
@@ -48,7 +48,7 @@ final class StudyDetailMapperTests: XCTestCase {
 
     func testDecodesDetailWithoutSlug() throws {
         let values: [String: Any] = [
-            "id": 42, "title": "스터디", "category": "BACKEND", "studyKind": "STUDY",
+            "id": 42, "title": "스터디", "category": "SOFTWARE", "studyKind": "STUDY",
             "deliveryFormat": "ONLINE", "status": "OPEN", "recruitStatus": "RECRUITING"
         ]
         let data = try JSONSerialization.data(withJSONObject: values)
@@ -56,11 +56,36 @@ final class StudyDetailMapperTests: XCTestCase {
         XCTAssertEqual(detail.id, "42")
     }
 
+    func testDecodesClosedStudyWithNullRecruitmentStatus() throws {
+        let values: [String: Any] = [
+            "id": 87, "title": "알고리즘 목 인터뷰", "category": "ALGORITHM",
+            "studyKind": "STUDY", "deliveryFormat": "ONLINE", "status": "CLOSED",
+            "recruitStatus": NSNull()
+        ]
+        let data = try JSONSerialization.data(withJSONObject: values)
+        let detail = try JSONDecoder().decode(StudyDetailDTO.self, from: data).toDomain()
+        XCTAssertEqual(detail.category, .algorithm)
+        XCTAssertEqual(detail.status, .closed)
+        XCTAssertNil(detail.recruitStatus)
+    }
+
+    func testDecodesCurrentBackendLifecycleValues() throws {
+        for status in ["DRAFT", "OPEN", "ONGOING", "ENDED", "CLOSED"] {
+            let values: [String: Any] = [
+                "id": 18, "title": "스터디", "category": "SOFTWARE", "studyKind": "STUDY",
+                "deliveryFormat": "HYBRID", "status": status, "recruitStatus": NSNull()
+            ]
+            let data = try JSONSerialization.data(withJSONObject: values)
+            let detail = try JSONDecoder().decode(StudyDetailDTO.self, from: data).toDomain()
+            XCTAssertEqual(detail.status.rawValue, status)
+        }
+    }
+
     func testMapsBackendDetailContractToDomain() throws {
         let detail = try makeDTO().toDomain()
 
         XCTAssertEqual(detail.id, "42")
-        XCTAssertEqual(detail.category, .backend)
+        XCTAssertEqual(detail.category, .software)
         XCTAssertEqual(detail.studyKind, .study)
         XCTAssertEqual(detail.deliveryFormat, .online)
         XCTAssertEqual(detail.recruitStatus, .recruiting)
@@ -98,7 +123,7 @@ final class StudyDetailMapperTests: XCTestCase {
             id: id,
             title: "백엔드 스터디",
             description: description,
-            category: .backend,
+            category: .software,
             studyKind: .study,
             thumbnailURL: nil,
             deliveryFormat: .online,

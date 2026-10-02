@@ -11,11 +11,9 @@ final class AlamofireStudyAPIClient: StudyAPIClient, @unchecked Sendable {
     }
 
     private static var defaultBaseURL: URL {
-        #if DEBUG
-        URL(string: "https://api.stage.studyclub-plusplus.com/api/")!
-        #else
+        // The public Production API is the verified mobile endpoint.
+        // Stage can still be selected explicitly through init(baseURL:).
         URL(string: "https://api.studyclub-plusplus.com/api/")!
-        #endif
     }
 
     func fetchStudies() async throws -> [StudyDTO] {

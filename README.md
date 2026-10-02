@@ -36,7 +36,7 @@ iOS를 먼저 만들고 Android를 나중에 만들면, 그사이에 정해지�
 - Debug 전용 SwiftUI Development Settings (`@Observable` ViewModel)
 - Mock/Real 선택 저장과 TabBar 전체 재구성, Feature Flag 기본값·override·초기화
 
-앱의 기본값은 정해진 Mock 데이터입니다. Debug에서 스터디 탭을 길게 누르면 개발 설정을 열 수 있습니다. Real 선택 시 스터디 상세는 Stage API를 사용하며 Release의 실제 API 주소는 Production입니다. 목록 API 연동은 별도 이슈 범위입니다. 실제 Feature Flag 목록은 비어 있고, Ready는 기본 ON·InProgress는 기본 OFF로 동작하는 기반을 준비했습니다.
+앱의 기본값은 정해진 Mock 데이터입니다. Debug에서 스터디 탭을 길게 누르면 개발 설정을 열 수 있습니다. Real 선택 시 스터디 상세는 Debug와 Release 모두 공개 Production API를 사용합니다. 목록 API 연동은 별도 이슈 범위입니다. 스터디 상세 API 플래그는 Ready(기본 ON)이며, Debug에서 명시적으로 OFF로 설정하면 Mock 상세를 사용합니다.
 
 ### Android
 

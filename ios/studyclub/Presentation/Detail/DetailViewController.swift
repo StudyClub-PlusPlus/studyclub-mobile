@@ -204,7 +204,9 @@ final class DetailViewController: UIViewController {
     private func updateViews() {
         categoryLabel.text = viewModel.category
         titleLabel.text = viewModel.title
-        metadataLabel.text = "\(viewModel.metadataText)  ·  \(viewModel.recruitStatusText)"
+        metadataLabel.text = [viewModel.metadataText, viewModel.recruitStatusText]
+            .filter { !$0.isEmpty }
+            .joined(separator: "  ·  ")
         scheduleLabel.text = viewModel.scheduleText
         scheduleLabel.isHidden = viewModel.scheduleText.isEmpty
         descriptionLabel.text = viewModel.descriptionText

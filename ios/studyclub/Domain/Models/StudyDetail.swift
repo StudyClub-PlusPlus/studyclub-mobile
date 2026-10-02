@@ -9,7 +9,7 @@ struct StudyDetail: Identifiable, Equatable, Sendable {
     let thumbnailURL: URL?
     let deliveryFormat: DeliveryFormat
     let status: StudyStatus
-    let recruitStatus: RecruitStatus
+    let recruitStatus: RecruitStatus?
     let curriculum: String
     let capacity: Int?
     let recruitDeadlineAt: Date?

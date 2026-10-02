@@ -102,7 +102,7 @@ actor MockStudyAPIClient: StudyAPIClient {
         "1": makeDetail(
             id: 1,
             title: "UIKit 아키텍처 같이 읽기",
-            category: .mobile,
+            category: .software,
             description: "작은 예제를 만들며 MVVM과 Repository의 책임을 함께 정리해요.",
             curriculum: "의존성 역전\nSwift Concurrency\n테스트 가능한 ViewModel",
             capacity: 8
@@ -110,7 +110,7 @@ actor MockStudyAPIClient: StudyAPIClient {
         "2": makeDetail(
             id: 2,
             title: "알고리즘 문제 풀이",
-            category: .cs,
+            category: .algorithm,
             description: "매주 두 문제를 풀고 풀이의 시간·공간 복잡도를 차분히 비교해요.",
             curriculum: "그래프 탐색\n동적 계획법\n코드 리뷰",
             capacity: 8,
@@ -119,7 +119,7 @@ actor MockStudyAPIClient: StudyAPIClient {
         "3": makeDetail(
             id: 3,
             title: "확장 가능한 API 설계",
-            category: .backend,
+            category: .software,
             description: "실제 서비스 사례를 바탕으로 API 경계와 오류 계약을 설계해요.",
             curriculum: "REST 계약\n관찰 가능성\n장애 대응",
             capacity: 10
@@ -127,7 +127,7 @@ actor MockStudyAPIClient: StudyAPIClient {
         "4": makeDetail(
             id: 4,
             title: "모바일 디자인 시스템 실습",
-            category: .design,
+            category: .other,
             description: "토큰부터 접근성까지 작은 컴포넌트 라이브러리를 함께 다듬어요.",
             curriculum: "디자인 토큰\nDynamic Type\n접근성",
             capacity: 9

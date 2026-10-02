@@ -142,7 +142,7 @@ private struct MismatchedDetailStudyAPIClient: StudyAPIClient {
             id: 999,
             title: "제목",
             description: "설명",
-            category: .mobile,
+            category: .software,
             studyKind: .study,
             thumbnailURL: nil,
             deliveryFormat: .online,
