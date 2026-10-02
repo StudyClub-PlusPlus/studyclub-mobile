@@ -7,7 +7,8 @@ StudyClub iOS starts with three top-level source layers:
 ```text
 App -> Presentation
 Presentation -> Domain
-Presentation -> Data.RepositoryFactory (repository creation only)
+Presentation -> Data.RepositoryFactory (repository creation)
+Presentation -> Data.DevelopmentSettingsStore (development configuration)
 Data -> Domain
 Domain -> Foundation only
 ```
@@ -32,7 +33,7 @@ Data owns external representations and adapters:
 - DTO-to-Domain mappers
 - concrete `StudyAPIClient` and request router
 - Alamofire transport
-- pure response-validation and error-classification functions
+- pure response-validation and error-classification static methods on Repository
 - concrete repositories
 - composition factories
 
@@ -48,11 +49,11 @@ Main passes only the selected stable ID to DetailViewModel, which obtains its ow
 
 ## Composition
 
-`RepositoryFactory` creates repositories; each concrete Repository creates its API client internally. App-facing ViewModel convenience initializers call the factory, while separate repository-accepting initializers allow deterministic unit tests. Repository operations still use protocols and return Domain models; DTOs and concrete repository construction stay inside Data. This deliberately permits a Presentation-to-Data dependency only for factory access, replacing the earlier composition-root-only rule to avoid forwarding repositories through screens.
+`RepositoryFactory` creates repositories; the real Repository creates its API client internally. App-facing ViewModel convenience initializers call the factory, while separate repository-accepting initializers allow deterministic unit tests. Repository operations still use protocols and return Domain models; DTOs and concrete repository construction stay inside Data. Presentation may access the factory for repositories and the concrete DevelopmentSettingsStore for development configuration. No store protocol or factory wrapper is maintained while the store has one implementation and no injected consumer.
 
-The factory calls `Repository()` in both Debug and Release. Each repository owns a fresh concrete `StudyAPIClient`; the Client calls `AF.request(StudyRouter.studies)`, which uses Alamofire's default Session. StudyRouter owns BaseURL, method, path and request headers. Response decoding uses Alamofire's `serializingDecodable(...).value` to match the Repository's `async throws` operations. Client/Session injection initializers are not maintained while there is only this request path. The client forwards request/DTO results and original errors; Repository maps errors at the Domain boundary. There is no API Client protocol or per-operation closure injection. App Mock clients, transport scenarios, Repository mode preferences and root-recreation callbacks are not maintained. Revisit construction when production integration needs environment or custom Session configuration.
+Release factory construction always returns `Repository()`. Debug reads DevelopmentSettingsStore.repositoryMode and returns either `MockRepository()` or `Repository()`; the saved mode persists across launches and defaults to Mock. MockRepository returns a static catalog of Domain Study values without DTOs, a Client double, delay or transport scenarios, and is compiled out of Release. The real repository owns a fresh concrete `StudyAPIClient`; the Client calls `AF.request(StudyRouter.studies)`, which uses Alamofire's default Session. StudyRouter owns BaseURL, method, path and request headers. Response decoding uses Alamofire's `serializingDecodable(...).value` to match the Repository's `async throws` operations. Client/Session injection initializers are not maintained while there is only this request path. The client forwards request/DTO results and original errors; Repository maps errors at the Domain boundary. There is no API Client protocol or per-operation closure injection. Client Mock/scenario support is removed. Changing the Debug repository mode rebuilds the tab navigation stacks through MainTabBarController, so new ViewModels receive the selected implementation without replacing the window root. Revisit construction when production integration needs environment or custom Session configuration.
 
-Development stores use standard UserDefaults. ViewModel tests inject Mock repositories returning Domain models. DTO-to-Study conversion stays in the existing Mapper. Data response-validation functions check unique list IDs and matching requested detail identity; a Data error-classification function preserves cancellation (including Alamofire cancellation), preserves Domain errors and translates other failures. These pure rules are tested directly. Repository connects the concrete client, mapping and validation without an isolated unit suite or API input doubles. Developers verify that connection during API integration. There are no UI-test launch arguments, environment overrides or app-only flag fixtures.
+Development stores use standard UserDefaults. ViewModel tests inject Mock repositories returning Domain models. DTO-to-Study conversion stays in the existing Mapper. Repository.swift owns internal static methods in an extension for unique list IDs, requested detail identity and error classification. Error classification preserves cancellation (including Alamofire cancellation), preserves Domain errors and translates other failures. These pure rules are tested directly through Repository without creating a Client or repository instance; no global helper functions or separate rule files are required. Repository connects the concrete client, mapping and validation without an isolated unit suite or API input doubles. Developers verify that connection during API integration. There are no UI-test launch arguments, environment overrides or app-only flag fixtures.
 
 App launches use the persisted Repository mode in Debug and the explicit app default in Release. Development stores use standard UserDefaults. Unit tests inject isolated stores, repositories or typed Mock scenarios directly; there are no UI-test launch arguments, environment overrides or app-only flag fixtures.
 
@@ -67,7 +68,7 @@ Selecting Real constructs the live transport. The client targets `https://api.st
 
 ## Development settings rows
 
-The Debug-only DevelopmentSettingsView uses SwiftUI List/Section with stable section/row identifiers and typed Button/Toggle rows. The view creates and retains its @Observable DevelopmentSettingsViewModel in @State. The model obtains its flag store through RepositoryFactory and uses the app's FeatureFlag catalog directly, with no injection initializers for this internal screen. Its initializer builds section display values; actions update persistence before rebuilding those values, and Observation invalidates the view. No Combine publisher, @Published or @AppStorage is used on this screen. Stores and the model own persistence/reset; the SwiftUI view only forwards actions and owns presentation state.
+The Debug-only DevelopmentSettingsView uses SwiftUI List/Section with stable section/row identifiers and typed Button/Toggle rows. The view creates and retains its @Observable DevelopmentSettingsViewModel in @State. The model creates DevelopmentSettingsStore directly and uses the static FeatureFlag.definitions catalog, with no injection initializers for this internal screen. Its initializer builds section display values; actions update persistence before rebuilding those values, and Observation invalidates the view. No Combine publisher, @Published or @AppStorage is used on this screen. The store and model own persistence/reset; the SwiftUI view only forwards actions and owns presentation state.
 
 MainTabBarController presents a UIHostingController containing the development screen's NavigationStack. Close uses SwiftUI dismiss. Flag changes update settings in place and do not recreate the window root. The app TabBar and Main/Detail/public Setting are not migrated to SwiftUI. UIKit ViewModels retain their existing private-subject/read-only-publisher convention.
 

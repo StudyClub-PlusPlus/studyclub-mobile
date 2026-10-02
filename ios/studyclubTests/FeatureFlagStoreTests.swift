@@ -20,14 +20,14 @@ final class FeatureFlagStoreTests: XCTestCase {
     }
 
     func testStageDefaultsAndMissingOverrides() {
-        let store = UserDefaultsFeatureFlagStore(defaults: defaults)
+        let store = DevelopmentSettingsStore(defaults: defaults)
         XCTAssertTrue(store.isEnabled(ready))
         XCTAssertFalse(store.isEnabled(inProgress))
     }
 
     func testMalformedOverrideUsesDefaultWithoutPoisoningOtherFlags() {
         defaults.set([ready.id: "bad-value", inProgress.id: true], forKey: "development.featureFlags")
-        let store = UserDefaultsFeatureFlagStore(defaults: defaults)
+        let store = DevelopmentSettingsStore(defaults: defaults)
         XCTAssertTrue(store.isEnabled(ready))
         #if DEBUG
         XCTAssertTrue(store.isEnabled(inProgress))
@@ -38,10 +38,10 @@ final class FeatureFlagStoreTests: XCTestCase {
 
     #if DEBUG
     func testOverridesAreIndependentAndPersistAcrossStoreRecreation() {
-        let store = UserDefaultsFeatureFlagStore(defaults: defaults)
+        let store = DevelopmentSettingsStore(defaults: defaults)
         store.setEnabled(false, for: ready)
         store.setEnabled(true, for: inProgress)
-        let relaunched = UserDefaultsFeatureFlagStore(defaults: UserDefaults(suiteName: suite)!)
+        let relaunched = DevelopmentSettingsStore(defaults: UserDefaults(suiteName: suite)!)
         XCTAssertFalse(relaunched.isEnabled(ready))
         XCTAssertTrue(relaunched.isEnabled(inProgress))
         store.setEnabled(false, for: inProgress)
@@ -50,7 +50,7 @@ final class FeatureFlagStoreTests: XCTestCase {
     }
 
     func testStagePromotionAndRenameKeepOverrideUntilReset() {
-        let store = UserDefaultsFeatureFlagStore(defaults: defaults)
+        let store = DevelopmentSettingsStore(defaults: defaults)
         let promoted = FeatureFlagDefinition(id: inProgress.id, name: "Renamed", stage: .ready)
         store.setEnabled(false, for: inProgress)
         XCTAssertFalse(store.isEnabled(promoted))
@@ -59,7 +59,7 @@ final class FeatureFlagStoreTests: XCTestCase {
     }
 
     func testResetRemovesAllOverridesButPreservesUnrelatedSettings() {
-        let store = UserDefaultsFeatureFlagStore(defaults: defaults)
+        let store = DevelopmentSettingsStore(defaults: defaults)
         defaults.set("keep", forKey: "unrelated")
         defaults.set(["retired.flag": true], forKey: "development.featureFlags")
         store.setEnabled(false, for: ready)
@@ -75,7 +75,7 @@ final class FeatureFlagStoreTests: XCTestCase {
     #else
     func testReleaseIgnoresEveryPersistedFlagOverride() {
         defaults.set([ready.id: false, inProgress.id: true], forKey: "development.featureFlags")
-        let store = UserDefaultsFeatureFlagStore(defaults: defaults)
+        let store = DevelopmentSettingsStore(defaults: defaults)
         XCTAssertTrue(store.isEnabled(ready))
         XCTAssertFalse(store.isEnabled(inProgress))
     }

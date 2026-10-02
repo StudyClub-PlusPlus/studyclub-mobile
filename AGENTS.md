@@ -19,10 +19,10 @@ Before changing iOS code, read:
 - iOS uses UIKit and programmatic Auto Layout. The Debug-only Development Settings screen is a scoped exception: SwiftUI hosted by UIHostingController.
 - The architecture is MVVM + Repository. `R` does not mean Router.
 - Swift Concurrency owns asynchronous operations. UIKit ViewModels use Combine only for ViewModel-to-View observation through a private subject and read-only publisher; do not use `@Published`. Development Settings alone uses an `@Observable` ViewModel, owned by SwiftUI `@State`; persistence stays in Store/ViewModel.
-- Source dependencies are `Presentation -> Domain` and `Data -> Domain`, with `Presentation -> Data.RepositoryFactory` allowed for repository creation. Domain imports no UI, reactive, or networking framework.
+- Source dependencies are `Presentation -> Domain` and `Data -> Domain`, with `Presentation -> Data.RepositoryFactory` allowed for repository creation and `Presentation -> Data.DevelopmentSettingsStore` for development configuration. Domain imports no UI, reactive, or networking framework.
 - DTOs stay inside Data. Repository protocols return Domain models.
 - App-facing ViewModel initializers obtain repositories through `RepositoryFactory`; ViewControllers do not receive or forward repositories. Keep separate repository-injecting initializers for unit tests.
-- `RepositoryFactory` creates repositories; each concrete repository creates its API client internally. Do not add mutable global overrides or a generic service locator.
+- `RepositoryFactory` creates repositories: Release always uses the real implementation; Debug follows the persisted Development Settings choice between real and Domain-model Mock implementations. The real repository creates its API client internally. Do not add mutable global overrides or a generic service locator.
 - Do not add a UseCase, Router, Coordinator, or generic DI container without a concrete second use case and an architecture decision update.
 - Lists and feeds define loading, content, empty, and failure behavior. Current screens request once from ViewModel init via a private fetch method; retry, refresh, and Task management are deferred until needed.
 - Store fixed views with their default styling in private let initialization closures. configureView handles hierarchy and layout together; updateViews applies display data. ViewControllers use Combine as a notification and read values from the ViewModel.

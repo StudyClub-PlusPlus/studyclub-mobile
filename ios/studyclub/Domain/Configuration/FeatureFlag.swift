@@ -17,6 +17,8 @@ struct FeatureFlagDefinition: Hashable, Sendable {
 enum FeatureFlag: CaseIterable {
     case studyDetailAPI
 
+    static let definitions = allCases.map(\.definition)
+
     var definition: FeatureFlagDefinition {
         switch self {
         case .studyDetailAPI:
@@ -27,13 +29,4 @@ enum FeatureFlag: CaseIterable {
             )
         }
     }
-}
-
-protocol FeatureFlagStoring {
-    func isEnabled(_ definition: FeatureFlagDefinition) -> Bool
-
-    #if DEBUG
-    func setEnabled(_ isEnabled: Bool, for definition: FeatureFlagDefinition)
-    func resetToDefaults()
-    #endif
 }

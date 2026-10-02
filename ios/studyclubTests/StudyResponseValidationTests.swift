@@ -8,25 +8,25 @@ final class StudyResponseValidationTests: XCTestCase {
     }
 
     func testEmptyListIsValid() throws {
-        try validateUniqueStudyIDs([])
+        try Repository.validateUniqueStudyIDs([])
     }
 
     func testDifferentIDsAreValid() throws {
-        try validateUniqueStudyIDs([study(id: "first"), study(id: "second")])
+        try Repository.validateUniqueStudyIDs([study(id: "first"), study(id: "second")])
     }
 
     func testDuplicateIDsAreRejected() {
-        XCTAssertThrowsError(try validateUniqueStudyIDs([study(id: "same"), study(id: "same")])) {
+        XCTAssertThrowsError(try Repository.validateUniqueStudyIDs([study(id: "same"), study(id: "same")])) {
             XCTAssertEqual($0 as? RepositoryError, .invalidData)
         }
     }
 
     func testRequestedStudyIdentityIsValid() throws {
-        try validateStudyID(study(id: "selected"), expectedID: "selected")
+        try Repository.validateStudyID(study(id: "selected"), expectedID: "selected")
     }
 
     func testDifferentStudyIdentityIsRejected() {
-        XCTAssertThrowsError(try validateStudyID(study(id: "other"), expectedID: "selected")) {
+        XCTAssertThrowsError(try Repository.validateStudyID(study(id: "other"), expectedID: "selected")) {
             XCTAssertEqual($0 as? RepositoryError, .invalidData)
         }
     }

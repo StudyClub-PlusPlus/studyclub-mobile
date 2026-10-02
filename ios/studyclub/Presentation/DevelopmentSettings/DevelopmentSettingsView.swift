@@ -2,8 +2,10 @@
 import SwiftUI
 
 struct DevelopmentSettingsView: View {
+    let onRepositoryChange: () -> Void
     @Environment(\.dismiss) private var dismiss
     @State private var viewModel = DevelopmentSettingsViewModel()
+    @State private var showsRepositoryPicker = false
 
     var body: some View {
         NavigationStack {
@@ -23,6 +25,18 @@ struct DevelopmentSettingsView: View {
             .listStyle(.insetGrouped)
             .navigationTitle("Development Settings")
             .navigationBarTitleDisplayMode(.inline)
+            .alert("Repository", isPresented: $showsRepositoryPicker) {
+                ForEach(RepositoryMode.allCases, id: \.self) { mode in
+                    Button(mode.title) {
+                        if viewModel.changeRepositoryMode(to: mode) {
+                            onRepositoryChange()
+                        }
+                    }
+                }
+                Button("취소", role: .cancel) {}
+            } message: {
+                Text("변경하면 모든 탭을 새로 만들고 스터디 목록으로 돌아갑니다.")
+            }
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("닫기", action: { dismiss() })
@@ -34,6 +48,8 @@ struct DevelopmentSettingsView: View {
 
     private func selectButton(_ id: DevelopmentSettingRow.ID) {
         switch id {
+        case .repository:
+            showsRepositoryPicker = true
         case .resetFlags:
             viewModel.resetFlagsToDefaults()
         case .featureFlag:

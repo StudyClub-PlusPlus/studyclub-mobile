@@ -11,6 +11,17 @@ final class MainTabBarController: UITabBarController {
     }
 
     private func configureView() {
+        configureTabs()
+
+        #if DEBUG
+        let longPress = UILongPressGestureRecognizer(target: self, action: #selector(openDevelopmentSettings))
+        longPress.minimumPressDuration = 0.7
+        longPress.delegate = self
+        tabBar.addGestureRecognizer(longPress)
+        #endif
+    }
+
+    private func configureTabs() {
         let main = UINavigationController(
             rootViewController: MainViewController(viewModel: MainViewModel())
         )
@@ -26,12 +37,6 @@ final class MainTabBarController: UITabBarController {
         viewControllers = [main, setting]
         tabBar.tintColor = AppTheme.Palette.accent
 
-        #if DEBUG
-        let longPress = UILongPressGestureRecognizer(target: self, action: #selector(openDevelopmentSettings))
-        longPress.minimumPressDuration = 0.7
-        longPress.delegate = self
-        tabBar.addGestureRecognizer(longPress)
-        #endif
     }
 }
 
@@ -66,7 +71,12 @@ extension MainTabBarController: UIGestureRecognizerDelegate {
 
     @objc private func openDevelopmentSettings(_ gesture: UILongPressGestureRecognizer) {
         guard gesture.state == .began, presentedViewController == nil else { return }
-        let settings = DevelopmentSettingsView()
+        let settings = DevelopmentSettingsView { [weak self] in
+            self?.dismiss(animated: true) { [weak self] in
+                self?.configureTabs()
+                self?.selectedIndex = 0
+            }
+        }
         present(UIHostingController(rootView: settings), animated: true)
     }
 }

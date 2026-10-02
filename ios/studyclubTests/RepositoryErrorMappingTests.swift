@@ -5,26 +5,26 @@ import XCTest
 
 final class RepositoryErrorMappingTests: XCTestCase {
     func testSwiftCancellationIsPreserved() {
-        XCTAssertTrue(mapRepositoryError(CancellationError()) is CancellationError)
+        XCTAssertTrue(Repository.mapError(CancellationError()) is CancellationError)
     }
 
     func testAlamofireCancellationBecomesSwiftCancellation() {
-        XCTAssertTrue(mapRepositoryError(AFError.explicitlyCancelled) is CancellationError)
+        XCTAssertTrue(Repository.mapError(AFError.explicitlyCancelled) is CancellationError)
     }
 
     func testRepositoryErrorMeaningIsPreserved() {
         for error in [RepositoryError.invalidData, .unavailable, .detailAPIUnconfigured] {
-            XCTAssertEqual(mapRepositoryError(error) as? RepositoryError, error)
+            XCTAssertEqual(Repository.mapError(error) as? RepositoryError, error)
         }
     }
 
     func testTransportFailureBecomesUnavailable() {
         let error = AFError.sessionTaskFailed(error: URLError(.notConnectedToInternet))
-        XCTAssertEqual(mapRepositoryError(error) as? RepositoryError, .unavailable)
+        XCTAssertEqual(Repository.mapError(error) as? RepositoryError, .unavailable)
     }
 
     func testUnexpectedErrorBecomesUnavailable() {
         struct UnexpectedError: Error {}
-        XCTAssertEqual(mapRepositoryError(UnexpectedError()) as? RepositoryError, .unavailable)
+        XCTAssertEqual(Repository.mapError(UnexpectedError()) as? RepositoryError, .unavailable)
     }
 }

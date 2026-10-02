@@ -7,7 +7,7 @@ The app catalog in `ios/studyclub/Domain/Configuration/FeatureFlag.swift` contai
 ## Add a feature
 
 1. Add a real feature case to `FeatureFlag` and its `FeatureFlagDefinition` with a stable explicit ID, readable name and `.inProgress` stage. Once the first case exists, remove the temporary empty `allCases` declaration so `CaseIterable` synthesizes the catalog.
-2. Obtain `FeatureFlagStoring` through `RepositoryFactory.makeFeatureFlagStore()` in the app-facing VM initializer. Keep a separate test initializer accepting the store alongside other dependencies. Query `store.isEnabled(FeatureFlag.yourFeature.definition)` at the relevant feature boundary.
+2. Read configuration through the concrete `DevelopmentSettingsStore`, which defaults to standard UserDefaults. Store unit tests use isolated UserDefaults suites. Revisit a store protocol if real feature tests need an injected alternative; do not add a factory wrapper just for store creation. Query `store.isEnabled(FeatureFlag.yourFeature.definition)` at the relevant feature boundary.
 3. Guard the unfinished behavior and side effects, not only the visible entry button. Keep the existing OFF path usable. Test both ON and OFF paths before merging a small feature slice to trunk.
 4. Debug reads are live. Specify when that feature reads its flag (screen creation, action or another explicit boundary). A settings toggle changes the next lookup; it does not automatically recreate every existing screen or cancel work.
 5. Move the same ID to `.ready` only when the ON path is intended as the app default, including Release. Renaming the display name or moving the stage must not change the storage ID. Existing Debug overrides remain until reset.
@@ -15,10 +15,10 @@ The app catalog in `ios/studyclub/Domain/Configuration/FeatureFlag.swift` contai
 
 ## Reset semantics
 
-Reset Flag to Default removes the entire `development.featureFlags` override dictionary, including retired IDs. It then re-renders both sections and announces completion. It never changes unrelated UserDefaults. Because defaults are not copied into storage, later stage changes take effect when no override exists.
+Reset Flag to Default removes the entire `development.featureFlags` override dictionary, including retired IDs. It then re-renders both flag sections without resetting the selected Repository mode. It never changes unrelated UserDefaults. Because defaults are not copied into storage, later stage changes take effect when no override exists.
 
 ## Verification
 
-Use injected definitions and isolated UserDefaults suites for unit tests. The app uses only the real catalog; there are no launch-time flag fixtures. When a real flag is added or its UI changes, manually verify switches and full-row taps, app relaunch, reset preservation and landscape layout on Simulator. Unit tests verify Release isolation. Custom accessibility and large-text QA remain deferred. Use serial XCTest on the selected Simulator.
+FeatureFlagStoreTests use isolated UserDefaults suites and locally created definitions; the internal Development Settings ViewModel has no dedicated unit suite. The app uses only the real catalog; there are no launch-time flag fixtures. When a real flag is added or its UI changes, manually verify switches and full-row taps, app relaunch, reset preservation and landscape layout on Simulator. Unit tests verify Release isolation. Custom accessibility and large-text QA remain deferred. Use serial XCTest on the selected Simulator.
 
 Actual feature behavior still needs its own ON/OFF tests when its case is introduced; foundation tests do not prove an unfinished feature is ready to ship.

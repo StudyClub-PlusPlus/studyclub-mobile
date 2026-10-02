@@ -8,11 +8,21 @@ struct DevelopmentSettingRowView: View {
 
     var body: some View {
         switch row.kind {
-        case .button:
+        case .button(let value):
             Button(action: onButton) {
                 HStack {
-                    Text(row.title)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(row.title)
+                        if let value {
+                            Text(value).font(.subheadline).foregroundStyle(.secondary)
+                        }
+                    }
                     Spacer(minLength: 12)
+                    if value != nil {
+                        Image(systemName: "chevron.right")
+                            .font(.footnote.weight(.semibold))
+                            .foregroundStyle(.tertiary)
+                    }
                 }
                 .frame(minHeight: 44, alignment: .leading)
                 .contentShape(Rectangle())

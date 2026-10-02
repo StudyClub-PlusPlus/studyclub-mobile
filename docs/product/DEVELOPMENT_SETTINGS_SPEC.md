@@ -10,10 +10,10 @@ Only Debug builds offer Development Settings, by holding the Main tab button for
 
 ## Repository construction
 
-Each app-facing ViewModel obtains an Alamofire-backed repository through its convenience initializer and RepositoryFactory in Debug and Release. There is no Mock/Real picker, Repository mode persistence or root recreation for transport changes. Removing Mock support does not complete [API integration](../engineering/API_INTEGRATION.md).
+Each app-facing ViewModel obtains its repository through RepositoryFactory. Release always uses the real Repository. Debug follows the saved Mock/Real choice in Development Settings, defaulting to Mock. MockRepository returns Domain Study samples directly; it does not mock API Client or DTOs. Changing the mode closes Development Settings and recreates the tab navigation stacks on Main so new ViewModels use the chosen implementation. The window root is retained. Real [API integration](../engineering/API_INTEGRATION.md) remains pending under sc-93.
 
 ## Feature flags
 
 Ready defaults ON. InProgress defaults OFF. Developer overrides persist across app launches and are keyed by a stable feature ID, not display name or stage. Overrides affect Debug only; Release uses the definition's stage default. Moving to Ready is an explicit release decision because its default becomes ON. Actual feature definitions have not yet been supplied; the app catalog is empty.
 
-The miscellaneous list precedes Ready and InProgress. It supports button and toggle row types. “Reset Flag to Default” removes all feature flag overrides, immediately re-renders both flag sections, and preserves unrelated preferences. Each flag row has its name on the left and a switch on the right; tapping the row also toggles it. The two section headers remain visible when the catalog is empty.
+The miscellaneous list precedes Ready and InProgress. Its Repository button shows the current Mock/Real mode; Reset Flag to Default is a separate button. It supports button and toggle row types. “Reset Flag to Default” removes all feature flag overrides, immediately re-renders both flag sections, and preserves unrelated preferences. Each flag row has its name on the left and a switch on the right; tapping the row also toggles it. The two section headers remain visible when the catalog is empty.
