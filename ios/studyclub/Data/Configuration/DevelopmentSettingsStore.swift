@@ -1,12 +1,8 @@
 import Foundation
 
 struct DevelopmentSettingsStore {
-    private let defaults: UserDefaults
+    private let defaults = UserDefaults.standard
     private static let key = "development.featureFlags"
-
-    init(defaults: UserDefaults = .standard) {
-        self.defaults = defaults
-    }
 
     #if DEBUG
     private static let repositoryModeKey = "development.repositoryMode"

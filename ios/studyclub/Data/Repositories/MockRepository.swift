@@ -1,25 +1,22 @@
 #if DEBUG
 struct MockRepository: RepositoryProtocol {
     func fetchStudies() async throws -> [Study] {
-        try Task.checkCancellation()
         return Self.studies
     }
 
     func fetchStudy(id: Study.ID) async throws -> Study {
-        try Task.checkCancellation()
-        guard let study = Self.studies.first(where: { $0.id == id }) else {
-            throw RepositoryError.invalidData
-        }
-        return study
+        Self.studies.first(where: { $0.id == id }) ?? Self.defaultStudy
     }
 
+    private static let defaultStudy = Study(
+        id: "ios-architecture", category: "iOS", title: "UIKit 아키텍처 같이 읽기",
+        summary: "작은 예제를 만들며 MVVM과 Repository의 책임을 함께 정리해요.",
+        currentMembers: 5, maximumMembers: 8, status: .recruiting,
+        topics: ["의존성 역전", "Swift Concurrency", "테스트 가능한 ViewModel"]
+    )
+
     private static let studies: [Study] = [
-        Study(
-            id: "ios-architecture", category: "iOS", title: "UIKit 아키텍처 같이 읽기",
-            summary: "작은 예제를 만들며 MVVM과 Repository의 책임을 함께 정리해요.",
-            currentMembers: 5, maximumMembers: 8, status: .recruiting,
-            topics: ["의존성 역전", "Swift Concurrency", "테스트 가능한 ViewModel"]
-        ),
+        defaultStudy,
         Study(
             id: "algorithm", category: "알고리즘", title: "알고리즘 문제 풀이",
             summary: "매주 두 문제를 풀고 풀이의 시간·공간 복잡도를 차분히 비교해요.",

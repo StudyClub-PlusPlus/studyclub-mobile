@@ -7,7 +7,7 @@ The app catalog in `ios/studyclub/Domain/Configuration/FeatureFlag.swift` contai
 ## Add a feature
 
 1. Add a real feature case to `FeatureFlag` and its `FeatureFlagDefinition` with a stable explicit ID, readable name and `.inProgress` stage. Once the first case exists, remove the temporary empty `allCases` declaration so `CaseIterable` synthesizes the catalog.
-2. Read configuration through the concrete `DevelopmentSettingsStore`, which defaults to standard UserDefaults. Store unit tests use isolated UserDefaults suites. Revisit a store protocol if real feature tests need an injected alternative; do not add a factory wrapper just for store creation. Query `store.isEnabled(FeatureFlag.yourFeature.definition)` at the relevant feature boundary.
+2. Read configuration through the concrete `DevelopmentSettingsStore`, which owns a private standard UserDefaults value without an injection initializer. Internal development settings have no automated unit suite; do not add a protocol or factory wrapper solely for tests. Query `store.isEnabled(FeatureFlag.yourFeature.definition)` at the relevant feature boundary.
 3. Guard the unfinished behavior and side effects, not only the visible entry button. Keep the existing OFF path usable. Test both ON and OFF paths before merging a small feature slice to trunk.
 4. Debug reads are live. Specify when that feature reads its flag (screen creation, action or another explicit boundary). A settings toggle changes the next lookup; it does not automatically recreate every existing screen or cancel work.
 5. Move the same ID to `.ready` only when the ON path is intended as the app default, including Release. Renaming the display name or moving the stage must not change the storage ID. Existing Debug overrides remain until reset.
@@ -19,6 +19,6 @@ Reset Flag to Default removes the entire `development.featureFlags` override dic
 
 ## Verification
 
-FeatureFlagStoreTests use isolated UserDefaults suites and locally created definitions; the internal Development Settings ViewModel has no dedicated unit suite. The app uses only the real catalog; there are no launch-time flag fixtures. When a real flag is added or its UI changes, manually verify switches and full-row taps, app relaunch, reset preservation and landscape layout on Simulator. Unit tests verify Release isolation. Custom accessibility and large-text QA remain deferred. Use serial XCTest on the selected Simulator.
+Internal Development Settings Store and ViewModel have no automated unit suite. The app uses only the real catalog; there are no launch-time flag fixtures. When a real flag is added or its UI changes, manually verify switches and full-row taps, app relaunch, reset preservation and landscape layout on Simulator. Manually verify that Release ignores saved overrides and uses stage defaults when actual definitions are present. Custom accessibility and large-text QA remain deferred. Use serial XCTest on the selected Simulator.
 
-Actual feature behavior still needs its own ON/OFF tests when its case is introduced; foundation tests do not prove an unfinished feature is ready to ship.
+Actual feature behavior still needs its own ON/OFF tests when its case is introduced; manual settings checks do not prove an unfinished feature is ready to ship.
