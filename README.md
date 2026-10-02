@@ -32,7 +32,7 @@ iOS를 먼저 만들고 Android를 나중에 만들면, 그사이에 정해지�
 - Swift Concurrency를 사용한 비동기 처리
 - Combine의 Subject를 사용한 ViewModel → View 바인딩
 - Alamofire를 사용하는 스터디 상세 실제 API 연결
-- mock API와 단위 테스트
+- DTO-to-Domain Mapper·검증 규칙·ViewModel 단위 테스트
 - Debug 전용 SwiftUI Development Settings (`@Observable` ViewModel)
 - Feature Flag 기본값·override·초기화
 
