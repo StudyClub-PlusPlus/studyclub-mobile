@@ -44,7 +44,7 @@ final class DetailViewModel {
             do {
                 let study = try await repository.fetchStudy(id: studyID)
                 guard let self else { return }
-                guard study.id == studyID || study.slug == studyID else {
+                guard study.id == studyID else {
                     self.stateSubject.send(.empty)
                     return
                 }

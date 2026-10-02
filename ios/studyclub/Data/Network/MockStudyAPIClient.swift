@@ -57,7 +57,7 @@ actor MockStudyAPIClient: StudyAPIClient {
 
     private static let samples: [StudyDTO] = [
         StudyDTO(
-            id: "ios-architecture",
+            id: "1",
             category: "iOS",
             title: "UIKit 아키텍처 같이 읽기",
             summary: "작은 예제를 만들며 MVVM과 Repository의 책임을 함께 정리해요.",
@@ -67,7 +67,7 @@ actor MockStudyAPIClient: StudyAPIClient {
             topics: ["의존성 역전", "Swift Concurrency", "테스트 가능한 ViewModel"]
         ),
         StudyDTO(
-            id: "algorithm",
+            id: "2",
             category: "알고리즘",
             title: "알고리즘 문제 풀이",
             summary: "매주 두 문제를 풀고 풀이의 시간·공간 복잡도를 차분히 비교해요.",
@@ -77,7 +77,7 @@ actor MockStudyAPIClient: StudyAPIClient {
             topics: ["그래프 탐색", "동적 계획법", "코드 리뷰"]
         ),
         StudyDTO(
-            id: "backend-design",
+            id: "3",
             category: "Backend",
             title: "확장 가능한 API 설계",
             summary: "실제 서비스 사례를 바탕으로 API 경계와 오류 계약을 설계해요.",
@@ -87,7 +87,7 @@ actor MockStudyAPIClient: StudyAPIClient {
             topics: ["REST 계약", "관찰 가능성", "장애 대응"]
         ),
         StudyDTO(
-            id: "design-system",
+            id: "4",
             category: "Design",
             title: "모바일 디자인 시스템 실습",
             summary: "토큰부터 접근성까지 작은 컴포넌트 라이브러리를 함께 다듬어요.",
@@ -99,18 +99,16 @@ actor MockStudyAPIClient: StudyAPIClient {
     ]
 
     private static let detailSamples: [Study.ID: StudyDetailDTO] = [
-        "ios-architecture": makeDetail(
+        "1": makeDetail(
             id: 1,
-            slug: "ios-architecture",
             title: "UIKit 아키텍처 같이 읽기",
             category: .mobile,
             description: "작은 예제를 만들며 MVVM과 Repository의 책임을 함께 정리해요.",
             curriculum: "의존성 역전\nSwift Concurrency\n테스트 가능한 ViewModel",
             capacity: 8
         ),
-        "algorithm": makeDetail(
+        "2": makeDetail(
             id: 2,
-            slug: "algorithm",
             title: "알고리즘 문제 풀이",
             category: .cs,
             description: "매주 두 문제를 풀고 풀이의 시간·공간 복잡도를 차분히 비교해요.",
@@ -118,18 +116,16 @@ actor MockStudyAPIClient: StudyAPIClient {
             capacity: 8,
             recruitStatus: .closed
         ),
-        "backend-design": makeDetail(
+        "3": makeDetail(
             id: 3,
-            slug: "backend-design",
             title: "확장 가능한 API 설계",
             category: .backend,
             description: "실제 서비스 사례를 바탕으로 API 경계와 오류 계약을 설계해요.",
             curriculum: "REST 계약\n관찰 가능성\n장애 대응",
             capacity: 10
         ),
-        "design-system": makeDetail(
+        "4": makeDetail(
             id: 4,
-            slug: "design-system",
             title: "모바일 디자인 시스템 실습",
             category: .design,
             description: "토큰부터 접근성까지 작은 컴포넌트 라이브러리를 함께 다듬어요.",
@@ -140,7 +136,6 @@ actor MockStudyAPIClient: StudyAPIClient {
 
     private static func makeDetail(
         id: Int,
-        slug: String,
         title: String,
         category: StudyCategory,
         description: String,
@@ -150,7 +145,6 @@ actor MockStudyAPIClient: StudyAPIClient {
     ) -> StudyDetailDTO {
         StudyDetailDTO(
             id: id,
-            slug: slug,
             title: title,
             description: description,
             category: category,

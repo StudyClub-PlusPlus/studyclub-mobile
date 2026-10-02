@@ -4,7 +4,6 @@ extension StudyDetailDTO {
     func toDomain() throws -> StudyDetail {
         guard
             id > 0,
-            !slug.isEmpty,
             !title.isEmpty,
             capacity.map({ $0 > 0 }) ?? true
         else {
@@ -13,7 +12,6 @@ extension StudyDetailDTO {
 
         return StudyDetail(
             id: String(id),
-            slug: slug,
             title: title,
             description: description ?? "",
             category: category,

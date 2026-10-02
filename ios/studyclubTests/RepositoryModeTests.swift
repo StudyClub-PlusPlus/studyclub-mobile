@@ -64,7 +64,7 @@ final class RepositoryModeTests: XCTestCase {
             baseURL: URL(string: "https://api.example.invalid/api/")!
         )
         do {
-            _ = try await repository.fetchStudy(id: "algorithm")
+            _ = try await repository.fetchStudy(id: "2")
             XCTFail("Live repository must not silently fall back to Mock")
         } catch {
             XCTAssertEqual(error as? RepositoryError, .unavailable)

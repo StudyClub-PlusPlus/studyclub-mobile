@@ -2,7 +2,6 @@ import Foundation
 
 struct StudyDetailDTO: Decodable, Sendable {
     let id: Int
-    let slug: String
     let title: String
     let description: String?
     let category: StudyCategory
@@ -18,7 +17,7 @@ struct StudyDetailDTO: Decodable, Sendable {
     let endAt: String?
 
     enum CodingKeys: String, CodingKey {
-        case id, slug, title, description, category, studyKind, deliveryFormat
+        case id, title, description, category, studyKind, deliveryFormat
         case status, recruitStatus, curriculum, capacity, recruitDeadlineAt, startAt, endAt
         case thumbnailURL = "thumbnailUrl"
     }

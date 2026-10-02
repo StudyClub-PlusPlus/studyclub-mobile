@@ -2,7 +2,6 @@ import Foundation
 
 struct StudyDetail: Identifiable, Equatable, Sendable {
     let id: Study.ID
-    let slug: String
     let title: String
     let description: String
     let category: StudyCategory

@@ -46,6 +46,16 @@ final class StudyDetailMapperTests: XCTestCase {
         }
     }
 
+    func testDecodesDetailWithoutSlug() throws {
+        let values: [String: Any] = [
+            "id": 42, "title": "스터디", "category": "BACKEND", "studyKind": "STUDY",
+            "deliveryFormat": "ONLINE", "status": "OPEN", "recruitStatus": "RECRUITING"
+        ]
+        let data = try JSONSerialization.data(withJSONObject: values)
+        let detail = try JSONDecoder().decode(StudyDetailDTO.self, from: data).toDomain()
+        XCTAssertEqual(detail.id, "42")
+    }
+
     func testMapsBackendDetailContractToDomain() throws {
         let detail = try makeDTO().toDomain()
 
@@ -86,7 +96,6 @@ final class StudyDetailMapperTests: XCTestCase {
     ) -> StudyDetailDTO {
         StudyDetailDTO(
             id: id,
-            slug: "backend-study",
             title: "백엔드 스터디",
             description: description,
             category: .backend,

@@ -4,8 +4,8 @@ import XCTest
 final class DefaultStudyRepositoryTests: XCTestCase {
     func testDetailReturnsRequestedDomainModelWithoutListFetch() async throws {
         let repository = Repository(client: MockStudyAPIClient(scenario: .content, delayNanoseconds: 0))
-        let detail = try await repository.fetchStudy(id: "algorithm")
-        XCTAssertEqual(detail.slug, "algorithm")
+        let detail = try await repository.fetchStudy(id: "2")
+        XCTAssertEqual(detail.id, "2")
         XCTAssertEqual(detail.title, "알고리즘 문제 풀이")
     }
 
@@ -21,7 +21,7 @@ final class DefaultStudyRepositoryTests: XCTestCase {
 
     func testDetailPreservesCancellation() async {
         let repository = Repository(client: MockStudyAPIClient(scenario: .detailLoading, delayNanoseconds: 0))
-        let task = Task { try await repository.fetchStudy(id: "algorithm") }
+        let task = Task { try await repository.fetchStudy(id: "2") }
         task.cancel()
         do {
             _ = try await task.value
@@ -49,7 +49,7 @@ final class DefaultStudyRepositoryTests: XCTestCase {
         let studies = try await repository.fetchStudies()
 
         XCTAssertEqual(studies.count, 4)
-        XCTAssertEqual(studies.first?.id, "ios-architecture")
+        XCTAssertEqual(studies.first?.id, "1")
     }
 
     func testRepositoryPreservesEmptySuccess() async throws {
@@ -140,7 +140,6 @@ private struct MismatchedDetailStudyAPIClient: StudyAPIClient {
     func fetchStudy(id: Study.ID) async throws -> StudyDetailDTO {
         StudyDetailDTO(
             id: 999,
-            slug: "wrong",
             title: "제목",
             description: "설명",
             category: .mobile,

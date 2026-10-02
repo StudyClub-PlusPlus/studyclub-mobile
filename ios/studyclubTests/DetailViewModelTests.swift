@@ -96,7 +96,6 @@ private actor DetailRepositoryDouble: RepositoryProtocol {
         if let error { throw error }
         return StudyDetail(
             id: id,
-            slug: "selected",
             title: "상세 응답",
             description: "전체 설명",
             category: .mobile,
