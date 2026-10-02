@@ -3,11 +3,7 @@ import SwiftUI
 
 struct DevelopmentSettingsView: View {
     @Environment(\.dismiss) private var dismiss
-    @State private var viewModel: DevelopmentSettingsViewModel
-
-    init(viewModel: DevelopmentSettingsViewModel) {
-        _viewModel = State(initialValue: viewModel)
-    }
+    @State private var viewModel = DevelopmentSettingsViewModel()
 
     var body: some View {
         NavigationStack {

@@ -5,8 +5,8 @@ import Observation
 @Observable
 @MainActor
 final class DevelopmentSettingsViewModel {
-    private let flagStore: any FeatureFlagStoring
-    private let flags: [FeatureFlagDefinition]
+    private let flagStore = RepositoryFactory.makeFeatureFlagStore()
+    private let flags = FeatureFlag.allCases.map(\.definition)
     private(set) var sections: [DevelopmentSettingSection] = []
 
     private func updateSections() {
@@ -24,16 +24,7 @@ final class DevelopmentSettingsViewModel {
         sections = [miscellaneous] + flagSections
     }
 
-    convenience init() {
-        self.init(
-            flagStore: RepositoryFactory.makeFeatureFlagStore(),
-            flags: FeatureFlag.allCases.map(\.definition)
-        )
-    }
-
-    init(flagStore: any FeatureFlagStoring, flags: [FeatureFlagDefinition]) {
-        self.flagStore = flagStore
-        self.flags = flags
+    init() {
         updateSections()
     }
 

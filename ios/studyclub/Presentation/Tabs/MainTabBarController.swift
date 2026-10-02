@@ -66,7 +66,7 @@ extension MainTabBarController: UIGestureRecognizerDelegate {
 
     @objc private func openDevelopmentSettings(_ gesture: UILongPressGestureRecognizer) {
         guard gesture.state == .began, presentedViewController == nil else { return }
-        let settings = DevelopmentSettingsView(viewModel: DevelopmentSettingsViewModel())
+        let settings = DevelopmentSettingsView()
         present(UIHostingController(rootView: settings), animated: true)
     }
 }

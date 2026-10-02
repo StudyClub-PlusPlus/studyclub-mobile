@@ -31,7 +31,7 @@ Do not report a build, test, or visual pass from output produced before the last
 ## Development settings verification
 
 - FeatureFlagStoreTests cover Ready/InProgress defaults, per-flag overrides, persistence, rename/stage promotion, malformed entries, reset idempotence and preservation of unrelated preferences. Release variants prove saved developer overrides are ignored.
-- DevelopmentSettingsViewModelTests inject definitions to check section ordering and updated toggle/reset state. The app catalog contains only actual product definitions and is currently empty.
+- The internal Development Settings ViewModel has no dedicated unit suite; verify relevant screen changes manually. The app catalog contains only actual product definitions and is currently empty.
 - For relevant changes, manually verify Main tab long press, rejected normal taps/Setting long press, SwiftUI hosting updates and Close. Verify flag switches, reset and relaunch persistence when actual definitions are present; unit-test fixtures do not appear in app launches.
 
 Focused Release unit verification should run FeatureFlagStoreTests with `-configuration Release -enableCodeCoverage NO ENABLE_TESTABILITY=YES -parallel-testing-enabled NO`. Testability is enabled only for this test build; also build the ordinary Release app without that override. Manually verify that Release has no Development Settings entry when this boundary changes.
