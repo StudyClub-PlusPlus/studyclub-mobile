@@ -13,7 +13,7 @@ final class DetailViewModelTests: XCTestCase {
             states.append(state)
             if state == .content {
                 XCTAssertEqual(model.title, "상세 응답")
-                XCTAssertEqual(model.category, "iOS")
+                XCTAssertEqual(model.category, "모바일")
                 XCTAssertEqual(model.descriptionText, "전체 설명")
                 XCTAssertEqual(model.metadataText, "스터디  ·  온라인  ·  정원 8명")
                 XCTAssertEqual(model.recruitStatusText, "모집 중")
@@ -99,12 +99,12 @@ private actor DetailRepositoryDouble: RepositoryProtocol {
             slug: "selected",
             title: "상세 응답",
             description: "전체 설명",
-            category: "iOS",
-            studyKind: "스터디",
+            category: .mobile,
+            studyKind: .study,
             thumbnailURL: nil,
-            deliveryFormat: "온라인",
-            status: "OPEN",
-            recruitStatus: "모집 중",
+            deliveryFormat: .online,
+            status: .open,
+            recruitStatus: .recruiting,
             curriculum: "",
             capacity: 8,
             recruitDeadlineAt: nil,

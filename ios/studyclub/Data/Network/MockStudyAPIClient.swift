@@ -103,7 +103,7 @@ actor MockStudyAPIClient: StudyAPIClient {
             id: 1,
             slug: "ios-architecture",
             title: "UIKit 아키텍처 같이 읽기",
-            category: "MOBILE",
+            category: .mobile,
             description: "작은 예제를 만들며 MVVM과 Repository의 책임을 함께 정리해요.",
             curriculum: "의존성 역전\nSwift Concurrency\n테스트 가능한 ViewModel",
             capacity: 8
@@ -112,17 +112,17 @@ actor MockStudyAPIClient: StudyAPIClient {
             id: 2,
             slug: "algorithm",
             title: "알고리즘 문제 풀이",
-            category: "CS",
+            category: .cs,
             description: "매주 두 문제를 풀고 풀이의 시간·공간 복잡도를 차분히 비교해요.",
             curriculum: "그래프 탐색\n동적 계획법\n코드 리뷰",
             capacity: 8,
-            recruitStatus: "RECRUIT_CLOSED"
+            recruitStatus: .closed
         ),
         "backend-design": makeDetail(
             id: 3,
             slug: "backend-design",
             title: "확장 가능한 API 설계",
-            category: "BACKEND",
+            category: .backend,
             description: "실제 서비스 사례를 바탕으로 API 경계와 오류 계약을 설계해요.",
             curriculum: "REST 계약\n관찰 가능성\n장애 대응",
             capacity: 10
@@ -131,7 +131,7 @@ actor MockStudyAPIClient: StudyAPIClient {
             id: 4,
             slug: "design-system",
             title: "모바일 디자인 시스템 실습",
-            category: "DESIGN",
+            category: .design,
             description: "토큰부터 접근성까지 작은 컴포넌트 라이브러리를 함께 다듬어요.",
             curriculum: "디자인 토큰\nDynamic Type\n접근성",
             capacity: 9
@@ -142,11 +142,11 @@ actor MockStudyAPIClient: StudyAPIClient {
         id: Int,
         slug: String,
         title: String,
-        category: String,
+        category: StudyCategory,
         description: String,
         curriculum: String,
         capacity: Int,
-        recruitStatus: String = "RECRUITING"
+        recruitStatus: RecruitStatus = .recruiting
     ) -> StudyDetailDTO {
         StudyDetailDTO(
             id: id,
@@ -154,10 +154,10 @@ actor MockStudyAPIClient: StudyAPIClient {
             title: title,
             description: description,
             category: category,
-            studyKind: "STUDY",
+            studyKind: .study,
             thumbnailURL: nil,
-            deliveryFormat: "ONLINE",
-            status: "OPEN",
+            deliveryFormat: .online,
+            status: .open,
             recruitStatus: recruitStatus,
             curriculum: curriculum,
             capacity: capacity,

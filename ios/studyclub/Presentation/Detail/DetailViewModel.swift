@@ -48,11 +48,11 @@ final class DetailViewModel {
                     self.stateSubject.send(.empty)
                     return
                 }
-                self.category = study.category
+                self.category = study.category.displayText
                 self.title = study.title
                 self.descriptionText = study.description
                 self.metadataText = Self.metadataText(for: study)
-                self.recruitStatusText = study.recruitStatus
+                self.recruitStatusText = study.recruitStatus.displayText
                 self.curriculum = study.curriculum
                 self.scheduleText = Self.scheduleText(for: study)
                 self.stateSubject.send(.content)
@@ -67,7 +67,7 @@ final class DetailViewModel {
     }
 
     private static func metadataText(for study: StudyDetail) -> String {
-        var values = [study.studyKind, study.deliveryFormat]
+        var values = [study.studyKind.displayText, study.deliveryFormat.displayText]
         if let capacity = study.capacity {
             values.append("정원 \(capacity)명")
         }

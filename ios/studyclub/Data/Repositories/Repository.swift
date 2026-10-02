@@ -13,6 +13,8 @@ struct Repository: RepositoryProtocol {
             try Task.checkCancellation()
             guard study.id == id || study.slug == id else { throw RepositoryError.invalidData }
             return study
+        } catch is DecodingError {
+            throw RepositoryError.invalidData
         } catch is CancellationError {
             throw CancellationError()
         } catch let error as RepositoryError {

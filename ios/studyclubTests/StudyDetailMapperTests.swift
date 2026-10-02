@@ -30,14 +30,30 @@ final class StudyDetailMapperTests: XCTestCase {
         XCTAssertNotNil(detail.startAt)
     }
 
+    func testRejectsUnknownDetailCodeValuesDuringDecoding() throws {
+        let values: [String: Any] = [
+            "id": 42, "slug": "study", "title": "스터디",
+            "category": "BACKEND", "studyKind": "STUDY",
+            "deliveryFormat": "ONLINE", "status": "OPEN", "recruitStatus": "RECRUITING"
+        ]
+        for field in ["category", "studyKind", "deliveryFormat", "status", "recruitStatus"] {
+            var invalid = values
+            invalid[field] = "UNKNOWN"
+            let data = try JSONSerialization.data(withJSONObject: invalid)
+            XCTAssertThrowsError(try JSONDecoder().decode(StudyDetailDTO.self, from: data)) { error in
+                XCTAssertTrue(error is DecodingError)
+            }
+        }
+    }
+
     func testMapsBackendDetailContractToDomain() throws {
         let detail = try makeDTO().toDomain()
 
         XCTAssertEqual(detail.id, "42")
-        XCTAssertEqual(detail.category, "백엔드")
-        XCTAssertEqual(detail.studyKind, "스터디")
-        XCTAssertEqual(detail.deliveryFormat, "온라인")
-        XCTAssertEqual(detail.recruitStatus, "모집 중")
+        XCTAssertEqual(detail.category, .backend)
+        XCTAssertEqual(detail.studyKind, .study)
+        XCTAssertEqual(detail.deliveryFormat, .online)
+        XCTAssertEqual(detail.recruitStatus, .recruiting)
         XCTAssertEqual(detail.capacity, 20)
         XCTAssertNotNil(detail.startAt)
     }
@@ -73,12 +89,12 @@ final class StudyDetailMapperTests: XCTestCase {
             slug: "backend-study",
             title: "백엔드 스터디",
             description: description,
-            category: "BACKEND",
-            studyKind: "STUDY",
+            category: .backend,
+            studyKind: .study,
             thumbnailURL: nil,
-            deliveryFormat: "ONLINE",
-            status: "OPEN",
-            recruitStatus: "RECRUITING",
+            deliveryFormat: .online,
+            status: .open,
+            recruitStatus: .recruiting,
             curriculum: curriculum,
             capacity: capacity,
             recruitDeadlineAt: "2026-10-01T00:00:00Z",

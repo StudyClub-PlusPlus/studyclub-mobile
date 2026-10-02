@@ -1,0 +1,16 @@
+enum StudyCategory: String, Decodable, CaseIterable, Sendable {
+    case aiML = "AI_ML"
+    case cs = "CS"
+    case data = "DATA"
+    case backend = "BACKEND"
+    case frontend = "FRONTEND"
+    case mobile = "MOBILE"
+    case planning = "PLANNING"
+    case pm = "PM"
+    case design = "DESIGN"
+    case career = "CAREER"
+    case language = "LANGUAGE"
+    case lifestyle = "LIFESTYLE"
+    case business = "BUSINESS"
+    case other = "OTHER"
+}

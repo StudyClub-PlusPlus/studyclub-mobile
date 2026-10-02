@@ -43,6 +43,8 @@ final class AlamofireStudyAPIClient: StudyAPIClient, @unchecked Sendable {
                 .value
         } catch let error as AFError where error.responseCode == 404 {
             throw RepositoryError.notFound
+        } catch let error as AFError where error.underlyingError is DecodingError {
+            throw RepositoryError.invalidData
         } catch is CancellationError {
             throw CancellationError()
         } catch {
