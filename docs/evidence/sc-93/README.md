@@ -1,5 +1,6 @@
 # SC-93 Simulator Evidence
 
+Historical evidence from sc-93 before the sc-145 rebase. The commands, test counts and images below describe that earlier source only; UI tests and launch scenarios have since been removed. These captures are not current QA for sc-145.
 - Captured: 2026-09-20
 - Device: iPhone 17 Pro Simulator
 - Runtime: iOS 26.2

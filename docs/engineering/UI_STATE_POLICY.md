@@ -10,7 +10,7 @@ Main models loading, content, empty, and failure explicitly. Detail models loadi
 - ViewControllers use notifications to call updateViews(), which reads the ViewModel's current values. CurrentValueSubject replays status to late subscribers.
 - Loading, content, empty, and failure surfaces are mutually exclusive.
 - Main content requires non-empty items. Empty is a valid successful response.
-- Select by stable diffable item identifier, never a stored array index. Missing or mismatched detail identity is failure.
+- Select by stable diffable item identifier, never a stored array index. Missing, invalid or mismatched detail identity is empty; Main duplicate IDs remain failure.
 - Failure ends loading and shows human-readable copy; no retry or reload controls are offered yet.
 
 ## Future stale-content policy

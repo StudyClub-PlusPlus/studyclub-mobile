@@ -1,5 +1,6 @@
 # SC-93 public detail API verification
 
+Historical evidence from sc-93 before the sc-145 rebase. The commands, test counts and images below describe that earlier source only; UI tests and launch scenarios have since been removed. These captures are not current QA for sc-145.
 - Verified: 2026-10-03 (Asia/Seoul)
 - Issue: [#93](https://app.notion.com/p/benkang/3df83feabad380b78cabc8be96f79990)
 - PR: https://github.com/StudyClub-PlusPlus/studyclub-mobile/pull/1

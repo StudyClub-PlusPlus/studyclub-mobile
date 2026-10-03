@@ -15,9 +15,26 @@ final class RepositoryErrorMappingTests: XCTestCase {
     }
 
     func testRepositoryErrorMeaningIsPreserved() {
-        for error in [RepositoryError.invalidData, .unavailable, .detailAPIUnconfigured] {
+        for error in [RepositoryError.invalidData, .unavailable, .notFound] {
             XCTAssertEqual(repository.mapError(error) as? RepositoryError, error)
         }
+    }
+
+    func testHTTPNotFoundBecomesNotFound() {
+        let error = AFError.responseValidationFailed(reason: .unacceptableStatusCode(code: 404))
+        XCTAssertEqual(repository.mapError(error) as? RepositoryError, .notFound)
+    }
+
+    func testInvalidDetailDecodingBecomesInvalidData() {
+        let decodingError = DecodingError.dataCorrupted(.init(codingPath: [], debugDescription: "Invalid detail"))
+        let error = AFError.responseSerializationFailed(reason: .decodingFailed(error: decodingError))
+        XCTAssertEqual(repository.mapError(error) as? RepositoryError, .invalidData)
+        XCTAssertEqual(repository.mapError(decodingError) as? RepositoryError, .invalidData)
+    }
+
+    func testServerFailureBecomesUnavailable() {
+        let error = AFError.responseValidationFailed(reason: .unacceptableStatusCode(code: 500))
+        XCTAssertEqual(repository.mapError(error) as? RepositoryError, .unavailable)
     }
 
     func testTransportFailureBecomesUnavailable() {

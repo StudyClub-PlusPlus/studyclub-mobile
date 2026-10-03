@@ -34,9 +34,9 @@ iOS를 먼저 만들고 Android를 나중에 만들면, 그사이에 정해지�
 - Alamofire를 사용하는 스터디 상세 실제 API 연결
 - DTO-to-Domain Mapper·검증 규칙·ViewModel 단위 테스트
 - Debug 전용 SwiftUI Development Settings (`@Observable` ViewModel)
-- Feature Flag 기본값·override·초기화
+- Mock/Real 선택 저장과 탭 내비게이션 재구성, Feature Flag 기본값·override·초기화
 
-앱의 기본값은 정해진 Mock 데이터입니다. Debug에서 스터디 탭을 길게 누르면 개발 설정을 열 수 있습니다. Real 선택 시 스터디 상세는 Debug와 Release 모두 공개 Production API를 사용합니다. 목록 API 연동은 별도 이슈 범위입니다. 스터디 상세 API 플래그는 Ready(기본 ON)이며, Debug에서 명시적으로 OFF로 설정하면 Mock 상세를 사용합니다.
+Debug 기본값은 Domain Mock 데이터이며, Release는 항상 Real Repository를 사용합니다. Debug에서 스터디 탭을 길게 누르면 개발 설정을 열 수 있습니다. Debug에서 Real을 선택하면 상세가 공개 Production API를 사용합니다. Release도 같은 API를 사용하며 저장된 Debug 모드와 플래그 override를 무시합니다. 목록 API 연동은 별도 이슈 범위입니다. 스터디 상세 API 플래그는 Ready(기본 ON)이며, Debug에서 명시적으로 OFF로 설정하면 Mock 상세를 사용합니다.
 
 ### Android
 

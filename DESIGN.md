@@ -49,9 +49,9 @@ Use the shared `AppTheme` source rather than one-off values.
 
 - Standard back navigation and inline title
 - Scrollable readable column
-- Category label, large study title, member/status metadata, summary, and “이 스터디에서 다룰 내용” section
+- Category label, large study title, study kind/delivery format/capacity metadata, recruitment status, schedule, description, and curriculum
 - Content comes from the independently fetched Domain model for the selected ID.
-- Detail uses the existing state surface for loading and failure with detail-specific Korean copy. Failure has no retry button and directs the user back; common ErrorView work is deferred. Content and state surfaces are mutually exclusive.
+- Detail uses the existing state surface for loading, empty (“스터디를 찾을 수 없어요”) and failure with detail-specific Korean copy. Failure has no retry button and directs the user back; common ErrorView work is deferred. Content and state surfaces are mutually exclusive.
 
 ## Interaction
 

@@ -32,6 +32,11 @@ extension Repository {
             return CancellationError()
         }
         if let repositoryError = error as? RepositoryError { return repositoryError }
+        if let afError = error as? AFError {
+            if afError.responseCode == 404 { return RepositoryError.notFound }
+            if afError.underlyingError is DecodingError { return RepositoryError.invalidData }
+        }
+        if error is DecodingError { return RepositoryError.invalidData }
         return RepositoryError.unavailable
     }
 
@@ -41,7 +46,7 @@ extension Repository {
         }
     }
 
-    func validateStudyID(_ study: Study, expectedID: Study.ID) throws {
+    func validateStudyID(_ study: StudyDetail, expectedID: Study.ID) throws {
         guard study.id == expectedID else {
             throw RepositoryError.invalidData
         }

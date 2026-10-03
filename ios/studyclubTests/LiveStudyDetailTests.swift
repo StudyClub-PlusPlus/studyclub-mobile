@@ -7,8 +7,8 @@ import XCTest
 /// Opt-in read-only verification against the deployed public API.
 final class LiveStudyDetailTests: XCTestCase {
     func testPublicDetailReturnsRequestedStudy() async throws {
-        let baseURL = try liveBaseURL()
-        let repository = RepositoryFactory.makeLiveStudyRepository(baseURL: baseURL)
+        try requireLiveProductionOptIn()
+        let repository = Repository()
         let detail = try await repository.fetchStudy(id: "18")
         XCTAssertEqual(detail.id, "18")
         XCTAssertEqual(detail.category, .software)
@@ -16,8 +16,8 @@ final class LiveStudyDetailTests: XCTestCase {
     }
 
     func testClosedPublicDetailAllowsNullRecruitmentStatus() async throws {
-        let baseURL = try liveBaseURL()
-        let repository = RepositoryFactory.makeLiveStudyRepository(baseURL: baseURL)
+        try requireLiveProductionOptIn()
+        let repository = Repository()
         let detail = try await repository.fetchStudy(id: "87")
         XCTAssertEqual(detail.id, "87")
         XCTAssertEqual(detail.status, .closed)
@@ -25,8 +25,8 @@ final class LiveStudyDetailTests: XCTestCase {
     }
 
     func testMissingPublicDetailReturnsNotFound() async throws {
-        let baseURL = try liveBaseURL()
-        let repository = RepositoryFactory.makeLiveStudyRepository(baseURL: baseURL)
+        try requireLiveProductionOptIn()
+        let repository = Repository()
         do {
             _ = try await repository.fetchStudy(id: "999999")
             XCTFail("Expected not found")
@@ -37,7 +37,8 @@ final class LiveStudyDetailTests: XCTestCase {
 
     @MainActor
     func testLiveDetailViewModelAndScreenRenderContent() async throws {
-        let repository = RepositoryFactory.makeLiveStudyRepository(baseURL: try liveBaseURL())
+        try requireLiveProductionOptIn()
+        let repository = Repository()
         let model = DetailViewModel(studyID: "18", repository: repository)
         let loaded = expectation(description: "live detail content")
         let subscription = model.statePublisher.sink { state in
@@ -61,11 +62,12 @@ final class LiveStudyDetailTests: XCTestCase {
         withExtendedLifetime(subscription) {}
     }
 
-    private func liveBaseURL() throws -> URL {
-        guard let value = ProcessInfo.processInfo.environment["STUDYCLUB_LIVE_API_BASE_URL"],
-              let url = URL(string: value) else {
-            throw XCTSkip("Set STUDYCLUB_LIVE_API_BASE_URL to opt into live API checks")
+    private func requireLiveProductionOptIn() throws {
+        guard let value = ProcessInfo.processInfo.environment["STUDYCLUB_LIVE_API_BASE_URL"] else {
+            throw XCTSkip("Set STUDYCLUB_LIVE_API_BASE_URL to the Production URL to opt into live API checks")
         }
-        return url
+        guard URL(string: value) == URL(string: "https://api.studyclub-plusplus.com/api/") else {
+            throw XCTSkip("The concrete Repository uses Production only; other base URLs are unsupported")
+        }
     }
 }

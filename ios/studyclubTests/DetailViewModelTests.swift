@@ -56,6 +56,34 @@ final class DetailViewModelTests: XCTestCase {
         withExtendedLifetime(subscription) {}
     }
 
+    func testInvalidDataShowsEmptyState() async {
+        let repository = DetailRepositoryDouble(error: .invalidData)
+        let model = DetailViewModel(studyID: "selected", repository: repository)
+        let empty = expectation(description: "invalid detail is empty")
+        let subscription = model.statePublisher.sink { state in
+            if state == .empty { empty.fulfill() }
+        }
+        await fulfillment(of: [empty], timeout: 2)
+        XCTAssertEqual(model.currentState, .empty)
+        XCTAssertEqual(model.title, "")
+        withExtendedLifetime(subscription) {}
+    }
+
+    func testMismatchedIdentityShowsEmptyInsteadOfContent() async {
+        let repository = DetailRepositoryDouble(returnedID: "other")
+        let model = DetailViewModel(studyID: "selected", repository: repository)
+        let empty = expectation(description: "mismatched detail is empty")
+        let subscription = model.statePublisher.sink { state in
+            if state == .empty { empty.fulfill() }
+        }
+        await fulfillment(of: [empty], timeout: 2)
+        XCTAssertEqual(model.currentState, .empty)
+        XCTAssertEqual(model.title, "")
+        let ids = await repository.requestedIDs
+        XCTAssertEqual(ids, ["selected"])
+        withExtendedLifetime(subscription) {}
+    }
+
     func testSubscriberReceivesContentAfterRequestHasAlreadyFinished() async {
         let repository = DetailRepositoryDouble()
         let model = DetailViewModel(studyID: "selected", repository: repository)
@@ -81,9 +109,11 @@ final class DetailViewModelTests: XCTestCase {
 private actor DetailRepositoryDouble: RepositoryProtocol {
     private(set) var requestedIDs: [Study.ID] = []
     let error: RepositoryError?
+    let returnedID: Study.ID?
 
-    init(shouldFail: Bool = false, error: RepositoryError? = nil) {
+    init(shouldFail: Bool = false, error: RepositoryError? = nil, returnedID: Study.ID? = nil) {
         self.error = error ?? (shouldFail ? .unavailable : nil)
+        self.returnedID = returnedID
     }
 
     func fetchStudies() async throws -> [Study] {
@@ -95,7 +125,7 @@ private actor DetailRepositoryDouble: RepositoryProtocol {
         requestedIDs.append(id)
         if let error { throw error }
         return StudyDetail(
-            id: id,
+            id: returnedID ?? id,
             title: "상세 응답",
             description: "전체 설명",
             category: .software,
