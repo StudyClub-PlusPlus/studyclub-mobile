@@ -1,12 +1,19 @@
 import Foundation
 
+struct StudyListResponseDTO: Decodable, Sendable {
+    let items: [StudyDTO]
+    let total: Int
+    let offset: Int
+    let limit: Int
+}
+
 struct StudyDTO: Decodable, Sendable {
-    let id: String
-    let category: String
+    let studyId: Int
+    let category: StudyCategory
     let title: String
-    let summary: String
-    let currentMembers: Int
-    let maximumMembers: Int
-    let status: String
-    let topics: [String]?
+    let oneLineSummary: String
+    let currentApplicants: Int
+    let capacity: Int?
+    let phase: StudyPhase
+    let closingSoon: Bool
 }

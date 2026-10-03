@@ -73,13 +73,13 @@ final class MainViewModelTests: XCTestCase {
     private func makeStudy(id: String, title: String) -> Study {
         Study(
             id: id,
-            category: "테스트",
+            category: .software,
             title: title,
             summary: "테스트 요약",
-            currentMembers: 1,
-            maximumMembers: 4,
-            status: .recruiting,
-            topics: ["테스트"]
+            participantCount: 1,
+            capacity: 4,
+            phase: .recruiting,
+            closingSoon: false
         )
     }
 
@@ -114,14 +114,14 @@ private actor TestStudyRepository: RepositoryProtocol {
         self.behaviors = behaviors
     }
 
-    func fetchStudies() async throws -> [Study] {
+    func fetchStudies(offset: Int) async throws -> StudyPage {
         requestCount += 1
-        guard !behaviors.isEmpty else { return [] }
+        guard !behaviors.isEmpty else { return StudyPage(studies: [], totalCount: 0, offset: offset) }
         let behavior = behaviors.removeFirst()
 
         switch behavior {
         case let .success(studies):
-            return studies
+            return StudyPage(studies: studies, totalCount: studies.count, offset: offset)
         case .failure:
             throw RepositoryError.unavailable
 

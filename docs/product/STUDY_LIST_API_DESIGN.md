@@ -1,6 +1,6 @@
 # sc-92 모집 중 목록 API 설계
 
-상태: 구현 전 draft. 사용자와 합의한 방향 및 독립 소스 리뷰의 보완을 기록한다. 앱 구현·Simulator 검증·최종 구현 승인을 의미하지 않는다.
+상태: sc-92 구현 후보의 설계 계약. 사용자 합의와 독립 소스 리뷰를 반영하며 실행 검증 결과는 별도 인계에서 보고한다.
 
 - 이슈: [sc-92 스터디 리스트](https://app.notion.com/p/benkang/3d283feabad380e995dbe12fc8ea2536)
 - iOS 검토 기준: `9d087d8f90edbfd64e4d3a774582069e33e74e31` (`sc-145` 기반)
@@ -21,7 +21,7 @@
 - 사용자 pull-to-refresh로 첫 페이지를 갱신한다. 상세 복귀·검색 취소 때 목록과 상대 스크롤 위치를 유지한다.
 - Swift 숫자는 Int를 쓴다. Repository가 limit=20을 고정하고 Client/Router는 offset·limit 인자를 전달한다. 화면은 offset만 요청한다.
 - DTO는 앱에서 쓰는 필드만 선언하며 slug는 제외한다. 필요한 표현 변환은 `init(from:)`에서 처리할 수 있고, 단순 키 변경은 CodingKeys로 충분하다.
-- 기존 Repository·ViewModel에서 해결한다. 범용 페이지 관리자·요청 framework·캐시·DI·새 Feature Flag를 도입하지 않는다.
+- 기존 Repository·ViewModel에서 해결한다. 범용 페이지 관리자·요청 framework·캐시·DI·새 FeatureFlag 구조를 도입하지 않는다. 기존 catalog에 study.list-api/InProgress(default OFF)를 추가하며 두 빌드에서 같은 override를 읽는다.
 
 ## 최소 데이터 흐름
 
@@ -77,7 +77,7 @@ MainViewModel에 현재 request Task 하나를 보관하는 정도로 요청을 
 
 별도 리뷰어가 위 고정 소스를 읽어 계약·DTO·합의한 방향을 검토했다. 반복 content 알림뿐 아니라 동일 ID 카드 재표시, empty 화면의 당김 접근, 0건 진행 불능·실패 복구 명세를 보완해야 한다는 의견을 이 문서에 반영했다. 이는 소스 리뷰이며 앱 QA 결과가 아니다.
 
-이후 Mapper 변환 규칙, Repository의 추출 validation/error helper, Domain 테스트 Repository를 통한 VM 상태·늦은 응답 차단을 확인한다. DTO JSON fixture·얇은 Client/Repository 연결을 위한 주입·자동 UI 테스트·내부 설정 테스트는 추가하지 않는다. 실제 디코딩·무한 스크롤·빈 화면 당김·카드 재표시·ID 상세 이동은 이후 앱 경로에서 확인한다. Mock은 신뢰 가능한 Domain 샘플을 즉시 반환하고 기존 factory/Sendable/async 실행 문맥 정책을 유지한다.
+Mapper 변환 규칙, Repository의 추출 validation/error helper, Domain 테스트 Repository를 통한 VM 상태·늦은 응답 차단을 단위 테스트로 확인한다. DTO JSON fixture·얇은 Client/Repository 연결을 위한 주입·자동 UI 테스트·내부 설정 테스트는 추가하지 않는다. 실제 디코딩·무한 스크롤·빈 화면 당김·카드 재표시·ID 상세 이동은 이후 앱 경로에서 확인한다. Mock은 신뢰 가능한 Domain 샘플을 즉시 반환하고 기존 factory/Sendable/async 실행 문맥 정책을 유지한다.
 
 ## 고정 서버 근거
 
