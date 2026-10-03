@@ -2,18 +2,24 @@
 
 ## Brief
 
-The existing guest list uses readable, self-sizing cards with the team's Figma green/cream palette. The user selected the card hierarchy and light-only appearance for sc-116 on 2026-10-03 after research and independent development review. UIKit navigation, system fonts and the existing display/data contracts remain in place; no screenshot, illustration, or generated image stands in for interface elements.
+When `study.design-system` is ON, the existing guest list uses readable, self-sizing cards with the team's Figma green/cream palette. The user selected the card hierarchy and light-only appearance for sc-116 on 2026-10-03 after research and independent development review. UIKit navigation, system fonts and the existing display/data contracts remain in place; no screenshot, illustration, or generated image stands in for interface elements.
+
+## Rollout boundary
+
+`study.design-system` is InProgress and defaults OFF in Debug and Release. OFF preserves the previous system palette, category badge/separate status card, unlimited summary, Detail spacing/divider behavior and OS-adaptive appearance. ON enables the design described below, including light-only appearance.
+
+AppTheme resolves the existing FeatureFlagStore once per app process. The same immutable decision gates palette, card anatomy, Detail polish and scene-window appearance. Changing the Debug switch or resetting flags affects the next cold launch; switching tabs, opening Detail or rebuilding the root after a Repository change does not mix designs in the current process. The switch name states that an app restart is required. No mutable theme override or new flag catalog is introduced.
 
 ## Design references
 
 - [Team Figma Color Scheme](https://www.figma.com/design/2K09lEbASPTPqpAlKuyjAt?node-id=54-40): cream canvas, white surface, dark text and green accents. These are source colors, not an approved iOS screen specification.
 - UIKit: preferred text styles, self-sizing cells, standard navigation and tab behavior, restrained borders and no default shadow.
 - Frozen FE source and Storybook are structural comparisons. Their indigo palette is not mixed into this selected Figma direction. Source versions, mapping and exclusions are recorded in [the sc-116 token map](docs/design/SC_116_TOKEN_MAP.md).
-- App appearance is light-only, owned by the scene window before root creation. A dark OS setting should still produce light app screens and hosted modals; this needs native observation. Window appearance does not establish launch-screen behavior.
+- With the design flag ON, app appearance is light-only, owned by the scene window before root creation. A dark OS setting should still produce light app screens and hosted modals; this needs native observation. Window appearance does not establish launch-screen behavior.
 
 ## Tokens
 
-Use the shared `AppTheme` source rather than one-off values.
+Use the shared `AppTheme` source rather than one-off values. The selected values below are the ON palette; OFF returns the original dynamic UIKit colors.
 
 - Canvas: Figma Light Bg `#FAF9F5`
 - Primary surface: Figma Surface `#FFFFFF`
@@ -81,9 +87,11 @@ Enumerate and capture these surfaces after the last UI edit. These are acceptanc
 4. Main failure
 5. Main loading
 6. Detail empty, failure and loading
-7. Light appearance under dark OS settings, including Setting, navigation/tab chrome and the Debug hosted modal/alert
+7. With the flag ON, light appearance under dark OS settings, including Setting, navigation/tab chrome and the Debug hosted modal/alert
+8. With the flag OFF, original card/detail layout and dynamic system palette under light and dark OS settings; toggle/reset must take effect only after cold launch
+9. Release also reads saved overrides; without one, this InProgress feature remains OFF
 
-Check safe areas, card alignment, long Korean title/metadata wrapping, empty summary, state exclusivity, optional Detail blocks, pressed feedback and stable-ID navigation. Record exact source candidate, bundle/device/OS, input provenance and captures. Controlled component renders establish only that surface; they do not establish live API transitions or installed-app navigation. Do not add permanent scenarios, flags or automatic UI/internal-settings tests for this verification. Any blocking finding must be fixed and re-captured before completion.
+Check safe areas, card alignment, long Korean title/metadata wrapping, empty summary, state exclusivity, optional Detail blocks, pressed feedback and stable-ID navigation. Record exact source candidate, bundle/device/OS, input provenance and captures. Controlled component renders establish only that surface; they do not establish live API transitions or installed-app navigation. Do not add permanent scenarios, verification-only flags or automatic UI/internal-settings tests for this verification. Any blocking finding must be fixed and re-captured before completion.
 
 ## Accepted debt
 
