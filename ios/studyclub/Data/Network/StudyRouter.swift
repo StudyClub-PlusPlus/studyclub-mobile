@@ -1,7 +1,7 @@
 import Alamofire
 import Foundation
 
-enum StudyRouter: URLRequestConvertible, Sendable {
+enum StudyRouter: URLRequestConvertible {
     case studies
     case study(id: Study.ID)
 

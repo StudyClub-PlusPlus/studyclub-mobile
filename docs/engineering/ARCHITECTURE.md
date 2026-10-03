@@ -64,6 +64,10 @@ Selecting Real constructs the live transport. The client targets `https://api.st
 - Add a DI container only when explicit manual composition becomes measurably error-prone.
 - Revisit feature-first folders when top-level layers make one feature expensive to locate or own.
 
+## Async execution boundaries
+
+App and test Debug/Release configurations explicitly disable `SWIFT_UPCOMING_FEATURE_NONISOLATED_NONSENDING_BY_DEFAULT`; other Approachable Concurrency features remain enabled. Nonisolated async Repository/Client methods run outside the caller's actor. RepositoryProtocol retains Sendable for that boundary, and the stored StudyAPIClient also conforms. StudyRouter inherits Sendable from Alamofire URLRequestConvertible and needs no repeated declaration. Domain results and errors remain Sendable for actor crossings.
+
 ## Development settings rows
 
 The Debug-only DevelopmentSettingsView uses SwiftUI List/Section with stable section/row identifiers and typed Button/Toggle rows. The view creates and retains its @Observable DevelopmentSettingsViewModel in @State. The model creates DevelopmentSettingsStore directly and uses the static FeatureFlag.definitions catalog, with no injection initializers for this internal screen. Its initializer builds section display values; actions update persistence before rebuilding those values, and Observation invalidates the view. No Combine publisher, @Published or @AppStorage is used on this screen. The store and model own persistence/reset; the SwiftUI view only forwards actions and owns presentation state.
