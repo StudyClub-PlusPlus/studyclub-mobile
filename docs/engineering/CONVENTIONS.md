@@ -51,7 +51,7 @@ The model flow is `DTO -> Domain model -> ViewModel display values`:
 
 - Repository operations use `async throws`.
 - UI-facing ViewModels are `@MainActor`.
-- Current screens fetch once from ViewModel init via a private method. Do not add load flags, retry, Task retention, or cancellation management until the feature requires them.
+- Detail fetches once from init through a private method. Main repeats requests for pagination/refresh with one retained Task and cancelled-result guards. Do not introduce extra lifecycle machinery without a concrete need.
 - Domain values crossing concurrency boundaries conform to `Sendable` where practical.
 - ViewModels keep mutable state in a private `CurrentValueSubject` when the current value must replay to a newly bound view.
 - ViewControllers subscribe with `.sink` during `viewDidLoad` and retain the subscription in `Set<AnyCancellable>`.

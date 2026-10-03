@@ -20,11 +20,9 @@ struct DevelopmentSettingsStore {
     #endif
 
     func isEnabled(_ definition: FeatureFlagDefinition) -> Bool {
-        #if DEBUG
         if let override = defaults.dictionary(forKey: Self.key)?[definition.id] as? Bool {
             return override
         }
-        #endif
         return definition.defaultValue
     }
 

@@ -1,7 +1,7 @@
 import Foundation
 
 protocol RepositoryProtocol: Sendable {
-    func fetchStudies() async throws -> [Study]
+    func fetchStudies(offset: Int) async throws -> StudyPage
     func fetchStudy(id: Study.ID) async throws -> StudyDetail
 }
 
