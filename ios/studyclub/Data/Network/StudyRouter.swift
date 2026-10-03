@@ -1,24 +1,30 @@
 import Alamofire
 import Foundation
 
-enum StudyRouter: URLRequestConvertible, Sendable {
-    case studies(baseURL: URL)
-    case study(baseURL: URL, id: Study.ID)
+enum StudyRouter: URLRequestConvertible {
+    case studies
+    case study(id: Study.ID)
+
+    private static let baseURL = URL(string: "https://api.studyclub-plusplus.com/api/")!
+
+    private var method: HTTPMethod { .get }
+
+    private var path: String {
+        switch self {
+        case .studies, .study: "studies"
+        }
+    }
+
+    private var headers: HTTPHeaders { [.accept("application/json")] }
 
     func asURLRequest() throws -> URLRequest {
-        switch self {
-        case let .studies(baseURL):
-            let url = baseURL.appending(path: "studies")
-            var request = URLRequest(url: url)
-            request.method = .get
-            request.headers = [.accept("application/json")]
-            return request
-        case let .study(baseURL, id):
-            let url = baseURL.appending(path: "studies").appending(path: id)
-            var request = URLRequest(url: url)
-            request.method = .get
-            request.headers = [.accept("application/json")]
-            return request
+        var url = Self.baseURL.appending(path: path)
+        if case let .study(id) = self {
+            url = url.appending(path: id)
         }
+        var request = URLRequest(url: url)
+        request.method = method
+        request.headers = headers
+        return request
     }
 }

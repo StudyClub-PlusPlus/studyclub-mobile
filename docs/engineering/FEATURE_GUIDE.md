@@ -6,7 +6,7 @@
 4. Add Presentation ViewState, ViewModel, UIKit view/controller.
 5. Obtain repositories through RepositoryFactory in app-facing ViewModel initializers; keep protocol-injecting initializers for unit tests.
 6. Define loading/content/empty/failure behavior. Current screens load once from ViewModel init; retry and request management are deferred until required.
-7. Add mapper, repository, ViewModel, and user-flow tests.
+7. Follow [Testing Policy](TESTING.md): test DTO-to-Domain mapping, response validation, error classification and ViewModel behavior. Add Repository tests when it owns meaningful orchestration policy. Verify changed user paths manually on Simulator.
 8. Update architecture or convention docs if a dependency rule changes.
 9. Build, test, run the Simulator flow, and review fresh visual evidence.
 

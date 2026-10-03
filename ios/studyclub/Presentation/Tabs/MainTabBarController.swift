@@ -5,16 +5,23 @@ import SwiftUI
 
 @MainActor
 final class MainTabBarController: UITabBarController {
-    #if DEBUG
-    var onRepositoryChange: (() -> Void)?
-    #endif
-
     override func viewDidLoad() {
         super.viewDidLoad()
         configureView()
     }
 
     private func configureView() {
+        configureTabs()
+
+        #if DEBUG
+        let longPress = UILongPressGestureRecognizer(target: self, action: #selector(openDevelopmentSettings))
+        longPress.minimumPressDuration = 0.7
+        longPress.delegate = self
+        tabBar.addGestureRecognizer(longPress)
+        #endif
+    }
+
+    private func configureTabs() {
         let main = UINavigationController(
             rootViewController: MainViewController(viewModel: MainViewModel())
         )
@@ -30,12 +37,6 @@ final class MainTabBarController: UITabBarController {
         viewControllers = [main, setting]
         tabBar.tintColor = AppTheme.Palette.accent
 
-        #if DEBUG
-        let longPress = UILongPressGestureRecognizer(target: self, action: #selector(openDevelopmentSettings))
-        longPress.minimumPressDuration = 0.7
-        longPress.delegate = self
-        tabBar.addGestureRecognizer(longPress)
-        #endif
     }
 }
 
@@ -70,9 +71,10 @@ extension MainTabBarController: UIGestureRecognizerDelegate {
 
     @objc private func openDevelopmentSettings(_ gesture: UILongPressGestureRecognizer) {
         guard gesture.state == .began, presentedViewController == nil else { return }
-        let settings = DevelopmentSettingsView(viewModel: DevelopmentSettingsViewModel()) { [weak self] in
+        let settings = DevelopmentSettingsView { [weak self] in
             self?.dismiss(animated: true) { [weak self] in
-                self?.onRepositoryChange?()
+                self?.configureTabs()
+                self?.selectedIndex = 0
             }
         }
         present(UIHostingController(rootView: settings), animated: true)

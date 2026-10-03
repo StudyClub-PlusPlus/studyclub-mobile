@@ -2,7 +2,11 @@
 
 ## Issues, commits, and pull requests
 
-- Prefix commit messages with the Notion task issue number: `[92] feat: 스터디 목록 빈 상태 화면 추가`.
+- Start implementation from a matching Notion issue and a work branch. If no ticket exists, draft the purpose, change, scope, completion criteria and verification from the request; ask only for missing details or a consequential decision before creating the ticket. An explicit request to create the ticket and do the already-defined work does not need repeated confirmation.
+- Reuse an existing matching issue. Create new tickets in the team's existing issue database and read back the real issue number and URL before creating the branch. Never invent an issue number or use a GitHub issue/PR number in its place.
+- Use `sc-<Notion issue number>` for the work branch and `[sc-<number>]` for commit/PR prefixes (for example, branch `sc-145` and `[sc-145] refactor: UI 테스트 지원 제거`). Use the repository's integration base. In Orca, create the managed worktree, then verify or rename the generated branch to this exact key before implementation. Link the Notion URL in the worktree comment and ticket body; Orca's `--issue` flag refers to GitHub issues.
+- The installed `notion-ticket-branch` skill handles task intake, ticket reuse/creation and branch preparation. Ticket creation can reuse the user's existing explicit authorization; pushing, PR creation and merging remain separate actions.
+- Prefix commit messages with the Notion task issue number: `[sc-92] feat: 스터디 목록 빈 상태 화면 추가`.
 - Use the same issue-number prefix in the PR title and include the actual Notion issue URL in the PR body. The Notion issue number and GitHub PR number are separate identifiers.
 - Keep work branches short-lived and PRs small enough to review and integrate into trunk. One issue may have multiple PRs; link them back to that issue.
 - Follow [Feature flag workflow](FEATURE_FLAGS.md) for unfinished features, including behavior and side-effect guards and ON/OFF verification.
@@ -40,7 +44,7 @@ The model flow is `DTO -> Domain model -> ViewModel display values`:
 - App-facing ViewModel initializers obtain repositories through `RepositoryFactory`. ViewControllers do not receive or forward repositories.
 - Keep a separate initializer accepting a repository protocol for deterministic unit tests.
 - No dependency factory in a default initializer argument.
-- Tests supply their own repository or client test double.
+- ViewModel tests supply their own repository test double. Test meaningful conversion, response validation and error classification directly; do not add a Client abstraction solely to preserve an isolated Repository test harness.
 - Factories may build object graphs but do not expose mutable global state.
 
 ## Concurrency and binding
@@ -62,7 +66,7 @@ The model flow is `DTO -> Domain model -> ViewModel display values`:
 - Screens, cells, and shared views store fixed views as `private let` properties with fixed styling in initialization closures. Data-driven rows may use a local factory.
 - `configureView()` adds subviews and sets constraints and spacing together; `updateViews()` reads display values from the ViewModel after a Combine notification. Update all display values before publishing the notification. Cells and shared views also use `updateViews` for data application.
 - Organize `configureView()` by view: add the view, configure its relationships or arranged subviews and custom spacing, then activate its constraints before moving to the next view. Keep a child's explicit size constraints next to its addition. Preserve stacking order and ensure a common ancestor exists before activating cross-view constraints.
-- Custom accessibility support is deferred, including accessibility identifiers. UI tests locate native controls by visible text.
+- Custom accessibility support is deferred, including accessibility identifiers. Verify native controls manually on Simulator; automated UI tests are not maintained at this stage.
 
 ## Errors and copy
 
@@ -72,4 +76,4 @@ The model flow is `DTO -> Domain model -> ViewModel display values`:
 
 ## Scoped SwiftUI exception: Development Settings
 
-Only the Debug-only Development Settings screen uses SwiftUI List, Section, Button and Toggle, presented from UIKit via UIHostingController. Its @Observable @MainActor ViewModel is owned with @State by the root SwiftUI view. Use explicit bindings that call model actions; keep UserDefaults, repository selection and flag reset in Store/ViewModel. Do not use @Published, Combine or @AppStorage for this screen. Other screens continue using UIKit, programmatic layout and private-subject/read-only-publisher observation.
+Only the Debug-only Development Settings screen uses SwiftUI List, Section, Button and Toggle, presented from UIKit via UIHostingController. Its @Observable @MainActor ViewModel is owned with @State by the root SwiftUI view. Use explicit bindings that call model actions; keep UserDefaults and flag reset in Store/ViewModel. Do not use @Published, Combine or @AppStorage for this screen. Other screens continue using UIKit, programmatic layout and private-subject/read-only-publisher observation.

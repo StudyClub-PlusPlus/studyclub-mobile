@@ -49,9 +49,9 @@ Use the shared `AppTheme` source rather than one-off values.
 
 - Standard back navigation and inline title
 - Scrollable readable column
-- Category label, large study title, member/status metadata, summary, and “이 스터디에서 다룰 내용” section
+- Category label, large study title, study kind/delivery format/capacity metadata, recruitment status, schedule, description, and curriculum
 - Content comes from the independently fetched Domain model for the selected ID.
-- Detail uses the existing state surface for loading and failure with detail-specific Korean copy. Failure has no retry button and directs the user back; common ErrorView work is deferred. Content and state surfaces are mutually exclusive.
+- Detail uses the existing state surface for loading, empty (“스터디를 찾을 수 없어요”) and failure with detail-specific Korean copy. Failure has no retry button and directs the user back; common ErrorView work is deferred. Content and state surfaces are mutually exclusive.
 
 ## Interaction
 
@@ -63,7 +63,7 @@ Use the shared `AppTheme` source rather than one-off values.
 
 ## Current accessibility scope
 
-Custom accessibility labels, traits, announcements, special large-text layouts, and dedicated accessibility QA are deferred. Preserve native control behavior and existing system fonts. Do not add accessibility identifiers; UI tests locate native controls by visible text.
+Custom accessibility labels, traits, announcements, special large-text layouts, and dedicated accessibility QA are deferred. Preserve native control behavior and existing system fonts. Do not add accessibility identifiers; verify native controls manually on Simulator.
 
 ## Visual QA contract
 
@@ -84,4 +84,4 @@ Check safe areas, card alignment, Korean wrapping, dark-mode semantics, state ex
 
 ## Development Settings
 
-Debug-only SwiftUI modal hosted by UIHostingController, with its own NavigationStack title and Close button. Use an inset-grouped SwiftUI List with “기타”, “Ready”, “InProgress” headers. Repository shows the current mode below its label and opens a mode picker. Reset Flag to Default is a button row. Flag rows use a wrapping name on the left and a labeled switch on the right; the full row is also tappable. Ready defaults ON and InProgress defaults OFF. Empty flag sections keep their headers. Reset updates switches in place. Repository changes close the modal and return to a freshly constructed Main tab.
+Debug-only SwiftUI modal hosted by UIHostingController, with its own NavigationStack title and Close button. Use an inset-grouped SwiftUI List with “기타”, “Ready”, “InProgress” headers. The miscellaneous section has a Repository button displaying Mock/Real and a separate Reset Flag to Default button. Repository opens a mode alert; a changed selection closes the modal and recreates the tab navigation stacks on Main. The saved mode applies to Debug only, while Release always uses Real. Flag rows use a wrapping name on the left and a labeled switch on the right; the full row is also tappable. Ready defaults ON and InProgress defaults OFF. Empty flag sections keep their headers. Reset updates switches in place without recreating the app root.

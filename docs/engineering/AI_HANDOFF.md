@@ -2,7 +2,7 @@
 
 Use this contract when an AI-assisted task changes the repository. Keep it short, factual, and reproducible.
 
-For issue-based work, include the Notion issue number and URL, and any existing PR link. Follow the commit/PR issue-number prefix in [Engineering Conventions](CONVENTIONS.md). Do not invent a missing issue or PR number.
+Before implementation, prepare a matching Notion issue and work branch through the intake workflow in [Engineering Conventions](CONVENTIONS.md). Include the actual issue number and URL, branch/base, and any existing PR link in the handoff. Follow the commit/PR issue-number prefix. Do not invent a missing issue or PR number.
 
 ## Required handoff
 

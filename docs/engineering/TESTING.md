@@ -3,52 +3,40 @@
 ## Unit tests
 
 - DTO-to-Domain mapping, including optional/default handling and invalid member counts
-- repository success, empty, error propagation, cancellation behavior, and duplicate identifier rejection
+- pure response validation: empty/unique lists, duplicate identifier rejection and requested detail identity
+- pure error classification: cancellation preservation, Domain error preservation and transport/unexpected failure translation
 - ViewModel initialization triggers one request; loading-to-content/empty/failure transitions
 - Display values are ready before notification and available to late subscribers
 - display formatting that contains non-trivial policy
 
-Test doubles are injected through protocols. Tests must not call the static factory from the system under test.
+ViewModel loading/content/empty/failure tests inject Mock repositories through the Domain repository protocol. DTO-to-Domain conversion is tested through the existing DTO mapper; response validation and error classification are internal instance methods in Repository.swift's same-file extension, tested directly on Repository() with values/errors without starting network requests. Tests need neither a Client protocol nor per-operation closure injection. Thin Repository/API Client wrappers do not have isolated unit suites. API integration developers verify their actual connection. Add Repository tests when it owns meaningful orchestration such as cache, pagination or retry policy. App Mock output comes from Debug MockRepository; there is no Mock Client or transport scenario selector.
 
-## UI tests
+JSON-to-DTO decoding is excluded from the current unit-test scope; parsing tests here mean DTO-to-Study/StudyDetail conversion. Do not add a separate unit suite for thin Alamofire request wrappers at this stage. API integration work must verify the actual endpoint, response and DTO decoding during development before commit, then check the app path. `Decodable` conformance or unit-test success does not prove compatibility with the server. Logging supports diagnosis after a failure; it does not replace that integration check. Revisit Client tests if custom request, auth, retry or serialization policy becomes substantial.
 
-Mock behavior is selected with deterministic launch arguments:
+## Opt-in live detail checks
 
-- `--mock-scenario content`
-- `--mock-scenario empty`
-- `--mock-scenario failure`
-- `--mock-scenario loading`
-- `--mock-scenario detail-failure`
-- `--mock-scenario detail-loading`
+LiveStudyDetailTests remain read-only opt-in integration checks from sc-93. Set STUDYCLUB_LIVE_API_BASE_URL to `https://api.studyclub-plusplus.com/api/` to exercise Repository() against Production. Missing opt-in or a different URL skips with an explicit reason; no Client/Session injection or Stage selector is maintained. These checks cover known details 18/87, missing ID 999999 and a rendered Detail view attachment. They depend on external server data and do not prove normal live list-to-detail navigation, because list integration remains separate.
 
-Required smoke flows:
+## Manual Simulator checks
 
-1. Content launches and the second study opens the matching Detail.
-2. Empty state renders without cells.
-3. Main failure and empty states expose no retry/reload action.
-4. Loading remains visible while a deterministic long-running request is active.
-5. Detail failure has no retry button; both failure and loading allow back navigation.
-6. Main and Detail screenshots are retained in XCTest result attachments.
+Automated UI tests and their Xcode target are not maintained at this product stage. UI changes still require a walkthrough and fresh screenshots of every changed state. Unit-test results do not prove rendered layout or interaction.
+
+For Main/Detail changes, verify stable-ID selection, matching Detail content, back navigation, safe areas and normal-size interaction. Cover loading, empty and failure presentation when those states change. Release and Debug Real mode use Alamofire; Debug Mock mode uses Domain sample studies; the current integration gap is documented in [API integration status](API_INTEGRATION.md). If a changed state needs a controlled local QA setup, keep it out of shipped source, label the evidence and restore the ordinary setup afterward.
 
 ## Verification order
 
-1. Resolve packages and build.
-2. Run unit tests.
-3. Run focused UI tests on a named Simulator.
-4. Walk all product states manually.
-5. Capture fresh screenshots and run independent visual/code review.
+1. Resolve packages and build from the outer repository.
+2. Run relevant unit tests serially on the selected named Simulator with `-parallel-testing-enabled NO`.
+3. Walk the changed user paths manually.
+4. Retain fresh screenshots for UI changes and review the resulting source/layout.
 
-Do not report a build, test, or visual pass from output produced before the last relevant source edit.
+Do not report a build, test, or visual pass from output produced before the last relevant source edit. Preserve Simulator data; storage cleanup is a separately authorized action.
 
 ## Development settings verification
 
-- RepositoryModeTests cover missing/invalid preferences, store recreation, model/store consistency, no-op selection, and actual Real-client selection without falling back to Mock.
-- FeatureFlagStoreTests cover Ready/InProgress defaults, per-flag overrides, persistence, rename/stage promotion, malformed entries, reset idempotence and preservation of Repository/unrelated preferences. Release variants prove saved developer overrides are ignored.
-- DevelopmentSettingsViewModelTests check section ordering and that toggle/reset actions expose the updated state.
-- DevelopmentSettingsUITests exercise the actual Main tab long press and SwiftUI hosting/Observation updates, rejected normal taps/Setting long press, root recreation from Detail, Mock/Real round trip, app relaunch, flag switches and reset.
-- Flag UI tests opt into two clearly named fixture definitions using `STUDYCLUB_UI_TEST_FLAGS=1` plus a unique `STUDYCLUB_UI_TEST_SUITE=studyclub.ui-tests.<UUID>`. Both requirements and all fixture code are Debug-only. These definitions do not enter FeatureFlag or gate product behavior; ordinary launches have no flag rows yet. Captures with `fixture` in their names are test-fixture UI evidence, not an actual feature rollout.
-- Run XCTest serially with `-parallel-testing-enabled NO` on the selected named device. UI tests verify relaunch within the same isolated preference suite. Screenshots are retained in result attachments.
+- Internal Development Settings, including Store and ViewModel, have no automated unit suite. Verify relevant changes manually: Ready/InProgress defaults, overrides, persistence, reset and preservation of unrelated preferences. The app catalog contains the Ready `study.detail-api` definition.
+- For relevant changes, manually verify Main tab long press, rejected normal taps/Setting long press, SwiftUI hosting updates and Close. Verify Mock/Real selection rebuilds tabs and follows the saved mode after relaunch; Release must use Real even when Debug saved Mock. Verify detail flag OFF uses Mock and ON follows the saved mode, plus reset and relaunch persistence; there are no launch-time flag fixtures.
 
-Focused Release verification should run RepositoryModeTests, FeatureFlagStoreTests and DevelopmentSettingsUITests/testOnlyMainTabLongPressOpensDevelopmentSettings using `-configuration Release -enableCodeCoverage NO ENABLE_TESTABILITY=YES -parallel-testing-enabled NO`. Testability is enabled only for the unit-test build; additionally build the ordinary Release app without that override. Release app launches ignore mock-scenario arguments; scenario-driven UI flows are Debug checks.
+Build the ordinary Release app. When this boundary changes, manually verify that Release has no Development Settings entry and ignores saved developer flag overrides, using actual definitions when present.
 
-Custom accessibility and large-text QA are deferred at this product stage. UI tests locate native controls by visible text and check content and functional interactions, without app-defined accessibility identifiers.
+Custom accessibility and large-text QA are deferred at this product stage. Do not add app-defined accessibility identifiers for testing.

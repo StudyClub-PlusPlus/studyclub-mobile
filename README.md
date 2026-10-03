@@ -25,18 +25,18 @@ iOS를 먼저 만들고 Android를 나중에 만들면, 그사이에 정해지�
 ### iOS
 
 - UIKit 기반 Main / Setting 하단 탭과 Main → Detail 화면
-- Main 화면의 mock 목록
+- Main 화면의 목록 및 상태 UI
 - Diffable Data Source와 Compositional Layout
 - loading, content, empty, failure 상태 표시
 - MVVM + Repository 구조
 - Swift Concurrency를 사용한 비동기 처리
 - Combine의 Subject를 사용한 ViewModel → View 바인딩
 - Alamofire를 사용하는 스터디 상세 실제 API 연결
-- mock API와 단위 테스트
+- DTO-to-Domain Mapper·검증 규칙·ViewModel 단위 테스트
 - Debug 전용 SwiftUI Development Settings (`@Observable` ViewModel)
-- Mock/Real 선택 저장과 TabBar 전체 재구성, Feature Flag 기본값·override·초기화
+- Mock/Real 선택 저장과 탭 내비게이션 재구성, Feature Flag 기본값·override·초기화
 
-앱의 기본값은 정해진 Mock 데이터입니다. Debug에서 스터디 탭을 길게 누르면 개발 설정을 열 수 있습니다. Real 선택 시 스터디 상세는 Debug와 Release 모두 공개 Production API를 사용합니다. 목록 API 연동은 별도 이슈 범위입니다. 스터디 상세 API 플래그는 Ready(기본 ON)이며, Debug에서 명시적으로 OFF로 설정하면 Mock 상세를 사용합니다.
+Debug 기본값은 Domain Mock 데이터이며, Release는 항상 Real Repository를 사용합니다. Debug에서 스터디 탭을 길게 누르면 개발 설정을 열 수 있습니다. Debug에서 Real을 선택하면 상세가 공개 Production API를 사용합니다. Release도 같은 API를 사용하며 저장된 Debug 모드와 플래그 override를 무시합니다. 목록 API 연동은 별도 이슈 범위입니다. 스터디 상세 API 플래그는 Ready(기본 ON)이며, Debug에서 명시적으로 OFF로 설정하면 Mock 상세를 사용합니다.
 
 ### Android
 
@@ -117,7 +117,7 @@ Android 작업을 시작할 때는 바로 iOS 코드를 옮기기보다 아래 �
 - 사용할 UI 방식과 최소 SDK
 - navigation과 ViewModel 구성
 - 의존성을 조립하는 방식
-- iOS mock과 같은 상황을 재현할 테스트 데이터
+- Mock Repository에서 화면 상태를 재현할 테스트 데이터
 - 두 앱에서 같아야 하는 동작과 Android에서 다르게 가져갈 부분
 
 Android 프로젝트가 생기면 `ios/`와 `android/`는 각각 따로 빌드하고 테스트합니다. 한쪽 코드만 바뀌었다면 해당 플랫폼 검증만 실행하고, 두 앱의 공통 동작이 바뀌었다면 양쪽을 함께 확인하는 방식으로 CI를 구성할 생각입니다.

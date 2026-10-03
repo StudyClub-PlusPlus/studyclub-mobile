@@ -2,82 +2,28 @@ import XCTest
 @testable import studyclub
 
 final class StudyDetailMapperTests: XCTestCase {
-    func testDecodesBackendDetailResponse() throws {
-        let json = """
-        {
-          "id": 42,
-          "slug": "backend-study",
-          "title": "백엔드 스터디",
-          "description": "설명",
-          "category": "SOFTWARE",
-          "studyKind": "STUDY",
-          "thumbnailUrl": "https://example.com/thumbnail.png",
-          "deliveryFormat": "ONLINE",
-          "status": "OPEN",
-          "recruitStatus": "RECRUITING",
-          "curriculum": "1주차",
-          "capacity": 20,
-          "recruitDeadlineAt": "2026-10-01T00:00:00Z",
-          "startAt": "2026-10-15T00:00:00.123Z",
-          "endAt": "2026-12-15T00:00:00Z"
-        }
-        """
-
-        let detail = try JSONDecoder().decode(StudyDetailDTO.self, from: Data(json.utf8)).toDomain()
+    func testMapsThumbnailAndFractionalDate() throws {
+        let detail = try makeDTO(
+            thumbnailURL: URL(string: "https://example.com/thumbnail.png"),
+            startAt: "2026-10-15T00:00:00.123Z"
+        ).toDomain()
 
         XCTAssertEqual(detail.id, "42")
         XCTAssertEqual(detail.thumbnailURL?.absoluteString, "https://example.com/thumbnail.png")
-        XCTAssertNotNil(detail.startAt)
+        XCTAssertEqual(try XCTUnwrap(detail.startAt).timeIntervalSince1970, 1_792_022_400.123, accuracy: 0.001)
     }
 
-    func testRejectsUnknownDetailCodeValuesDuringDecoding() throws {
-        let values: [String: Any] = [
-            "id": 42, "slug": "study", "title": "스터디",
-            "category": "SOFTWARE", "studyKind": "STUDY",
-            "deliveryFormat": "ONLINE", "status": "OPEN", "recruitStatus": "RECRUITING"
-        ]
-        for field in ["category", "studyKind", "deliveryFormat", "status", "recruitStatus"] {
-            var invalid = values
-            invalid[field] = "UNKNOWN"
-            let data = try JSONSerialization.data(withJSONObject: invalid)
-            XCTAssertThrowsError(try JSONDecoder().decode(StudyDetailDTO.self, from: data)) { error in
-                XCTAssertTrue(error is DecodingError)
-            }
-        }
-    }
-
-    func testDecodesDetailWithoutSlug() throws {
-        let values: [String: Any] = [
-            "id": 42, "title": "스터디", "category": "SOFTWARE", "studyKind": "STUDY",
-            "deliveryFormat": "ONLINE", "status": "OPEN", "recruitStatus": "RECRUITING"
-        ]
-        let data = try JSONSerialization.data(withJSONObject: values)
-        let detail = try JSONDecoder().decode(StudyDetailDTO.self, from: data).toDomain()
-        XCTAssertEqual(detail.id, "42")
-    }
-
-    func testDecodesClosedStudyWithNullRecruitmentStatus() throws {
-        let values: [String: Any] = [
-            "id": 87, "title": "알고리즘 목 인터뷰", "category": "ALGORITHM",
-            "studyKind": "STUDY", "deliveryFormat": "ONLINE", "status": "CLOSED",
-            "recruitStatus": NSNull()
-        ]
-        let data = try JSONSerialization.data(withJSONObject: values)
-        let detail = try JSONDecoder().decode(StudyDetailDTO.self, from: data).toDomain()
+    func testMapsClosedStudyWithNullRecruitmentStatus() throws {
+        let detail = try makeDTO(category: .algorithm, status: .closed, recruitStatus: nil).toDomain()
         XCTAssertEqual(detail.category, .algorithm)
         XCTAssertEqual(detail.status, .closed)
         XCTAssertNil(detail.recruitStatus)
     }
 
-    func testDecodesCurrentBackendLifecycleValues() throws {
-        for status in ["DRAFT", "OPEN", "ONGOING", "ENDED", "CLOSED"] {
-            let values: [String: Any] = [
-                "id": 18, "title": "스터디", "category": "SOFTWARE", "studyKind": "STUDY",
-                "deliveryFormat": "HYBRID", "status": status, "recruitStatus": NSNull()
-            ]
-            let data = try JSONSerialization.data(withJSONObject: values)
-            let detail = try JSONDecoder().decode(StudyDetailDTO.self, from: data).toDomain()
-            XCTAssertEqual(detail.status.rawValue, status)
+    func testPreservesBackendLifecycleValues() throws {
+        for status in [StudyStatus.draft, .open, .ongoing, .ended, .closed] {
+            let detail = try makeDTO(status: status).toDomain()
+            XCTAssertEqual(detail.status, status)
         }
     }
 
@@ -115,6 +61,10 @@ final class StudyDetailMapperTests: XCTestCase {
     private func makeDTO(
         id: Int = 42,
         description: String? = "설명",
+        category: StudyCategory = .software,
+        thumbnailURL: URL? = nil,
+        status: StudyStatus = .open,
+        recruitStatus: RecruitStatus? = .recruiting,
         curriculum: String? = "1주차",
         capacity: Int? = 20,
         startAt: String? = "2026-10-15T00:00:00Z"
@@ -123,12 +73,12 @@ final class StudyDetailMapperTests: XCTestCase {
             id: id,
             title: "백엔드 스터디",
             description: description,
-            category: .software,
+            category: category,
             studyKind: .study,
-            thumbnailURL: nil,
+            thumbnailURL: thumbnailURL,
             deliveryFormat: .online,
-            status: .open,
-            recruitStatus: .recruiting,
+            status: status,
+            recruitStatus: recruitStatus,
             curriculum: curriculum,
             capacity: capacity,
             recruitDeadlineAt: "2026-10-01T00:00:00Z",
