@@ -50,12 +50,20 @@ final class DetailViewController: UIViewController {
         return metadataLabel
     }()
 
-    private let summaryLabel: UILabel = {
-        let summaryLabel = UILabel()
-        summaryLabel.font = .preferredFont(forTextStyle: .body)
-        summaryLabel.textColor = AppTheme.Palette.primaryText
-        summaryLabel.numberOfLines = 0
-        return summaryLabel
+    private let scheduleLabel: UILabel = {
+        let scheduleLabel = UILabel()
+        scheduleLabel.font = .preferredFont(forTextStyle: .subheadline)
+        scheduleLabel.textColor = AppTheme.Palette.secondaryText
+        scheduleLabel.numberOfLines = 0
+        return scheduleLabel
+    }()
+
+    private let descriptionLabel: UILabel = {
+        let descriptionLabel = UILabel()
+        descriptionLabel.font = .preferredFont(forTextStyle: .body)
+        descriptionLabel.textColor = AppTheme.Palette.primaryText
+        descriptionLabel.numberOfLines = 0
+        return descriptionLabel
     }()
 
     private let divider: UIView = {
@@ -65,21 +73,21 @@ final class DetailViewController: UIViewController {
         return divider
     }()
 
-    private let topicsTitleLabel: UILabel = {
-        let topicsTitleLabel = UILabel()
-        topicsTitleLabel.text = "이 스터디에서 다룰 내용"
-        topicsTitleLabel.font = .preferredFont(forTextStyle: .headline)
-        topicsTitleLabel.textColor = AppTheme.Palette.primaryText
-        topicsTitleLabel.numberOfLines = 0
-        return topicsTitleLabel
+    private let curriculumTitleLabel: UILabel = {
+        let curriculumTitleLabel = UILabel()
+        curriculumTitleLabel.text = "커리큘럼"
+        curriculumTitleLabel.font = .preferredFont(forTextStyle: .headline)
+        curriculumTitleLabel.textColor = AppTheme.Palette.primaryText
+        curriculumTitleLabel.numberOfLines = 0
+        return curriculumTitleLabel
     }()
 
-    private let topicsStack: UIStackView = {
-        let topicsStack = UIStackView()
-        topicsStack.axis = .vertical
-        topicsStack.spacing = AppTheme.Spacing.medium
-
-        return topicsStack
+    private let curriculumLabel: UILabel = {
+        let curriculumLabel = UILabel()
+        curriculumLabel.font = .preferredFont(forTextStyle: .body)
+        curriculumLabel.textColor = AppTheme.Palette.primaryText
+        curriculumLabel.numberOfLines = 0
+        return curriculumLabel
     }()
 
     private let stackView: UIStackView = {
@@ -152,16 +160,19 @@ final class DetailViewController: UIViewController {
         stackView.setCustomSpacing(AppTheme.Spacing.small, after: titleLabel)
 
         stackView.addArrangedSubview(metadataLabel)
+        stackView.setCustomSpacing(AppTheme.Spacing.small, after: metadataLabel)
 
-        stackView.addArrangedSubview(summaryLabel)
-        stackView.setCustomSpacing(AppTheme.Spacing.xLarge, after: summaryLabel)
+        stackView.addArrangedSubview(scheduleLabel)
+
+        stackView.addArrangedSubview(descriptionLabel)
+        stackView.setCustomSpacing(AppTheme.Spacing.xLarge, after: descriptionLabel)
 
         stackView.addArrangedSubview(divider)
         stackView.setCustomSpacing(AppTheme.Spacing.xLarge, after: divider)
         divider.heightAnchor.constraint(equalToConstant: 1 / max(traitCollection.displayScale, 1)).isActive = true
 
-        stackView.addArrangedSubview(topicsTitleLabel)
-        stackView.addArrangedSubview(topicsStack)
+        stackView.addArrangedSubview(curriculumTitleLabel)
+        stackView.addArrangedSubview(curriculumLabel)
         NSLayoutConstraint.activate([
             stackView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: AppTheme.Spacing.xLarge),
             stackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: AppTheme.Spacing.large),
@@ -180,6 +191,8 @@ final class DetailViewController: UIViewController {
                     self.stateView.updateViews(.loading, context: .detail)
                 case .failure:
                     self.stateView.updateViews(.failure, context: .detail)
+                case .empty:
+                    self.stateView.updateViews(.empty, context: .detail)
                 case .content:
                     self.stateView.isHidden = true
                     self.updateViews()
@@ -191,29 +204,15 @@ final class DetailViewController: UIViewController {
     private func updateViews() {
         categoryLabel.text = viewModel.category
         titleLabel.text = viewModel.title
-        metadataLabel.text = "\(viewModel.memberText)  ·  \(viewModel.statusText)"
-        summaryLabel.text = viewModel.summary
-        topicsStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        for topic in viewModel.topics {
-            topicsStack.addArrangedSubview(makeTopicRow(text: topic))
-        }
-    }
-
-    private func makeTopicRow(text: String) -> UIView {
-        let imageView = UIImageView(image: UIImage(systemName: "checkmark.circle.fill"))
-        imageView.tintColor = AppTheme.Palette.accent
-        imageView.setContentHuggingPriority(.required, for: .horizontal)
-
-        let label = UILabel()
-        label.text = text
-        label.font = .preferredFont(forTextStyle: .body)
-        label.textColor = AppTheme.Palette.primaryText
-        label.numberOfLines = 0
-
-        let stackView = UIStackView(arrangedSubviews: [imageView, label])
-        stackView.axis = .horizontal
-        stackView.alignment = .firstBaseline
-        stackView.spacing = AppTheme.Spacing.medium
-        return stackView
+        metadataLabel.text = [viewModel.metadataText, viewModel.recruitStatusText]
+            .filter { !$0.isEmpty }
+            .joined(separator: "  ·  ")
+        scheduleLabel.text = viewModel.scheduleText
+        scheduleLabel.isHidden = viewModel.scheduleText.isEmpty
+        descriptionLabel.text = viewModel.descriptionText
+        descriptionLabel.isHidden = viewModel.descriptionText.isEmpty
+        curriculumTitleLabel.isHidden = viewModel.curriculum.isEmpty
+        curriculumLabel.text = viewModel.curriculum
+        curriculumLabel.isHidden = viewModel.curriculum.isEmpty
     }
 }

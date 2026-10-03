@@ -59,13 +59,15 @@ final class RepositoryModeTests: XCTestCase {
     }
     #endif
 
-    func testRealFactoryUsesLiveClientWithUnconfiguredDetail() async {
-        let repository = RepositoryFactory.makeStudyRepository(mode: .real)
+    func testLiveRepositoryDoesNotFallBackToMockWhenRequestFails() async {
+        let repository = RepositoryFactory.makeLiveStudyRepository(
+            baseURL: URL(string: "https://api.example.invalid/api/")!
+        )
         do {
-            _ = try await repository.fetchStudy(id: "algorithm")
-            XCTFail("Real must not silently fall back to Mock")
+            _ = try await repository.fetchStudy(id: "2")
+            XCTFail("Live repository must not silently fall back to Mock")
         } catch {
-            XCTAssertEqual(error as? RepositoryError, .detailAPIUnconfigured)
+            XCTAssertEqual(error as? RepositoryError, .unavailable)
         }
     }
 

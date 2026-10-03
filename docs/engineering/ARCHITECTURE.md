@@ -43,7 +43,7 @@ Presentation owns screens, ViewModels, view state, and display formatting. Main,
 
 ViewControllers own UIKit lifecycle and immediate navigation. They do not decode DTOs or create concrete repository implementations.
 
-Main passes only the selected stable ID to DetailViewModel, which obtains its own repository through the factory and starts one asynchronous detail request from init. Its category, title, summary, member/status text, and topics are directly readable properties with private setters; a private subject publishes loading/content/failure after display values are updated together. Production detail transport remains unconfigured until a real endpoint and schema are supplied.
+Main passes only the selected stable ID to DetailViewModel, which obtains its own repository through the factory and starts one asynchronous detail request from init. Detail identity is checked by ID only; slug is not retained in the mobile DTO or Domain model, and Mock list/detail fixtures share numeric IDs. Detail code fields use typed Domain enums shared by the DTO; unknown values fail decoding and are classified as invalid detail data. Display text is defined in Presentation extensions on those enums. Detail uses a dedicated `StudyDetailDTO -> StudyDetail` mapping because the backend list and detail contracts differ. Its category, title, description, metadata, recruitment status, schedule, and curriculum are directly readable properties with private setters; a private subject publishes loading/content/empty/failure after display values are updated together. The `study.detail-api` flag is read when DetailViewModel is created: OFF keeps the existing Mock repository, and ON uses the configured Repository mode. A missing study is empty, while nullable detail fields remain valid content. The live client calls the public web API `GET /api/studies/{studyId}` using Production in both Debug and Release.
 
 ## Composition
 
@@ -55,7 +55,7 @@ Repository mode has a Domain contract and a UserDefaults implementation in Data,
 
 `--mock-scenario` remains a Debug launch-only override for deterministic existing UI tests. Debug UI tests can set `STUDYCLUB_UI_TEST_SUITE` to a `studyclub.ui-tests.`-prefixed suite to verify persistence without changing ordinary app preferences. Release ignores both developer mode and the test suite environment. Explicit test repository injection remains separate.
 
-The live client owns the explicitly temporary `https://api.example.invalid` default BaseURL. Selecting Real constructs the live transport; it does not make live integration ready. The existing list request fails until configured, and Detail still throws `detailAPIUnconfigured`.
+Selecting Real constructs the live transport. The client targets `https://api.studyclub-plusplus.com/api/` in both Debug and Release. Detail is connected to the real backend contract; list API integration remains owned by its separate issue.
 
 ## Deferred abstractions
 
@@ -74,6 +74,15 @@ Observation follows [Apple's model data guidance](https://developer.apple.com/do
 
 ## Feature flag definitions and overrides
 
-Domain defines FeatureFlag, FeatureFlagDefinition and FeatureFlagStage. The enum is intentionally empty until actual features are supplied. Definitions have a stable storage ID, display name and stage. Ready defaults ON; InProgress defaults OFF. Data's UserDefaultsFeatureFlagStore implements the Domain store contract, and RepositoryFactory constructs it. Reads resolve a per-ID developer override before the stage default in Debug. Release always returns the stage default and compiles out mutation/reset methods.
+Domain defines FeatureFlag, FeatureFlagDefinition and FeatureFlagStage. Definitions have a stable storage ID, display name and stage. Ready defaults ON; InProgress defaults ON. Data's UserDefaultsFeatureFlagStore implements the Domain store contract, and RepositoryFactory constructs it. Reads resolve a per-ID developer override before the stage default in Debug. Release always returns the stage default and compiles out mutation/reset methods.
 
 Overrides are read fresh, so changes apply to the next lookup without restarting the app. Moving a definition between stages or renaming it does not change its ID. Reset removes the entire flag override key (including retired IDs) without touching repository mode or other preferences. It does not copy current defaults into storage.
+
+
+## Current public detail API integration
+
+The backend Controller and StudyDetailResponse source, plus deployed Production responses, are the contract reference; the old get-single-study-contract.md describes a different historical response shape. Detail decodes a flat response, uses the current 11-category enum and five lifecycle statuses, and accepts null recruitStatus (omitting that display segment). Numeric ID is the only identity check; server slug and private links are not used.
+
+The detail flag is Ready (default ON). Explicit Debug overrides remain supported. Repository mode still controls Mock/Real and keeps its existing Mock default. Real detail calls the public Production endpoint; there is no automatic fallback to Mock or Production on a Stage failure. Stage can be supplied explicitly via the client's baseURL initializer. The list API is not connected in this change, so normal Real-mode list navigation remains a separate task.
+
+Opt-in read-only live tests use STUDYCLUB_LIVE_API_BASE_URL. They verify public details 18 and 87, missing ID 999999, ViewModel content state, and a rendered detail view attachment. These IDs are verification data only, not production navigation defaults.

@@ -100,7 +100,8 @@ final class ContentStateView: UIView {
                 titleLabel.text = "상세 정보를 불러오지 못했어요"
                 messageLabel.text = "이전 화면으로 돌아가 주세요."
             case .empty:
-                break
+                titleLabel.text = "스터디를 찾을 수 없어요"
+                messageLabel.text = "이전 화면으로 돌아가 주세요."
             }
         }
     }

@@ -7,6 +7,7 @@ enum MockStudyScenario: String, Sendable {
     case loading
     case detailFailure = "detail-failure"
     case detailLoading = "detail-loading"
+    case detailEmpty = "detail-empty"
 }
 
 actor MockStudyAPIClient: StudyAPIClient {
@@ -23,7 +24,7 @@ actor MockStudyAPIClient: StudyAPIClient {
         try Task.checkCancellation()
 
         switch scenario {
-        case .content, .detailFailure, .detailLoading:
+        case .content, .detailFailure, .detailLoading, .detailEmpty:
             return Self.samples
         case .empty:
             return []
@@ -35,18 +36,20 @@ actor MockStudyAPIClient: StudyAPIClient {
         }
     }
 
-    func fetchStudy(id: Study.ID) async throws -> StudyDTO {
+    func fetchStudy(id: Study.ID) async throws -> StudyDetailDTO {
         try await Task.sleep(nanoseconds: delayNanoseconds)
         try Task.checkCancellation()
         switch scenario {
         case .failure, .detailFailure:
             throw RepositoryError.unavailable
+        case .detailEmpty:
+            throw RepositoryError.notFound
         case .loading, .detailLoading:
             try await Task.sleep(nanoseconds: .max)
             throw CancellationError()
         default:
-            guard let study = Self.samples.first(where: { $0.id == id }) else {
-                throw RepositoryError.invalidData
+            guard let study = Self.detailSamples[id] else {
+                throw RepositoryError.notFound
             }
             return study
         }
@@ -54,7 +57,7 @@ actor MockStudyAPIClient: StudyAPIClient {
 
     private static let samples: [StudyDTO] = [
         StudyDTO(
-            id: "ios-architecture",
+            id: "1",
             category: "iOS",
             title: "UIKit 아키텍처 같이 읽기",
             summary: "작은 예제를 만들며 MVVM과 Repository의 책임을 함께 정리해요.",
@@ -64,7 +67,7 @@ actor MockStudyAPIClient: StudyAPIClient {
             topics: ["의존성 역전", "Swift Concurrency", "테스트 가능한 ViewModel"]
         ),
         StudyDTO(
-            id: "algorithm",
+            id: "2",
             category: "알고리즘",
             title: "알고리즘 문제 풀이",
             summary: "매주 두 문제를 풀고 풀이의 시간·공간 복잡도를 차분히 비교해요.",
@@ -74,7 +77,7 @@ actor MockStudyAPIClient: StudyAPIClient {
             topics: ["그래프 탐색", "동적 계획법", "코드 리뷰"]
         ),
         StudyDTO(
-            id: "backend-design",
+            id: "3",
             category: "Backend",
             title: "확장 가능한 API 설계",
             summary: "실제 서비스 사례를 바탕으로 API 경계와 오류 계약을 설계해요.",
@@ -84,7 +87,7 @@ actor MockStudyAPIClient: StudyAPIClient {
             topics: ["REST 계약", "관찰 가능성", "장애 대응"]
         ),
         StudyDTO(
-            id: "design-system",
+            id: "4",
             category: "Design",
             title: "모바일 디자인 시스템 실습",
             summary: "토큰부터 접근성까지 작은 컴포넌트 라이브러리를 함께 다듬어요.",
@@ -94,4 +97,67 @@ actor MockStudyAPIClient: StudyAPIClient {
             topics: ["디자인 토큰", "Dynamic Type", "접근성"]
         )
     ]
+
+    private static let detailSamples: [Study.ID: StudyDetailDTO] = [
+        "1": makeDetail(
+            id: 1,
+            title: "UIKit 아키텍처 같이 읽기",
+            category: .software,
+            description: "작은 예제를 만들며 MVVM과 Repository의 책임을 함께 정리해요.",
+            curriculum: "의존성 역전\nSwift Concurrency\n테스트 가능한 ViewModel",
+            capacity: 8
+        ),
+        "2": makeDetail(
+            id: 2,
+            title: "알고리즘 문제 풀이",
+            category: .algorithm,
+            description: "매주 두 문제를 풀고 풀이의 시간·공간 복잡도를 차분히 비교해요.",
+            curriculum: "그래프 탐색\n동적 계획법\n코드 리뷰",
+            capacity: 8,
+            recruitStatus: .closed
+        ),
+        "3": makeDetail(
+            id: 3,
+            title: "확장 가능한 API 설계",
+            category: .software,
+            description: "실제 서비스 사례를 바탕으로 API 경계와 오류 계약을 설계해요.",
+            curriculum: "REST 계약\n관찰 가능성\n장애 대응",
+            capacity: 10
+        ),
+        "4": makeDetail(
+            id: 4,
+            title: "모바일 디자인 시스템 실습",
+            category: .other,
+            description: "토큰부터 접근성까지 작은 컴포넌트 라이브러리를 함께 다듬어요.",
+            curriculum: "디자인 토큰\nDynamic Type\n접근성",
+            capacity: 9
+        )
+    ]
+
+    private static func makeDetail(
+        id: Int,
+        title: String,
+        category: StudyCategory,
+        description: String,
+        curriculum: String,
+        capacity: Int,
+        recruitStatus: RecruitStatus = .recruiting
+    ) -> StudyDetailDTO {
+        StudyDetailDTO(
+            id: id,
+            title: title,
+            description: description,
+            category: category,
+            studyKind: .study,
+            thumbnailURL: nil,
+            deliveryFormat: .online,
+            status: .open,
+            recruitStatus: recruitStatus,
+            curriculum: curriculum,
+            capacity: capacity,
+            recruitDeadlineAt: "2026-10-01T00:00:00Z",
+            startAt: "2026-10-15T00:00:00Z",
+            endAt: "2026-12-15T00:00:00Z"
+        )
+    }
 }

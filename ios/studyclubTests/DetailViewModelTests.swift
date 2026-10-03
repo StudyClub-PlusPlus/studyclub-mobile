@@ -13,11 +13,12 @@ final class DetailViewModelTests: XCTestCase {
             states.append(state)
             if state == .content {
                 XCTAssertEqual(model.title, "상세 응답")
-                XCTAssertEqual(model.category, "iOS")
-                XCTAssertEqual(model.summary, "전체 설명")
-                XCTAssertEqual(model.memberText, "멤버 2/8")
-                XCTAssertEqual(model.statusText, "모집 중")
-                XCTAssertEqual(model.topics, [])
+                XCTAssertEqual(model.category, "소프트웨어")
+                XCTAssertEqual(model.descriptionText, "전체 설명")
+                XCTAssertEqual(model.metadataText, "스터디  ·  온라인  ·  정원 8명")
+                XCTAssertEqual(model.recruitStatusText, "모집 중")
+                XCTAssertEqual(model.curriculum, "")
+                XCTAssertEqual(model.scheduleText, "2026. 10. 15. - 2026. 12. 15.")
                 content.fulfill()
             }
         }
@@ -40,6 +41,18 @@ final class DetailViewModelTests: XCTestCase {
         XCTAssertEqual(model.title, "")
         let ids = await repository.requestedIDs
         XCTAssertEqual(ids, ["selected"])
+        withExtendedLifetime(subscription) {}
+    }
+
+    func testNotFoundShowsEmptyState() async {
+        let repository = DetailRepositoryDouble(error: .notFound)
+        let model = DetailViewModel(studyID: "missing", repository: repository)
+        let empty = expectation(description: "empty")
+        let subscription = model.statePublisher.sink { state in
+            if state == .empty { empty.fulfill() }
+        }
+        await fulfillment(of: [empty], timeout: 2)
+        XCTAssertEqual(model.currentState, .empty)
         withExtendedLifetime(subscription) {}
     }
 
@@ -67,10 +80,10 @@ final class DetailViewModelTests: XCTestCase {
 
 private actor DetailRepositoryDouble: RepositoryProtocol {
     private(set) var requestedIDs: [Study.ID] = []
-    let shouldFail: Bool
+    let error: RepositoryError?
 
-    init(shouldFail: Bool = false) {
-        self.shouldFail = shouldFail
+    init(shouldFail: Bool = false, error: RepositoryError? = nil) {
+        self.error = error ?? (shouldFail ? .unavailable : nil)
     }
 
     func fetchStudies() async throws -> [Study] {
@@ -78,11 +91,24 @@ private actor DetailRepositoryDouble: RepositoryProtocol {
         return []
     }
 
-    func fetchStudy(id: Study.ID) async throws -> Study {
+    func fetchStudy(id: Study.ID) async throws -> StudyDetail {
         requestedIDs.append(id)
-        if shouldFail { throw RepositoryError.unavailable }
-        return Study(id: id, category: "iOS", title: "상세 응답",
-                     summary: "전체 설명", currentMembers: 2, maximumMembers: 8,
-                     status: .recruiting, topics: [])
+        if let error { throw error }
+        return StudyDetail(
+            id: id,
+            title: "상세 응답",
+            description: "전체 설명",
+            category: .software,
+            studyKind: .study,
+            thumbnailURL: nil,
+            deliveryFormat: .online,
+            status: .open,
+            recruitStatus: .recruiting,
+            curriculum: "",
+            capacity: 8,
+            recruitDeadlineAt: nil,
+            startAt: try! Date("2026-10-15T00:00:00Z", strategy: .iso8601),
+            endAt: try! Date("2026-12-15T00:00:00Z", strategy: .iso8601)
+        )
     }
 }

@@ -1,0 +1,7 @@
+enum StudyStatus: String, Decodable, CaseIterable, Sendable {
+    case draft = "DRAFT"
+    case open = "OPEN"
+    case ongoing = "ONGOING"
+    case ended = "ENDED"
+    case closed = "CLOSED"
+}

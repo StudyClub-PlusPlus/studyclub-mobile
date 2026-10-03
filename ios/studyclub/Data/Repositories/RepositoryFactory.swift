@@ -20,6 +20,16 @@ enum RepositoryFactory {
         return Repository(client: client)
     }
 
+    static func makeDetailRepository(
+        arguments: [String] = ProcessInfo.processInfo.arguments
+    ) -> any RepositoryProtocol {
+        let featureFlagStore = makeFeatureFlagStore()
+        guard featureFlagStore.isEnabled(FeatureFlag.studyDetailAPI.definition) else {
+            return makeStudyRepository(mode: .mock, arguments: arguments)
+        }
+        return makeStudyRepository(arguments: arguments)
+    }
+
     static func makeLiveStudyRepository(baseURL: URL) -> any RepositoryProtocol {
         let client = AlamofireStudyAPIClient(baseURL: baseURL)
         return Repository(client: client)

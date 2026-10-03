@@ -38,16 +38,19 @@ Selecting an item opens Detail for that exact stable ID. Detail fetches independ
 Detail presents:
 
 - category and title
-- current/max member count and status
-- full summary
-- learning topics
+- study kind, delivery format, capacity, and recruitment status
+- study schedule when supplied
+- full description
+- curriculum when supplied
 - standard back navigation
 
-Detail starts loading when its ViewModel is initialized and exposes loading, content, and failure without retry. Failure ends loading and shows a short instruction to return to the previous screen. Retry and common ErrorView work are deferred. Detail does not manage request cancellation or request generations: a request may finish after navigating back. An unknown or mismatched ID is a failure; zero topics is valid content.
+Detail starts loading when its ViewModel is initialized and exposes loading, content, empty, and failure without retry. A missing or mismatched study is empty and shows “스터디를 찾을 수 없어요”. Network and server errors are failure and show a short instruction to return to the previous screen. Nullable cohort, schedule, and description fields do not make the state empty; the remaining detail content is shown. Retry and common ErrorView work are deferred. Detail does not manage request cancellation or request generations: a request may finish after navigating back.
 
 There is no join action, editing, or persistence.
 
-The client and repository expose separate list and detail operations: `fetchStudies()` and `fetchStudy(id:)`. Mock detail lookup uses an independent request and the existing sample fields. Production detail URL, authentication and response schema are unknown: the live client explicitly throws `detailAPIUnconfigured` until those are provided. Separate StudyList/StudyDetail DTO shapes should follow the actual API contract rather than guessed fields.
+The client and repository expose separate list and detail operations: `fetchStudies()` and `fetchStudy(id:)`. Mock detail lookup uses an independent request. Live detail uses the public web API `GET /api/studies/{studyId}` without authentication. The `study.detail-api` Feature Flag defaults ON and preserves the Mock path; when enabled, Debug and Release target the verified public Production API. A 404 is mapped to the empty state. `StudyDetailDTO` stays in Data and maps to the separate `StudyDetail` Domain model; the list DTO is not reused because the server contracts differ.
+
+The current backend detail response does not include the current applicant count, so Detail displays capacity without inventing a current-member value. Thumbnail loading and application actions are outside this issue.
 
 ## Mock scenarios
 
@@ -58,3 +61,12 @@ The client and repository expose separate list and detail operations: `fetchStud
 - `detail-failure`, `detail-loading`: list succeeds, detail exercises its own failure or loading lifecycle
 
 The iOS and Android implementations may use different UI frameworks, but state meaning, stable selection behavior, Korean copy intent, and retry policy should remain equivalent.
+
+
+## Current public detail API integration
+
+The backend Controller and StudyDetailResponse source, plus deployed Production responses, are the contract reference; the old get-single-study-contract.md describes a different historical response shape. Detail decodes a flat response, uses the current 11-category enum and five lifecycle statuses, and accepts null recruitStatus (omitting that display segment). Numeric ID is the only identity check; server slug and private links are not used.
+
+The detail flag is Ready (default ON). Explicit Debug overrides remain supported. Repository mode still controls Mock/Real and keeps its existing Mock default. Real detail calls the public Production endpoint; there is no automatic fallback to Mock or Production on a Stage failure. Stage can be supplied explicitly via the client's baseURL initializer. The list API is not connected in this change, so normal Real-mode list navigation remains a separate task.
+
+Opt-in read-only live tests use STUDYCLUB_LIVE_API_BASE_URL. They verify public details 18 and 87, missing ID 999999, ViewModel content state, and a rendered detail view attachment. These IDs are verification data only, not production navigation defaults.
