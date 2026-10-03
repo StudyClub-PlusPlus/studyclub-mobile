@@ -22,9 +22,9 @@ Before changing iOS code, read:
 - Source dependencies are `Presentation -> Domain` and `Data -> Domain`, with `Presentation -> Data.RepositoryFactory` allowed for repository creation and `Presentation -> Data.DevelopmentSettingsStore` for development configuration. Domain imports no UI, reactive, or networking framework.
 - DTOs stay inside Data. Repository protocols return Domain models.
 - App-facing ViewModel initializers obtain repositories through `RepositoryFactory`; ViewControllers do not receive or forward repositories. Keep separate repository-injecting initializers for unit tests.
-- `RepositoryFactory` creates repositories: Release always uses the real implementation; Debug follows the persisted Development Settings choice between real and Domain-model Mock implementations. The real repository creates its API client internally. Do not add mutable global overrides or a generic service locator.
+- `RepositoryFactory` creates repositories: When a feature is enabled, Release uses Real and Debug follows the persisted Mock/Real choice. Both configurations apply saved FeatureFlag overrides; OFF uses trusted Domain samples without transport. The real repository creates its API client internally. Do not add mutable global overrides or a generic service locator.
 - Do not add a UseCase, Router, Coordinator, or generic DI container without a concrete second use case and an architecture decision update.
-- Lists and feeds define loading, content, empty, and failure behavior. Detail treats missing, invalid or mismatched identity as empty. Current screens request once from ViewModel init via a private fetch method; retry, refresh, and Task management are deferred until needed.
+- Lists and feeds define loading, content, empty, and failure behavior. Detail treats missing, invalid or mismatched identity as empty. Detail requests once from ViewModel init via a private method. Main also supports infinite scrolling, failed-page retry and pull-to-refresh using one retained Task; cancelled requests must not mutate newer state.
 - Store fixed views with their default styling in private let initialization closures. configureView handles hierarchy and layout together; updateViews applies display data. ViewControllers use Combine as a notification and read values from the ViewModel.
 - Within configureView, group work by view: add the view, configure arranged subviews or relationship-dependent values, and activate its constraints together. Do not split all hierarchy operations and all layout operations into separate phases.
 - Collection views use stable identifiers and diffable snapshots. Selection never depends on a stale array index.
@@ -44,7 +44,7 @@ Before changing iOS code, read:
 - Project and tests build from the outer monorepo.
 - No nested `.git`, `xcuserdata`, secret, or generated build output is tracked.
 - New DTOs do not escape Data and new concrete repositories do not leak into Presentation.
-- Async work matches its request policy. Current one-request ViewModels use weak captures and need no retained Task or request-generation counter; revisit concurrency protection when adding repeated requests.
+- Async work matches its request policy. Detail uses a weak capture without a retained Task. Main uses one retained Task for repeated page/refresh requests and cancelled-result guards, without a request-generation counter.
 - Verify safe areas and normal-size interaction manually on Simulator. Automated UI tests are not maintained at this stage; preserve unit tests. Custom accessibility support and dedicated accessibility QA are deferred. Do not add accessibilityIdentifier.
 - Documentation describes the implementation that actually shipped.
 - The handoff separates verified evidence, decisions, external unknowns, and uncommitted work.

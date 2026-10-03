@@ -20,6 +20,7 @@ final class MainViewController: UIViewController {
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
+    private let refreshControl = UIRefreshControl()
     private var dataSource: UICollectionViewDiffableDataSource<Section, Study.ID>!
     private var itemsByID: [Study.ID: StudyCardCellViewModel] = [:]
     private var cancellables = Set<AnyCancellable>()
@@ -38,6 +39,7 @@ final class MainViewController: UIViewController {
         super.viewDidLoad()
         configureView()
         configureDataSource()
+        configureFooter()
         bindViewModel()
     }
 
@@ -49,6 +51,8 @@ final class MainViewController: UIViewController {
 
         view.addSubview(collectionView)
         collectionView.delegate = self
+        collectionView.refreshControl = refreshControl
+        refreshControl.addTarget(self, action: #selector(refreshList), for: .valueChanged)
         NSLayoutConstraint.activate([
             collectionView.topAnchor.constraint(equalTo: view.topAnchor),
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -57,6 +61,9 @@ final class MainViewController: UIViewController {
         ])
 
         view.addSubview(stateView)
+        // The existing collection receives pull gestures even while a state surface is shown.
+        stateView.isUserInteractionEnabled = false
+        stateView.backgroundColor = .clear
         NSLayoutConstraint.activate([
             stateView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             stateView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -87,9 +94,25 @@ final class MainViewController: UIViewController {
         }
     }
 
+    private func configureFooter() {
+        let registration = UICollectionView.SupplementaryRegistration<StudyListFooterView>(
+            elementKind: UICollectionView.elementKindSectionFooter
+        ) { [weak self] footer, _, _ in
+            guard let self else { return }
+            footer.retryButton.removeTarget(nil, action: nil, for: .touchUpInside)
+            footer.retryButton.addTarget(self, action: #selector(self.retryPage), for: .touchUpInside)
+            footer.updateViews(self.viewModel.pageState)
+        }
+        dataSource.supplementaryViewProvider = { collectionView, _, indexPath in
+            collectionView.dequeueConfiguredReusableSupplementary(using: registration, for: indexPath)
+        }
+    }
+
+    @objc private func refreshList() { viewModel.refresh() }
+    @objc private func retryPage() { viewModel.retryPage() }
+
     private func bindViewModel() {
         viewModel.statePublisher
-            .removeDuplicates()
             .sink { [weak self] _ in
                 self?.updateViews()
             }
@@ -97,26 +120,40 @@ final class MainViewController: UIViewController {
     }
 
     private func updateViews() {
-        switch viewModel.currentState {
-        case .loading:
-            collectionView.isHidden = true
-            stateView.updateViews(.loading)
-        case .content:
-            let items = viewModel.items
-            itemsByID = Dictionary(uniqueKeysWithValues: items.map { ($0.id, $0) })
-            stateView.isHidden = true
-            collectionView.isHidden = false
-            var snapshot = NSDiffableDataSourceSnapshot<Section, Study.ID>()
-            snapshot.appendSections([.main])
-            snapshot.appendItems(items.map(\.id), toSection: .main)
-            dataSource.apply(snapshot, animatingDifferences: view.window != nil)
-        case .empty:
-            collectionView.isHidden = true
-            stateView.updateViews(.empty)
-        case .failure:
-            collectionView.isHidden = true
-            stateView.updateViews(.failure)
+        if !viewModel.isRefreshing { refreshControl.endRefreshing() }
+        navigationItem.prompt = viewModel.refreshError
+        let items = viewModel.items
+        let previousItems = itemsByID
+        let previousIDs = Set(dataSource.snapshot().itemIdentifiers)
+        itemsByID = Dictionary(uniqueKeysWithValues: items.map { ($0.id, $0) })
+        var snapshot = NSDiffableDataSourceSnapshot<Section, Study.ID>()
+        snapshot.appendSections([.main])
+        snapshot.appendItems(items.map(\.id), toSection: .main)
+        snapshot.reconfigureItems(items.compactMap { item in
+            previousIDs.contains(item.id) && previousItems[item.id] != item ? item.id : nil
+        })
+        dataSource.apply(snapshot, animatingDifferences: view.window != nil) { [weak self] in
+            self?.loadMoreIfNeeded()
         }
+        collectionView.isHidden = false
+        switch viewModel.currentState {
+        case .loading: stateView.updateViews(.loading)
+        case .content: stateView.isHidden = true
+        case .empty: stateView.updateViews(.empty)
+        case .failure: stateView.updateViews(.failure)
+        }
+        for case let footer as StudyListFooterView in collectionView.visibleSupplementaryViews(
+            ofKind: UICollectionView.elementKindSectionFooter
+        ) {
+            footer.updateViews(viewModel.pageState)
+        }
+    }
+
+    private func loadMoreIfNeeded() {
+        guard viewModel.currentState == .content else { return }
+        let remaining = collectionView.contentSize.height
+            - collectionView.contentOffset.y - collectionView.bounds.height
+        if remaining < collectionView.bounds.height { viewModel.loadMore() }
     }
 
     private static func makeLayout() -> UICollectionViewLayout {
@@ -127,6 +164,13 @@ final class MainViewController: UIViewController {
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
         let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
         let section = NSCollectionLayoutSection(group: group)
+        section.boundarySupplementaryItems = [
+            NSCollectionLayoutBoundarySupplementaryItem(
+                layoutSize: NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .estimated(72)),
+                elementKind: UICollectionView.elementKindSectionFooter,
+                alignment: .bottom
+            )
+        ]
         section.interGroupSpacing = AppTheme.Spacing.medium
         section.contentInsets = NSDirectionalEdgeInsets(
             top: AppTheme.Spacing.regular,
@@ -139,6 +183,8 @@ final class MainViewController: UIViewController {
 }
 
 extension MainViewController: UICollectionViewDelegate {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) { loadMoreIfNeeded() }
+
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         defer { collectionView.deselectItem(at: indexPath, animated: true) }
         guard

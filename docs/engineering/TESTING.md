@@ -15,7 +15,7 @@ JSON-to-DTO decoding is excluded from the current unit-test scope; parsing tests
 
 ## Opt-in live detail checks
 
-LiveStudyDetailTests remain read-only opt-in integration checks from sc-93. Set STUDYCLUB_LIVE_API_BASE_URL to `https://api.studyclub-plusplus.com/api/` to exercise Repository() against Production. Missing opt-in or a different URL skips with an explicit reason; no Client/Session injection or Stage selector is maintained. These checks cover known details 18/87, missing ID 999999 and a rendered Detail view attachment. They depend on external server data and do not prove normal live list-to-detail navigation, because list integration remains separate.
+LiveStudyDetailTests remain read-only opt-in integration checks from sc-93. Set STUDYCLUB_LIVE_API_BASE_URL to `https://api.studyclub-plusplus.com/api/` to exercise Repository() against Production. Missing opt-in or a different URL skips with an explicit reason; no Client/Session injection or Stage selector is maintained. These checks cover known details 18/87, missing ID 999999 and a rendered Detail view attachment. They depend on external server data and do not prove normal live list-to-detail navigation. sc-92 adds its own opt-in list-page decoding and selected-ID detail check.
 
 ## Manual Simulator checks
 
@@ -34,9 +34,13 @@ Do not report a build, test, or visual pass from output produced before the last
 
 ## Development settings verification
 
-- Internal Development Settings, including Store and ViewModel, have no automated unit suite. Verify relevant changes manually: Ready/InProgress defaults, overrides, persistence, reset and preservation of unrelated preferences. The app catalog contains the Ready `study.detail-api` definition.
-- For relevant changes, manually verify Main tab long press, rejected normal taps/Setting long press, SwiftUI hosting updates and Close. Verify Mock/Real selection rebuilds tabs and follows the saved mode after relaunch; Release must use Real even when Debug saved Mock. Verify detail flag OFF uses Mock and ON follows the saved mode, plus reset and relaunch persistence; there are no launch-time flag fixtures.
+- Internal Development Settings, including Store and ViewModel, have no automated unit suite. Verify relevant changes manually: Ready/InProgress defaults, overrides, persistence, reset and preservation of unrelated preferences. The app catalog contains Ready `study.detail-api` and InProgress `study.list-api`.
+- For relevant changes, manually verify Main tab long press, rejected normal taps/Setting long press, SwiftUI hosting updates and Close. Verify Mock/Real selection rebuilds tabs and follows the saved mode after relaunch; Release must use Real for enabled features even when Debug saved Mock. Verify detail flag OFF uses Mock and ON follows the saved mode, plus reset and relaunch persistence; there are no launch-time flag fixtures.
 
-Build the ordinary Release app. When this boundary changes, manually verify that Release has no Development Settings entry and ignores saved developer flag overrides, using actual definitions when present.
+Build the ordinary Release app. When this boundary changes, manually verify that Release has no Development Settings entry, ignores saved Repository mode, and applies the same saved FeatureFlag overrides as Debug.
 
 Custom accessibility and large-text QA are deferred at this product stage. Do not add app-defined accessibility identifiers for testing.
+
+## Main pagination
+
+Use Domain-only test repositories to control page completion. Check cursor advancement from raw count, cross-page duplicate updates, duplicate-trigger suppression, failed-page same-offset retry, refresh failure preservation, successful empty clearing, and cancelled success/error not changing a newer request. Test real decoding separately via opt-in LiveStudyListTests; no JSON fixture/Client injection is needed. Main UI needs fresh manual evidence for content, refresh, empty/failure pull gestures and footer recovery.
