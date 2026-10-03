@@ -2,24 +2,26 @@
 
 ## Brief
 
-The first StudyClub surface should look like a calm, native reading list rather than a decorative prototype. The visual direction combines Apple-native UIKit behavior with restrained editorial spacing. It uses native components and reusable tokens; no screenshot, illustration, or generated image stands in for interface elements.
+The existing guest list uses readable, self-sizing cards with the team's Figma green/cream palette. The user selected the card hierarchy and light-only appearance for sc-116 on 2026-10-03 after research and independent development review. UIKit navigation, system fonts and the existing display/data contracts remain in place; no screenshot, illustration, or generated image stands in for interface elements.
 
 ## Design references
 
-- Layer A: premium utilitarian minimalism — restrained borders, generous space, muted accents, almost no shadow.
-- Layer B: Apple-native system language — semantic colors, system typography, clear navigation chrome, and familiar control behavior.
-- Web-only browser, Lighthouse, and responsive-page gates are not applicable. The equivalent native gates are Simulator rendering, trait-safe semantic colors, and compact/regular width checks.
+- [Team Figma Color Scheme](https://www.figma.com/design/2K09lEbASPTPqpAlKuyjAt?node-id=54-40): cream canvas, white surface, dark text and green accents. These are source colors, not an approved iOS screen specification.
+- UIKit: preferred text styles, self-sizing cells, standard navigation and tab behavior, restrained borders and no default shadow.
+- Frozen FE source and Storybook are structural comparisons. Their indigo palette is not mixed into this selected Figma direction. Source versions, mapping and exclusions are recorded in [the sc-116 token map](docs/design/SC_116_TOKEN_MAP.md).
+- App appearance is light-only, owned by the scene window before root creation. A dark OS setting should still produce light app screens and hosted modals; this needs native observation. Window appearance does not establish launch-screen behavior.
 
 ## Tokens
 
 Use the shared `AppTheme` source rather than one-off values.
 
-- Canvas: `systemGroupedBackground`
-- Primary surface: `secondarySystemGroupedBackground`
-- Primary text: `label`
-- Secondary text: `secondaryLabel`
-- Accent/action: `systemIndigo`
-- Border: `separator` at low alpha
+- Canvas: Figma Light Bg `#FAF9F5`
+- Primary surface: Figma Surface `#FFFFFF`
+- Primary text: Figma Text/Body `#252522`
+- Secondary text: Figma Text/Subtle `#6B6A64`
+- Accent/action: Figma Dark Green `#596F22`
+- Pressed surface: Figma Light Green `#EFF6D8`, assigned this interaction role by the app
+- Border: Figma Border `#E5E3DC`, full opacity and one physical pixel for cards
 - Error accent: `systemRed`
 - Spacing scale: 4, 8, 12, 16, 20, 24, 32
 - Radius scale: 8 for small controls, 16 for cards
@@ -32,9 +34,11 @@ Use the shared `AppTheme` source rather than one-off values.
 - Setting contains a large “설정” title and an empty native list until settings content is specified.
 
 - Large navigation title: “스터디”
-- Optional one-line introduction above the first card through section boundary spacing, not a hero panel
+- No added hero or introduction in this slice
 - One-column adaptive card list with readable content margins
-- Card: small category label, study title, two-line summary, member/status metadata, disclosure indicator
+- Card: neutral, wrapping category/status text; full title; up to two lines of summary; wrapping member information and disclosure indicator
+- Empty category/status parts omit their separator; empty summary closes its block and spacing. Status strings are not parsed into urgency or recruiting colors.
+- Outer inset 16, inter-card gap 12, inner padding 20, radius 16. Title-to-summary gap 8; summary-to-footer gap 16. These are native adaptations using the existing spacing scale, not Figma mobile specs.
 - Cell content is self-sizing
 
 ## State anatomy
@@ -49,8 +53,10 @@ Use the shared `AppTheme` source rather than one-off values.
 
 - Standard back navigation and inline title
 - Scrollable readable column
-- Category label, large study title, member/status metadata, summary, and “이 스터디에서 다룰 내용” section
+- Neutral wrapping category, full study title, existing kind/format/capacity/recruitment metadata, optional schedule, description and curriculum
+- Empty optional blocks close their spacing. The curriculum divider, heading and body are hidden together when curriculum is absent.
 - Content comes from the independently fetched Domain model for the selected ID.
+- List summary and Detail description are separate values; Detail is not promised to recover the full list summary.
 - Detail uses the existing state surface for loading and failure with detail-specific Korean copy. Failure has no retry button and directs the user back; common ErrorView work is deferred. Content and state surfaces are mutually exclusive.
 
 ## Interaction
@@ -67,15 +73,17 @@ Custom accessibility labels, traits, announcements, special large-text layouts, 
 
 ## Visual QA contract
 
-Enumerate and capture these surfaces after the last UI edit:
+Enumerate and capture these surfaces after the last UI edit. These are acceptance targets, not a record that QA has passed:
 
 1. Main content
 2. Detail for the second study
 3. Main empty
 4. Main failure
 5. Main loading
+6. Detail empty, failure and loading
+7. Light appearance under dark OS settings, including Setting, navigation/tab chrome and the Debug hosted modal/alert
 
-Check safe areas, card alignment, Korean wrapping, dark-mode semantics, state exclusivity, and correct Detail content. Any blocking finding must be fixed and re-captured before completion.
+Check safe areas, card alignment, long Korean title/metadata wrapping, empty summary, state exclusivity, optional Detail blocks, pressed feedback and stable-ID navigation. Record exact source candidate, bundle/device/OS, input provenance and captures. Controlled component renders establish only that surface; they do not establish live API transitions or installed-app navigation. Do not add permanent scenarios, flags or automatic UI/internal-settings tests for this verification. Any blocking finding must be fixed and re-captured before completion.
 
 ## Accepted debt
 

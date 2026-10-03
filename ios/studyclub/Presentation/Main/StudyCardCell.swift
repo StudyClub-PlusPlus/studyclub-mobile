@@ -1,22 +1,12 @@
 import UIKit
 
 final class StudyCardCell: UICollectionViewCell {
-    private let categoryLabel = {
-        let view = InsetLabel()
-        view.font = .preferredFont(forTextStyle: .caption1)
-        view.textColor = AppTheme.Palette.accent
-        view.backgroundColor = AppTheme.Palette.accent.withAlphaComponent(0.10)
-        view.layer.cornerRadius = AppTheme.Radius.control
-        view.layer.cornerCurve = .continuous
-        view.clipsToBounds = true
-        view.numberOfLines = 0
-        return view
-    }()
-    private let statusLabel = {
+    private let metadataLabel = {
         let view = UILabel()
         view.font = .preferredFont(forTextStyle: .caption1)
         view.textColor = AppTheme.Palette.secondaryText
         view.numberOfLines = 0
+        view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
     private let titleLabel = {
@@ -30,7 +20,7 @@ final class StudyCardCell: UICollectionViewCell {
         let view = UILabel()
         view.font = .preferredFont(forTextStyle: .subheadline)
         view.textColor = AppTheme.Palette.secondaryText
-        view.numberOfLines = 0
+        view.numberOfLines = 2
         return view
     }()
     private let memberImageView = {
@@ -43,12 +33,14 @@ final class StudyCardCell: UICollectionViewCell {
         let view = UILabel()
         view.font = .preferredFont(forTextStyle: .caption1)
         view.textColor = AppTheme.Palette.secondaryText
+        view.numberOfLines = 0
         return view
     }()
     private let disclosureImageView = {
         let view = UIImageView(image: UIImage(systemName: "chevron.right"))
         view.tintColor = AppTheme.Palette.secondaryText
         view.setContentHuggingPriority(.required, for: .horizontal)
+        view.setContentCompressionResistancePriority(.required, for: .horizontal)
         return view
     }()
     private let footerSpacer = UIView()
@@ -65,14 +57,6 @@ final class StudyCardCell: UICollectionViewCell {
         stack.spacing = AppTheme.Spacing.medium
         stack.translatesAutoresizingMaskIntoConstraints = false
         return stack
-    }()
-    private let headerSpacer = UIView()
-    private let headerStack = {
-        let view = UIStackView()
-        view.axis = .horizontal
-        view.alignment = .center
-        view.spacing = AppTheme.Spacing.small
-        return view
     }()
 
     override init(frame: CGRect) {
@@ -92,15 +76,21 @@ final class StudyCardCell: UICollectionViewCell {
             : AppTheme.Palette.surface
         contentView.layer.borderColor = AppTheme.Palette.border
             .resolvedColor(with: traitCollection)
-            .withAlphaComponent(0.35)
             .cgColor
     }
 
     func updateViews(with item: StudyCardCellViewModel) {
-        categoryLabel.text = item.category
-        statusLabel.text = item.statusText
+        metadataLabel.text = [item.category, item.statusText]
+            .filter { !$0.isEmpty }
+            .joined(separator: " · ")
+        metadataLabel.isHidden = metadataLabel.text?.isEmpty ?? true
         titleLabel.text = item.title
         summaryLabel.text = item.summary
+        summaryLabel.isHidden = item.summary.isEmpty
+        contentStack.setCustomSpacing(
+            item.summary.isEmpty ? AppTheme.Spacing.regular : AppTheme.Spacing.small,
+            after: titleLabel
+        )
         memberLabel.text = item.memberText
     }
 
@@ -110,18 +100,15 @@ final class StudyCardCell: UICollectionViewCell {
         contentView.layer.borderWidth = 1 / max(traitCollection.displayScale, 1)
 
         contentView.addSubview(contentStack)
-        [headerStack, titleLabel, summaryLabel, footerStack].forEach(contentStack.addArrangedSubview)
+        [metadataLabel, titleLabel, summaryLabel, footerStack].forEach(contentStack.addArrangedSubview)
         contentStack.setCustomSpacing(AppTheme.Spacing.small, after: titleLabel)
+        contentStack.setCustomSpacing(AppTheme.Spacing.regular, after: summaryLabel)
         NSLayoutConstraint.activate([
-            contentStack.topAnchor.constraint(equalTo: contentView.topAnchor, constant: AppTheme.Spacing.regular),
-            contentStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: AppTheme.Spacing.regular),
-            contentStack.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -AppTheme.Spacing.regular),
-            contentStack.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -AppTheme.Spacing.regular)
+            contentStack.topAnchor.constraint(equalTo: contentView.topAnchor, constant: AppTheme.Spacing.large),
+            contentStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: AppTheme.Spacing.large),
+            contentStack.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -AppTheme.Spacing.large),
+            contentStack.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -AppTheme.Spacing.large)
         ])
-
-        headerStack.addArrangedSubview(categoryLabel)
-        headerStack.addArrangedSubview(headerSpacer)
-        headerStack.addArrangedSubview(statusLabel)
 
         footerStack.addArrangedSubview(memberImageView)
         NSLayoutConstraint.activate([
