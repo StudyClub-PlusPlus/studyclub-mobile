@@ -23,3 +23,9 @@ InProgress `study.list-api` defaults OFF. Both Debug and Release apply stored ov
 Main owns one Task for initial page, automatic additional pages and pull-to-refresh. Content and cursor survive failed page/refresh requests. Cancelled old tasks cannot overwrite a refreshed list or stop its indicator. Same-ID cards are reconfigured and empty snapshots clear stale selection. See [list design](../product/STUDY_LIST_API_DESIGN.md) and [UI state policy](UI_STATE_POLICY.md).
 
 Opt-in LiveStudyListTests construct Repository directly and check actual page decoding and selected-ID detail lookup. Mapper, page/error helpers and Main state tests remain separate. Automated UI tests, JSON fixtures and thin transport doubles are not added. A source change or green test does not prove manual scrolling/rendering; fresh evidence for this candidate is reported separately.
+
+## sc-92 implementation evidence (2026-10-03)
+
+The Swift candidate in `a2f2e0e` built in Debug and Release. Serial XCTest on the existing iPhone 17 Pro / iOS 26.5 passed all 50 tests, including opt-in Production list-to-detail integration and pagination/refresh cancellation cases. Installed Debug and Release screens showed persisted flag behavior with debugger-assisted writes through the app's UserDefaults API: Debug ON follows Mock/Real mode, Release ON uses Real with saved Mock mode, and Release OFF shows trusted samples. This does not verify Development Settings touch interaction.
+
+Loading/content/empty/failure were captured from a temporary installed host using the same screen source and controlled Domain data; the host is excluded from the repository. Scroll, pull-to-refresh, footer taps and card-to-detail taps still need a native manual walkthrough: CUA returned `cgWindowNotFound` for native windows and its in-app browser was unavailable. Unit/integration results and installed state captures do not establish that gesture path or independent final QA.
