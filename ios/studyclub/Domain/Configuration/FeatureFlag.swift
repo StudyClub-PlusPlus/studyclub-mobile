@@ -16,6 +16,7 @@ struct FeatureFlagDefinition: Hashable, Sendable {
 /// Register actual features here once specified. Test fixtures are not app feature flags.
 enum FeatureFlag: CaseIterable {
     case studyDetailAPI
+    case studyDesignSystem
 
     var definition: FeatureFlagDefinition {
         switch self {
@@ -24,6 +25,12 @@ enum FeatureFlag: CaseIterable {
                 id: "study.detail-api",
                 name: "스터디 상세 API 연동",
                 stage: .ready
+            )
+        case .studyDesignSystem:
+            FeatureFlagDefinition(
+                id: "study.design-system",
+                name: "디자인 시스템 적용 · 앱 재실행",
+                stage: .inProgress
             )
         }
     }

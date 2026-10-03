@@ -2,7 +2,15 @@
 
 ## Current foundation
 
-The app catalog in `ios/studyclub/Domain/Configuration/FeatureFlag.swift` contains the Ready study.detail-api flag (default ON). Ready defaults ON; InProgress defaults OFF. Debug resolves saved overrides first. Release ignores overrides and compiles out developer entry and mutation methods.
+The app catalog in `ios/studyclub/Domain/Configuration/FeatureFlag.swift` contains Ready `study.detail-api` (default ON) and InProgress `study.design-system` (default OFF). Ready defaults ON; InProgress defaults OFF. Debug resolves saved overrides first. Debug and Release both resolve saved overrides before the stage default. Release compiles out developer entry and mutation methods.
+
+## Design-system rollout
+
+`study.design-system` gates the sc-116 palette, card anatomy, Detail polish and light-only window as one feature. OFF uses the previous system palette/layout and OS appearance. ON uses the selected Figma green/cream design. It does not gate API requests or change Repository mode.
+
+AppTheme obtains the existing store from RepositoryFactory and resolves the flag once per app process. This visual boundary deliberately keeps one immutable choice: a Debug toggle or Reset changes the next cold launch, not currently visible screens or a Repository-triggered root rebuild. The switch name includes the restart requirement. This avoids combining old/new palettes and layouts while the app runs, without adding a mutable global override, DI layer or theme framework. Release uses the same saved override / stage default as Debug; without an override, this InProgress feature remains OFF. The settings UI and mutation methods remain Debug-only. Promote the same ID to Ready only when the redesigned UI is intended as the Release default.
+
+ON/OFF native comparison and an ordinary Release build cover this slice. Automatic UI and internal settings tests/scenarios are not added for the rollout; controlled render evidence must remain distinguished from installed-app flag behavior.
 
 ## Add a feature
 

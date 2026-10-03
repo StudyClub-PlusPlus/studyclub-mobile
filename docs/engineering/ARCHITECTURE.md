@@ -51,7 +51,7 @@ Main passes only the selected stable ID to DetailViewModel, which obtains its ow
 
 The factory creates a fresh repository/client per ViewModel; it does not share a singleton or cache. Debug reads the persisted Repository mode at each creation. Changing the mode saves it, dismisses Development Settings, and notifies SceneDelegate through callbacks to replace the window root with a fresh TabBar and navigation stacks. Existing ViewModels are not mutated or forwarded. In-flight requests may finish against discarded screens, under the existing weak-capture request policy.
 
-Repository mode has a Domain contract and a UserDefaults implementation in Data, constructed through RepositoryFactory. Presentation depends only on the store contract plus factory creation. There is no mutable global override. Release ignores saved development settings and retains the explicit `.mock` app default until the real API contract is supplied.
+Repository mode has a Domain contract and a UserDefaults implementation in Data, constructed through RepositoryFactory. Presentation depends only on the store contract plus factory creation. There is no mutable global override. Release ignores saved Repository mode and retains the explicit `.mock` app default until the real API contract is supplied.
 
 `--mock-scenario` remains a Debug launch-only override for deterministic existing UI tests. Debug UI tests can set `STUDYCLUB_UI_TEST_SUITE` to a `studyclub.ui-tests.`-prefixed suite to verify persistence without changing ordinary app preferences. Release ignores both developer mode and the test suite environment. Explicit test repository injection remains separate.
 
@@ -74,9 +74,9 @@ Observation follows [Apple's model data guidance](https://developer.apple.com/do
 
 ## Feature flag definitions and overrides
 
-Domain defines FeatureFlag, FeatureFlagDefinition and FeatureFlagStage. Definitions have a stable storage ID, display name and stage. Ready defaults ON; InProgress defaults ON. Data's UserDefaultsFeatureFlagStore implements the Domain store contract, and RepositoryFactory constructs it. Reads resolve a per-ID developer override before the stage default in Debug. Release always returns the stage default and compiles out mutation/reset methods.
+Domain defines FeatureFlag, FeatureFlagDefinition and FeatureFlagStage. Definitions have a stable storage ID, display name and stage. Ready defaults ON; InProgress defaults OFF. Data's UserDefaultsFeatureFlagStore implements the Domain store contract, and RepositoryFactory constructs it. Both Debug and Release resolve a saved per-ID override before the stage default. Release compiles out the settings UI and mutation/reset methods.
 
-Overrides are read fresh, so changes apply to the next lookup without restarting the app. Moving a definition between stages or renaming it does not change its ID. Reset removes the entire flag override key (including retired IDs) without touching repository mode or other preferences. It does not copy current defaults into storage.
+The store reads overrides fresh, so changes apply to the next lookup. The `study.design-system` visual boundary takes one immutable AppTheme decision per process; toggles/reset apply to its palette/layout/window after a cold launch, while Repository-triggered root rebuilds retain the current decision. Moving a definition between stages or renaming it does not change its ID. Reset removes the entire flag override key (including retired IDs) without touching repository mode or other preferences. It does not copy current defaults into storage.
 
 
 ## Current public detail API integration
