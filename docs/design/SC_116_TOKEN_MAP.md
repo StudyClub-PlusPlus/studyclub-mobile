@@ -2,6 +2,10 @@
 
 User decision, 2026-10-03: Figma green/cream, self-sizing cards and light-only app appearance. Existing UIKit/Auto Layout, MVVM + Repository and native preferred fonts remain. This document specifies the selected mapping, not final visual QA or a team-wide design-system approval.
 
+## Feature boundary
+
+This mapping applies only when `study.design-system` is ON. The flag is InProgress/default OFF; the original dynamic UIKit colors/layout/OS appearance remain the fallback. AppTheme takes one immutable decision from the existing factory/store per process. Debug toggles/reset apply after cold launch, keeping all existing and newly created screens consistent in the meantime. Debug and Release both read saved overrides, then fall back to the stage default. The settings UI and mutation methods remain Debug-only. No FeatureFlagCatalog or mutable theme injection is added.
+
 ## Sources and limits
 
 - [Team Figma file / Design System page 30:2](https://www.figma.com/design/2K09lEbASPTPqpAlKuyjAt?node-id=30-2), [Color Scheme frame 54:40](https://www.figma.com/design/2K09lEbASPTPqpAlKuyjAt?node-id=54-40), color instances 54:42–54:51. Read 2026-10-03; immutable published version unavailable. Browser variable panel showed no local variable collections; returned style values do not prove aliases or appearance modes.
@@ -27,7 +31,7 @@ Keep consumers using AppTheme rather than screen-specific HEX values.
 | spacing/radius | existing 4/8/12/16/20/24/32 and 8/16 | card inner20/outer16/gap12, native Detail reading rhythm |
 | type | existing preferred UIKit text styles | native headline/subheadline/caption/title/body; no web font/pt conversion |
 
-SceneDelegate owns light-only appearance once at window creation. Screen-level overrides, a new trait token resolver and a SwiftUI-only color scheme are unnecessary unless actual inheritance fails. Root replacement uses the same window. Hosted-modal/alert behavior remains a runtime observation target.
+SceneDelegate applies light-only appearance at window creation when the same process decision is ON; OFF uses unspecified appearance. Screen-level overrides, a new trait token resolver and a SwiftUI-only color scheme are unnecessary unless actual inheritance fails. Root replacement uses the same window. Hosted-modal/alert behavior remains a runtime observation target.
 
 ## Exclusions and completeness
 

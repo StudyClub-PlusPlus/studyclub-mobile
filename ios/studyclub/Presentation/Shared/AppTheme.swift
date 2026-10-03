@@ -1,15 +1,20 @@
 import UIKit
 
 enum AppTheme {
+    // Resolve once per process; toggling/resetting flags or rebuilding the root
+    // must not mix palettes and layouts. Changes apply after a cold relaunch.
+    static let isStudyDesignSystemEnabled = DevelopmentSettingsStore()
+        .isEnabled(FeatureFlag.studyDesignSystem.definition)
+
     enum Palette {
-        static let canvas = color(0xFAF9F5)
-        static let surface = color(0xFFFFFF)
-        static let elevatedSurface = color(0xEFF6D8)
-        static let primaryText = color(0x252522)
-        static let secondaryText = color(0x6B6A64)
-        static let accent = color(0x596F22)
+        static let canvas = AppTheme.isStudyDesignSystemEnabled ? color(0xFAF9F5) : UIColor.systemGroupedBackground
+        static let surface = AppTheme.isStudyDesignSystemEnabled ? color(0xFFFFFF) : UIColor.secondarySystemGroupedBackground
+        static let elevatedSurface = AppTheme.isStudyDesignSystemEnabled ? color(0xEFF6D8) : UIColor.tertiarySystemGroupedBackground
+        static let primaryText = AppTheme.isStudyDesignSystemEnabled ? color(0x252522) : UIColor.label
+        static let secondaryText = AppTheme.isStudyDesignSystemEnabled ? color(0x6B6A64) : UIColor.secondaryLabel
+        static let accent = AppTheme.isStudyDesignSystemEnabled ? color(0x596F22) : UIColor.systemIndigo
         static let error = UIColor.systemRed
-        static let border = color(0xE5E3DC)
+        static let border = AppTheme.isStudyDesignSystemEnabled ? color(0xE5E3DC) : UIColor.separator
 
         private static func color(_ hex: UInt32) -> UIColor {
             UIColor(

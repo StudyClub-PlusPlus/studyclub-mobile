@@ -36,10 +36,10 @@ Do not report a build, test, or visual pass from output produced before the last
 
 ## Development settings verification
 
-- Internal Development Settings, including Store and ViewModel, have no automated unit suite. Verify relevant changes manually: Ready/InProgress defaults, overrides, persistence, reset and preservation of unrelated preferences. The app catalog contains Ready `study.detail-api` and InProgress `study.list-api`.
+- Internal Development Settings, including Store and ViewModel, have no automated unit suite. Verify relevant changes manually: Ready/InProgress defaults, overrides, persistence, reset and preservation of unrelated preferences. The app catalog contains Ready `study.detail-api` and InProgress `study.list-api` and `study.design-system`.
 - For relevant changes, manually verify Main tab long press, rejected normal taps/Setting long press, SwiftUI hosting updates and Close. Verify Mock/Real selection rebuilds tabs and follows the saved mode after relaunch; Release must always use Real even when Debug saved Mock. Verify flags never change repository type: Real list OFF makes no request and shows unavailable; Real detail OFF makes no request and shows failure; Mock detail keeps its samples in every flag combination. Verify Main OFF requests once without refresh, pagination or footer and ON retains those behaviors, plus reset and relaunch persistence; there are no launch-time flag fixtures.
 
-Build the ordinary Release app. When this boundary changes, manually verify that Release has no Development Settings entry, ignores saved Repository mode, and applies the same saved FeatureFlag overrides as Debug.
+Build the ordinary Release app. When this boundary changes, manually verify that Release has no Development Settings entry, ignores saved Repository mode, and applies the same saved FeatureFlag overrides as Debug. Verify design flag OFF/ON, persistence, cold-relaunch application and Reset with bounded native observation; distinguish controlled renders from installed-app behavior.
 
 Custom accessibility and large-text QA are deferred at this product stage. Do not add app-defined accessibility identifiers for testing.
 
