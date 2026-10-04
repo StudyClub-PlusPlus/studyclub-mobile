@@ -7,7 +7,12 @@ struct MockRepository: RepositoryProtocol {
     }
 
     func fetchStudy(id: Study.ID) async throws -> StudyDetail {
-        Self.details[id] ?? Self.defaultDetail
+        if let detail = Self.details[id] { return detail }
+        guard let study = Self.studies.first(where: { $0.id == id }) else {
+            throw RepositoryError.notFound
+        }
+        return Self.makeDetail(study: study, category: study.category,
+                               curriculum: "함께 읽기\n실습과 토론\n결과 공유")
     }
 
     private static let defaultStudy = Study(
@@ -33,7 +38,15 @@ struct MockRepository: RepositoryProtocol {
             summary: "토큰부터 접근성까지 작은 컴포넌트 라이브러리를 함께 다듬어요.",
             participantCount: 6, capacity: 9, phase: .recruiting, closingSoon: false
         )
-    ]
+    ] + (5...65).map { number in
+        Study(
+            id: String(number), category: number.isMultiple(of: 2) ? .software : .algorithm,
+            title: "스터디 \(number) · 함께 만드는 작은 프로젝트",
+            summary: "매주 학습한 내용을 나누고 작은 결과물을 완성해요.",
+            participantCount: number % 8 + 1, capacity: 10,
+            phase: .recruiting, closingSoon: number.isMultiple(of: 5)
+        )
+    }
 
     private static let defaultDetail = makeDetail(study: defaultStudy, category: .software, curriculum: "의존성 역전\nSwift Concurrency\n테스트 가능한 ViewModel")
 

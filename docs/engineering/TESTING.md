@@ -44,3 +44,5 @@ Custom accessibility and large-text QA are deferred at this product stage. Do no
 ## Main pagination
 
 Use Domain-only test repositories to control page completion. Check cursor advancement from raw count, within-page and cross-page duplicate updates, duplicate-trigger suppression, failed-page same-offset retry, refresh failure preservation, successful empty clearing, and cancelled success/error not changing a newer request. Verify actual decoding during API development; no maintained live tests, JSON fixture or Client injection is needed. Main UI needs fresh manual evidence for content, refresh, empty/failure pull gestures and footer recovery.
+
+MockRepository keeps 65 trusted Domain studies, paged in groups of 20, with matching-ID details. Use this ordinary Debug Mock mode for manual multi-page scrolling and end-of-list checks; no transport scenario or test-only app configuration is needed.
