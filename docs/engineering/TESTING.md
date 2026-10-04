@@ -13,9 +13,9 @@ ViewModel loading/content/empty/failure tests inject Mock repositories through t
 
 JSON-to-DTO decoding is excluded from the current unit-test scope; parsing tests here mean DTO-to-Study/StudyDetail conversion. Do not add a separate unit suite for thin Alamofire request wrappers at this stage. API integration work must verify the actual endpoint, response and DTO decoding during development before commit, then check the app path. `Decodable` conformance or unit-test success does not prove compatibility with the server. Logging supports diagnosis after a failure; it does not replace that integration check. Revisit Client tests if custom request, auth, retry or serialization policy becomes substantial.
 
-## Opt-in live detail checks
+## Actual API checks during development
 
-LiveStudyDetailTests remain read-only opt-in integration checks from sc-93. Set STUDYCLUB_LIVE_API_BASE_URL to `https://api.studyclub-plusplus.com/api/` to exercise Repository() against Production. Missing opt-in or a different URL skips with an explicit reason; no Client/Session injection or Stage selector is maintained. These checks cover known details 18/87, missing ID 999999 and a rendered Detail view attachment. They depend on external server data and do not prove normal live list-to-detail navigation. sc-92 adds its own opt-in list-page decoding and selected-ID detail check.
+Verify the actual endpoint, response decoding and list-to-detail connection when changing API integration, then retain dated evidence for that candidate. Do not maintain production-dependent XCTest cases or fixed live IDs as a regression suite. Unit tests remain deterministic and independent of server availability. Actual API and installed-app observations are separate from unit-test results.
 
 ## Manual Simulator checks
 
@@ -43,4 +43,4 @@ Custom accessibility and large-text QA are deferred at this product stage. Do no
 
 ## Main pagination
 
-Use Domain-only test repositories to control page completion. Check cursor advancement from raw count, within-page and cross-page duplicate updates, duplicate-trigger suppression, failed-page same-offset retry, refresh failure preservation, successful empty clearing, and cancelled success/error not changing a newer request. Test real decoding separately via opt-in LiveStudyListTests; no JSON fixture/Client injection is needed. Main UI needs fresh manual evidence for content, refresh, empty/failure pull gestures and footer recovery.
+Use Domain-only test repositories to control page completion. Check cursor advancement from raw count, within-page and cross-page duplicate updates, duplicate-trigger suppression, failed-page same-offset retry, refresh failure preservation, successful empty clearing, and cancelled success/error not changing a newer request. Verify actual decoding during API development; no maintained live tests, JSON fixture or Client injection is needed. Main UI needs fresh manual evidence for content, refresh, empty/failure pull gestures and footer recovery.

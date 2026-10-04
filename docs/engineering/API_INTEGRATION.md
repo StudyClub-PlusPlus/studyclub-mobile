@@ -10,7 +10,7 @@ Repository preserves cancellation and Domain errors, maps HTTP 404 to notFound a
 
 The Ready `study.detail-api` flag is retained. OFF selects MockRepository in both configurations. ON follows the persisted Mock/Real mode in Debug (default Mock), while Release uses Real. Both configurations apply saved FeatureFlag overrides; only Repository mode and the developer entry differ. MockRepository returns trusted Study list and matching StudyDetail samples with numeric IDs, with no DTOs, delay or transport scenarios. There is no Client protocol, Client/Session injection or per-operation closure injection. Stage selection is not maintained; no automatic environment fallback is added.
 
-Opt-in LiveStudyDetailTests construct Repository() and require STUDYCLUB_LIVE_API_BASE_URL to equal the Production URL; missing opt-in or another URL skips with a reason. Preserved [sc-93 evidence](../evidence/sc-93-live/README.md) describes its earlier candidate and is historical, not current validation of the rebase. This integration was source-reviewed only during the rebase; fresh build, serial tests and actual-path QA belong to the lead and independent QA.
+Actual detail API compatibility is checked during integration work; production-dependent XCTest cases are no longer maintained. Preserved [sc-93 evidence](../evidence/sc-93-live/README.md) describes its earlier candidate and is historical, not current validation of the rebase. This integration was source-reviewed only during the rebase; fresh build, serial tests and actual-path QA belong to the lead and independent QA.
 
 ## Recruiting list implementation (sc-92)
 
@@ -22,7 +22,7 @@ InProgress `study.list-api` defaults OFF. Both Debug and Release apply stored ov
 
 Main owns one Task for initial page, automatic additional pages and pull-to-refresh. Content and cursor survive failed page/refresh requests. Cancelled old tasks cannot overwrite a refreshed list or stop its indicator. Same-ID cards are reconfigured and empty snapshots clear stale selection. See [list design](../product/STUDY_LIST_API_DESIGN.md) and [UI state policy](UI_STATE_POLICY.md).
 
-Opt-in LiveStudyListTests construct Repository directly and check actual page decoding and selected-ID detail lookup. Mapper, page/error helpers and Main state tests remain separate. Automated UI tests, JSON fixtures and thin transport doubles are not added. A source change or green test does not prove manual scrolling/rendering; fresh evidence for this candidate is reported separately.
+During API integration, verify actual page decoding and selected-ID detail lookup and retain dated evidence; no production-dependent XCTest suite is maintained. Mapper, page/error helpers and Main state tests remain separate. Automated UI tests, JSON fixtures and thin transport doubles are not added. A source change or green test does not prove manual scrolling/rendering; fresh evidence for this candidate is reported separately.
 
 ## sc-92 implementation evidence (2026-10-03)
 

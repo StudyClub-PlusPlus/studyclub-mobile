@@ -122,19 +122,6 @@ final class MainViewController: UIViewController {
     private func updateViews() {
         if !viewModel.isRefreshing { refreshControl.endRefreshing() }
         navigationItem.prompt = viewModel.refreshError
-        let items = viewModel.items
-        let previousItems = itemsByID
-        let previousIDs = Set(dataSource.snapshot().itemIdentifiers)
-        itemsByID = Dictionary(uniqueKeysWithValues: items.map { ($0.id, $0) })
-        var snapshot = NSDiffableDataSourceSnapshot<Section, Study.ID>()
-        snapshot.appendSections([.main])
-        snapshot.appendItems(items.map(\.id), toSection: .main)
-        snapshot.reconfigureItems(items.compactMap { item in
-            previousIDs.contains(item.id) && previousItems[item.id] != item ? item.id : nil
-        })
-        dataSource.apply(snapshot, animatingDifferences: view.window != nil) { [weak self] in
-            self?.loadMoreIfNeeded()
-        }
         collectionView.isHidden = false
         switch viewModel.currentState {
         case .loading: stateView.updateViews(.loading)
@@ -146,6 +133,33 @@ final class MainViewController: UIViewController {
             ofKind: UICollectionView.elementKindSectionFooter
         ) {
             footer.updateViews(viewModel.pageState)
+        }
+        updateSnapshot()
+    }
+
+    private func updateSnapshot() {
+        let items = viewModel.items
+        let currentSnapshot = dataSource.snapshot()
+        let ids = items.map(\.id)
+        guard currentSnapshot.sectionIdentifiers.isEmpty
+            || currentSnapshot.itemIdentifiers != ids
+            || items.contains(where: { itemsByID[$0.id] != $0 })
+        else {
+            // An unchanged successful page can still advance the raw cursor.
+            loadMoreIfNeeded()
+            return
+        }
+        let previousItems = itemsByID
+        let previousIDs = Set(currentSnapshot.itemIdentifiers)
+        itemsByID = Dictionary(uniqueKeysWithValues: items.map { ($0.id, $0) })
+        var snapshot = NSDiffableDataSourceSnapshot<Section, Study.ID>()
+        snapshot.appendSections([.main])
+        snapshot.appendItems(ids, toSection: .main)
+        snapshot.reconfigureItems(items.compactMap { item in
+            previousIDs.contains(item.id) && previousItems[item.id] != item ? item.id : nil
+        })
+        dataSource.apply(snapshot, animatingDifferences: view.window != nil) { [weak self] in
+            self?.loadMoreIfNeeded()
         }
     }
 
