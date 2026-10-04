@@ -4,7 +4,6 @@ struct StudyListResponseDTO: Decodable, Sendable {
     let items: [StudyDTO]
     let total: Int
     let offset: Int
-    let limit: Int
 }
 
 struct StudyDTO: Decodable, Sendable {

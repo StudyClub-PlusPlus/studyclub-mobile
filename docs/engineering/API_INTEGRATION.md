@@ -16,7 +16,7 @@ Opt-in LiveStudyDetailTests construct Repository() and require STUDYCLUB_LIVE_AP
 
 `GET /api/studies?status=RECRUITING&offset=0&limit=20` uses the fixed Production URL. Router/Client accept offset and limit; Repository fixes limit to 20 and returns Domain StudyPage. The latest fixed source `94eb15f13c4b561e0d84ba77085c336365b25dad` uses flat items in a page object, with numeric studyId and phase (RECRUITING/ONGOING/CLOSED). Earlier OPEN/cohort notes are historical.
 
-The list DTO reads only used fields: studyId, category, title, oneLineSummary, currentApplicants, nullable capacity, phase and closingSoon; page metadata uses Int. Slug, images and unused fields are omitted. Mapper converts positive numeric ID to String Study.ID and preserves nullable capacity. currentApplicants counts ACTIVE/PAUSED participants, not application forms. Count above capacity is not inherently invalid. Domain values are formatted in Presentation.
+The list DTO reads only used fields: studyId, category, title, oneLineSummary, currentApplicants, nullable capacity, phase and closingSoon; page metadata uses Int. Slug, images and unused fields are omitted. Mapper converts the supplied numeric ID to String Study.ID and preserves server values without semantic rejection. currentApplicants counts ACTIVE/PAUSED participants, not application forms. Count above capacity is not inherently invalid. Domain values are formatted in Presentation.
 
 InProgress `study.list-api` defaults OFF. Both Debug and Release apply stored overrides. OFF uses trusted Domain samples without transport; ON selects Debug saved Repository mode or Release Real. No new flag catalog/Client protocol/Session injection is introduced. Detail keeps its independent flag and ID lookup.
 

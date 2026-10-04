@@ -3,7 +3,7 @@
 ## Unit tests
 
 - DTO-to-Domain mapping, including optional/default handling and invalid member counts
-- pure response validation: empty/unique lists, duplicate identifier rejection and requested detail identity
+- pure response validation: requested list offset and requested detail identity; Main owns duplicate identifier rejection
 - pure error classification: cancellation preservation, Domain error preservation and transport/unexpected failure translation
 - ViewModel initialization triggers one request; loading-to-content/empty/failure transitions
 - Display values are ready before notification and available to late subscribers

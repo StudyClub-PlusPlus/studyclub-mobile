@@ -4,11 +4,6 @@ import XCTest
 final class StudyResponseValidationTests: XCTestCase {
     private let repository = Repository()
 
-    private func study(id: String) -> Study {
-        Study(id: id, category: .software, title: "Study", summary: "Summary",
-              participantCount: 1, capacity: 4, phase: .recruiting, closingSoon: false)
-    }
-
     private func detail(id: String) -> StudyDetail {
         StudyDetail(id: id, title: "Study", description: "Description", category: .software,
                     studyKind: .study, thumbnailURL: nil, deliveryFormat: .online,
@@ -16,35 +11,17 @@ final class StudyResponseValidationTests: XCTestCase {
                     recruitDeadlineAt: nil, startAt: nil, endAt: nil)
     }
 
-    func testEmptyListIsValid() throws {
-        try repository.validateUniqueStudyIDs([])
-    }
-
-    func testDifferentIDsAreValid() throws {
-        try repository.validateUniqueStudyIDs([study(id: "first"), study(id: "second")])
-    }
-
-    func testDuplicateIDsAreRejected() {
-        XCTAssertThrowsError(try repository.validateUniqueStudyIDs([study(id: "same"), study(id: "same")])) {
-            XCTAssertEqual($0 as? RepositoryError, .invalidData)
-        }
-    }
-
-    func testPageAcceptsChangingTotalRatherThanRequiringOneSnapshot() throws {
+    func testPageAcceptsChangingTotalAndServerPageSize() throws {
         try repository.validatePage(
-            StudyListResponseDTO(items: [dto], total: 0, offset: 20, limit: 20),
-            expectedOffset: 20, expectedLimit: 20
+            StudyListResponseDTO(items: Array(repeating: dto, count: 21), total: 0, offset: 20),
+            expectedOffset: 20
         )
     }
 
-    func testPageRejectsWrongOffsetLimitAndNegativeTotal() {
-        for page in [
-            StudyListResponseDTO(items: [], total: -1, offset: 0, limit: 20),
-            StudyListResponseDTO(items: [], total: 1, offset: 20, limit: 20),
-            StudyListResponseDTO(items: [], total: 1, offset: 0, limit: 10),
-            StudyListResponseDTO(items: Array(repeating: dto, count: 21), total: 21, offset: 0, limit: 20)
-        ] {
-            XCTAssertThrowsError(try repository.validatePage(page, expectedOffset: 0, expectedLimit: 20))
+    func testPageRejectsDifferentRequestedOffset() {
+        let page = StudyListResponseDTO(items: [], total: 1, offset: 0)
+        XCTAssertThrowsError(try repository.validatePage(page, expectedOffset: 20)) {
+            XCTAssertEqual($0 as? RepositoryError, .invalidData)
         }
     }
 

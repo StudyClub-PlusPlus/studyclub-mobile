@@ -2,9 +2,9 @@ import XCTest
 @testable import studyclub
 
 final class StudyMapperTests: XCTestCase {
-    func testMapsNumericIDAndNullableCapacityWithoutInventingFields() throws {
+    func testMapsNumericIDAndNullableCapacityWithoutInventingFields() {
         let dto = makeDTO(capacity: nil)
-        let study = try dto.toDomain()
+        let study = dto.toDomain()
         XCTAssertEqual(study.id, "42")
         XCTAssertEqual(study.category, .software)
         XCTAssertEqual(study.summary, "요약")
@@ -13,23 +13,15 @@ final class StudyMapperTests: XCTestCase {
         XCTAssertEqual(StudyCardCellViewModel(study: study).memberText, "참여 3명 · 정원 제한 없음")
     }
 
-    func testCountAboveCapacityRemainsValidAndKnownOtherPhaseIsDisplayed() throws {
-        let study = try makeDTO(count: 9, capacity: 8, phase: .ongoing).toDomain()
+    func testCountAboveCapacityRemainsValidAndKnownOtherPhaseIsDisplayed() {
+        let study = makeDTO(count: 9, capacity: 8, phase: .ongoing).toDomain()
         XCTAssertEqual(study.participantCount, 9)
         XCTAssertEqual(StudyCardCellViewModel(study: study).statusText, "진행 중")
     }
 
-    func testClosingSoonIsNotDisplayedForClosedPhase() throws {
-        let study = try makeDTO(phase: .closed, closingSoon: true).toDomain()
+    func testClosingSoonIsNotDisplayedForClosedPhase() {
+        let study = makeDTO(phase: .closed, closingSoon: true).toDomain()
         XCTAssertEqual(StudyCardCellViewModel(study: study).statusText, "종료")
-    }
-
-    func testInvalidIdentityTitleCountAndCapacityAreRejected() {
-        for dto in [makeDTO(id: 0), makeDTO(title: " \n"), makeDTO(count: -1), makeDTO(capacity: 0)] {
-            XCTAssertThrowsError(try dto.toDomain()) {
-                XCTAssertEqual($0 as? RepositoryError, .invalidData)
-            }
-        }
     }
 
     private func makeDTO(

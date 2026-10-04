@@ -1,16 +1,7 @@
 import Foundation
 
 extension StudyDTO {
-    func toDomain() throws -> Study {
-        guard
-            studyId > 0,
-            !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
-            currentApplicants >= 0,
-            capacity.map({ $0 > 0 }) ?? true
-        else {
-            throw RepositoryError.invalidData
-        }
-
+    func toDomain() -> Study {
         return Study(
             id: String(studyId),
             category: category,

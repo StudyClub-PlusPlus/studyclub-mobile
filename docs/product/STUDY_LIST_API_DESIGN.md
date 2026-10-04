@@ -33,7 +33,7 @@ page DTO → Mapper / Repository validation → Domain StudyPage → 카드 표�
 선택된 Study.ID → DetailViewModel → 별도 GET /api/studies/{id}
 ```
 
-Page DTO는 items와 Int total/offset/limit을 읽는다. Domain page는 studies/totalCount/offset이면 충분하며 서버 DTO가 Presentation으로 나가지 않는다. 아래는 목록에서 사용할 요약 필드다.
+Page DTO는 items와 Int total/offset을 읽는다. 응답 limit은 사용하지 않으므로 생략한다. Repository는 요청·응답 offset 일치만 확인하며 다음 cursor는 원 응답 개수로 계산한다. Domain page는 studies/totalCount/offset이면 충분하며 서버 DTO가 Presentation으로 나가지 않는다. 아래는 목록에서 사용할 요약 필드다.
 
 | 필드 | Swift 타입 | 의미 |
 |---|---|---|
@@ -48,7 +48,7 @@ Page DTO는 items와 Int total/offset/limit을 읽는다. Domain page는 studies
 
 slug·이미지·일정·시간대·기타 미사용 필드는 목록 DTO에 복제하지 않는다. 기존 상세 DTO의 사용 필드는 유지한다. 필수 필드 누락·잘못된 타입·unknown enum을 임의 기본값으로 숨기지 않는다. 현재 필드에는 custom `init(from:)`가 필수는 아니다.
 
-Mapper는 양수 ID, 유효한 제목, 참여 수≥0, nullable/양수 정원을 검증한다. 정원 초과 참여 수를 일괄 거부하지 않는다. 서버는 모집 마감을 count≥capacity로 판정하며 정원 변경 등의 경우가 가능하다. phase를 앱 시간으로 재계산하거나 closingSoon을 자리 부족으로 해석하지 않는다. 기존 topics를 정리한다면 MockRepository의 Detail 샘플 생성에 필요한 내용은 별도로 보존한다.
+Mapper는 서버 값을 그대로 Domain으로 변환하고 ID·제목·참여 수·정원을 별도로 검증하지 않는다. 정원 초과 참여 수를 일괄 거부하지 않는다. 서버는 모집 마감을 count≥capacity로 판정하며 정원 변경 등의 경우가 가능하다. phase를 앱 시간으로 재계산하거나 closingSoon을 자리 부족으로 해석하지 않는다. 기존 topics를 정리한다면 MockRepository의 Detail 샘플 생성에 필요한 내용은 별도로 보존한다.
 
 ## 페이지·갱신·실패 처리
 

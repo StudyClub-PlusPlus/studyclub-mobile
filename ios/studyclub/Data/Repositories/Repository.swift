@@ -22,9 +22,8 @@ struct Repository: RepositoryProtocol {
             }
             let response = try await client.fetchStudies(offset: offset, limit: limit)
             try Task.checkCancellation()
-            try validatePage(response, expectedOffset: offset, expectedLimit: limit)
-            let studies = try response.items.map { try $0.toDomain() }
-            try validateUniqueStudyIDs(studies)
+            try validatePage(response, expectedOffset: offset)
+            let studies = response.items.map { $0.toDomain() }
             return StudyPage(studies: studies, totalCount: response.total, offset: response.offset)
         } catch {
             throw mapError(error)
@@ -47,25 +46,8 @@ extension Repository {
         return RepositoryError.unavailable
     }
 
-    func validatePage(
-        _ response: StudyListResponseDTO,
-        expectedOffset: Int,
-        expectedLimit: Int
-    ) throws {
-        guard
-            response.total >= 0,
-            response.offset == expectedOffset,
-            response.offset >= 0,
-            response.limit == expectedLimit,
-            response.limit > 0,
-            response.items.count <= response.limit
-        else {
-            throw RepositoryError.invalidData
-        }
-    }
-
-    func validateUniqueStudyIDs(_ studies: [Study]) throws {
-        guard Set(studies.map(\.id)).count == studies.count else {
+    func validatePage(_ response: StudyListResponseDTO, expectedOffset: Int) throws {
+        guard response.offset == expectedOffset else {
             throw RepositoryError.invalidData
         }
     }
