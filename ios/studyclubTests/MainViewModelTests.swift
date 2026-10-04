@@ -60,14 +60,18 @@ final class MainViewModelTests: XCTestCase {
         withExtendedLifetime(subscription) {}
     }
 
-    func testDuplicateIdentifiersTransitionToFailureInsteadOfCrashing() async {
-        let duplicate = makeStudy(id: "duplicate", title: "중복 스터디")
-        let repository = TestStudyRepository(behaviors: [.success([duplicate, duplicate])])
+    func testDuplicateIdentifiersKeepFirstPositionAndLatestValue() async {
+        let first = makeStudy(id: "duplicate", title: "이전 값")
+        let other = makeStudy(id: "other", title: "다른 스터디")
+        let latest = makeStudy(id: "duplicate", title: "최신 값")
+        let repository = TestStudyRepository(behaviors: [.success([first, other, latest])])
         let viewModel = MainViewModel(repository: repository)
 
-        await waitUntil { viewModel.currentState == .failure }
+        await waitUntil { viewModel.currentState == .content }
 
-        XCTAssertNil(viewModel.study(for: "duplicate"))
+        XCTAssertEqual(viewModel.items.map(\.id), ["duplicate", "other"])
+        XCTAssertEqual(viewModel.items.first?.title, latest.title)
+        XCTAssertEqual(viewModel.study(for: "duplicate"), latest)
     }
 
     private func makeStudy(id: String, title: String) -> Study {

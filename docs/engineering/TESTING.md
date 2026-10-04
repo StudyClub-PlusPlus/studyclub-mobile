@@ -3,7 +3,7 @@
 ## Unit tests
 
 - DTO-to-Domain mapping, including optional/default handling and invalid member counts
-- pure response validation: requested list offset and requested detail identity; Main owns duplicate identifier rejection
+- pure response validation: requested list offset and requested detail identity; Main owns ID-based merging
 - pure error classification: cancellation preservation, Domain error preservation and transport/unexpected failure translation
 - ViewModel initialization triggers one request; loading-to-content/empty/failure transitions
 - Display values are ready before notification and available to late subscribers
@@ -43,4 +43,4 @@ Custom accessibility and large-text QA are deferred at this product stage. Do no
 
 ## Main pagination
 
-Use Domain-only test repositories to control page completion. Check cursor advancement from raw count, cross-page duplicate updates, duplicate-trigger suppression, failed-page same-offset retry, refresh failure preservation, successful empty clearing, and cancelled success/error not changing a newer request. Test real decoding separately via opt-in LiveStudyListTests; no JSON fixture/Client injection is needed. Main UI needs fresh manual evidence for content, refresh, empty/failure pull gestures and footer recovery.
+Use Domain-only test repositories to control page completion. Check cursor advancement from raw count, within-page and cross-page duplicate updates, duplicate-trigger suppression, failed-page same-offset retry, refresh failure preservation, successful empty clearing, and cancelled success/error not changing a newer request. Test real decoding separately via opt-in LiveStudyListTests; no JSON fixture/Client injection is needed. Main UI needs fresh manual evidence for content, refresh, empty/failure pull gestures and footer recovery.

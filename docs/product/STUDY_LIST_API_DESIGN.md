@@ -55,7 +55,7 @@ Mapper는 서버 값을 그대로 Domain으로 변환하고 ID·제목·참여 �
 초기 loading/content/empty/failure는 유지한다. 추가 로딩과 refresh는 기존 content를 보존한다.
 
 - 다음 offset은 `response.offset + response.items.count`다. 중복 제거 후 표시 개수로 계산하지 않는다. offset+count<total일 때 다음 페이지 후보이며, 끝에 도달하거나 요청 중이면 추가 호출하지 않는다.
-- 같은 페이지의 중복 ID는 invalidData다. 페이지 사이 같은 ID는 기존 위치를 유지하며 최신 표시 값으로 교체한다.
+- 페이지 내부·페이지 사이 같은 ID는 저장 과정에서 기존 위치를 유지하고 마지막 값으로 교체한다. 첫 로딩·새로고침·추가 페이지가 동일한 병합 경로를 사용하므로 중복을 별도로 검사해 실패시키지 않는다.
 - total과 phase는 조회 중 바뀔 수 있으므로 단순 수 불일치나 알려진 다른 phase를 모두 오류로 만들지 않는다. Offset 방식의 중복 제거는 변동으로 인한 누락까지 보장하지 않는다.
 - 첫 items=0,total=0은 empty다. count=0인데 offset<total이면 자동 진행을 멈추고 refresh를 안내한다. content가 없으면 failure, 있으면 기존 목록을 유지한다.
 - 추가 페이지 일반 실패는 목록·실패 offset을 유지하고 footer에서 해당 페이지를 재시도한다. 같은 footer 노출로 실패 요청을 자동 반복하지 않는다.

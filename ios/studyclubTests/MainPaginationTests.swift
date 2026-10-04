@@ -12,18 +12,18 @@ final class MainPaginationTests: XCTestCase {
             if $0 == .content { contentNotifications += 1 }
         }
         await waitUntil { await repository.count == 1 }
-        await repository.complete(0, .success(page([study("1"), study("2")], total: 4)))
+        await repository.complete(0, .success(page([study("1"), study("2"), study("1")], total: 6)))
         await waitUntil { viewModel.currentState == .content }
 
         viewModel.loadMore()
         viewModel.loadMore()
         await waitUntil { await repository.count == 2 }
         let requested = await repository.offsets
-        XCTAssertEqual(requested, [0, 2])
-        await repository.complete(1, .success(page([study("2", title: "更新"), study("3")], total: 4, offset: 2)))
+        XCTAssertEqual(requested, [0, 3])
+        await repository.complete(1, .success(page([study("2"), study("3"), study("2", title: "최신 값")], total: 6, offset: 3)))
         await waitUntil { viewModel.pageState == .idle }
         XCTAssertEqual(viewModel.items.map(\.id), ["1", "2", "3"])
-        XCTAssertEqual(viewModel.study(for: "2")?.title, "更新")
+        XCTAssertEqual(viewModel.study(for: "2")?.title, "최신 값")
         XCTAssertGreaterThan(contentNotifications, 1)
         viewModel.loadMore()
         await Task.yield()
@@ -86,11 +86,13 @@ final class MainPaginationTests: XCTestCase {
         await waitUntil { await repository.count == 2 }
         viewModel.refresh()
         await waitUntil { await repository.count == 3 }
-        await repository.complete(2, .success(page([study("9")], total: 1)))
+        await repository.complete(2, .success(page([study("9"), study("8"), study("9", title: "갱신 값")], total: 3)))
         await waitUntil { !viewModel.isRefreshing }
         await repository.complete(1, .success(page([study("2")], total: 2, offset: 1)))
         await Task.yield()
-        XCTAssertEqual(viewModel.items.map(\.id), ["9"])
+        XCTAssertEqual(viewModel.items.map(\.id), ["9", "8"])
+        XCTAssertEqual(viewModel.study(for: "9")?.title, "갱신 값")
+        XCTAssertNil(viewModel.study(for: "1"))
         XCTAssertNil(viewModel.study(for: "2"))
     }
 

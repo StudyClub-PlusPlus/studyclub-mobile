@@ -74,9 +74,6 @@ final class MainViewModel {
             do {
                 let page = try await repository.fetchStudies(offset: request.offset)
                 guard !Task.isCancelled, let self else { return }
-                guard Set(page.studies.map(\.id)).count == page.studies.count else {
-                    throw RepositoryError.invalidData
-                }
                 self.apply(page, for: request)
             } catch {
                 guard !Task.isCancelled, let self else { return }
@@ -106,19 +103,21 @@ final class MainViewModel {
             handleFailure(for: request)
             return
         }
-        if case .more = request {
-            for study in page.studies {
-                let item = StudyCardCellViewModel(study: study)
-                if let index = items.firstIndex(where: { $0.id == study.id }) {
-                    items[index] = item
-                } else {
-                    items.append(item)
-                }
-                studiesByID[study.id] = study
+        switch request {
+        case .initial, .refresh:
+            studiesByID.removeAll()
+            items.removeAll()
+        case .more:
+            break
+        }
+        for study in page.studies {
+            let item = StudyCardCellViewModel(study: study)
+            if let index = items.firstIndex(where: { $0.id == study.id }) {
+                items[index] = item
+            } else {
+                items.append(item)
             }
-        } else {
-            studiesByID = Dictionary(uniqueKeysWithValues: page.studies.map { ($0.id, $0) })
-            items = page.studies.map(StudyCardCellViewModel.init)
+            studiesByID[study.id] = study
         }
         nextOffset = offset < page.totalCount && !page.studies.isEmpty ? offset : nil
         pageState = .idle
