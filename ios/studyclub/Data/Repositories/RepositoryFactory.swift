@@ -1,67 +1,19 @@
-import Foundation
-
 enum RepositoryFactory {
-    static func makeStudyRepository(
-        arguments: [String] = ProcessInfo.processInfo.arguments
-    ) -> any RepositoryProtocol {
+    static func makeStudyRepository() -> any RepositoryProtocol {
         #if DEBUG
-        // Deterministic UI scenarios override saved developer settings for that launch only.
-        let mode: RepositoryMode = arguments.contains("--mock-scenario") ? .mock : makeRepositoryModeStore().mode
-        return makeStudyRepository(mode: mode, arguments: arguments)
-        #else
-        return makeStudyRepository(mode: .defaultMode)
-        #endif
-    }
-
-    static func makeStudyRepository(mode: RepositoryMode, arguments: [String] = []) -> any RepositoryProtocol {
-        if mode == .real { return Repository(client: AlamofireStudyAPIClient()) }
-        let scenario = mockScenario(from: arguments)
-        let client = MockStudyAPIClient(scenario: scenario)
-        return Repository(client: client)
-    }
-
-    static func makeDetailRepository(
-        arguments: [String] = ProcessInfo.processInfo.arguments
-    ) -> any RepositoryProtocol {
-        let featureFlagStore = makeFeatureFlagStore()
-        guard featureFlagStore.isEnabled(FeatureFlag.studyDetailAPI.definition) else {
-            return makeStudyRepository(mode: .mock, arguments: arguments)
-        }
-        return makeStudyRepository(arguments: arguments)
-    }
-
-    static func makeLiveStudyRepository(baseURL: URL) -> any RepositoryProtocol {
-        let client = AlamofireStudyAPIClient(baseURL: baseURL)
-        return Repository(client: client)
-    }
-
-    static func makeRepositoryModeStore() -> any RepositoryModeStoring {
-        UserDefaultsRepositoryModeStore(defaults: makeDevelopmentDefaults())
-    }
-
-    static func makeFeatureFlagStore() -> any FeatureFlagStoring {
-        UserDefaultsFeatureFlagStore(defaults: makeDevelopmentDefaults())
-    }
-
-    private static func makeDevelopmentDefaults() -> UserDefaults {
-        #if DEBUG
-        // UI tests use an isolated persistent suite; ordinary app launches use standard defaults.
-        if let suite = ProcessInfo.processInfo.environment["STUDYCLUB_UI_TEST_SUITE"],
-           suite.hasPrefix("studyclub.ui-tests."), let defaults = UserDefaults(suiteName: suite) {
-            return defaults
+        if DevelopmentSettingsStore().repositoryMode == .mock {
+            return MockRepository()
         }
         #endif
-        return .standard
+        return Repository()
     }
 
-    private static func mockScenario(from arguments: [String]) -> MockStudyScenario {
-        guard
-            let flagIndex = arguments.firstIndex(of: "--mock-scenario"),
-            arguments.indices.contains(flagIndex + 1),
-            let scenario = MockStudyScenario(rawValue: arguments[flagIndex + 1])
-        else {
-            return .content
+    static func makeDetailRepository() -> any RepositoryProtocol {
+        #if DEBUG
+        if !DevelopmentSettingsStore().isEnabled(FeatureFlag.studyDetailAPI.definition) {
+            return MockRepository()
         }
-        return scenario
+        #endif
+        return makeStudyRepository()
     }
 }
