@@ -52,6 +52,8 @@ Mapper는 서버 값을 그대로 Domain으로 변환하고 ID·제목·참여 �
 
 ## 페이지·갱신·실패 처리
 
+아래 페이지·갱신 규칙은 study.list-api ON에 적용한다. Factory는 Debug의 저장 Mock/Real 또는 Release Real만 선택한다. Real 목록 OFF는 API를 호출하지 않고 featureUnavailable을 반환하며 Main은 미제공 상태를 표시한다. Mock OFF는 현재 신뢰 가능한 Domain 첫 페이지를 한 번 표시한다. Main VM·View는 생성 시 고정한 목록 flag로 OFF의 추가 호출·refresh·footer를 차단한다. 상세는 목록 flag와 독립이며 Real 상세 OFF는 API 미호출·기존 failure, Mock 상세는 기존 샘플을 유지한다.
+
 초기 loading/content/empty/failure는 유지한다. 추가 로딩과 refresh는 기존 content를 보존한다.
 
 - 다음 offset은 `response.offset + response.items.count`다. 중복 제거 후 표시 개수로 계산하지 않는다. offset+count<total일 때 다음 페이지 후보이며, 끝에 도달하거나 요청 중이면 추가 호출하지 않는다.

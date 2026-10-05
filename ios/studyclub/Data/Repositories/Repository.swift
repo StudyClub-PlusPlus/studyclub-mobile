@@ -2,8 +2,19 @@ import Alamofire
 
 struct Repository: RepositoryProtocol {
     private let client = StudyAPIClient()
+    private let isListAPIEnabled: Bool
+    private let isDetailAPIEnabled: Bool
+
+    init(
+        isListAPIEnabled: Bool = DevelopmentSettingsStore().isEnabled(FeatureFlag.studyListAPI.definition),
+        isDetailAPIEnabled: Bool = DevelopmentSettingsStore().isEnabled(FeatureFlag.studyDetailAPI.definition)
+    ) {
+        self.isListAPIEnabled = isListAPIEnabled
+        self.isDetailAPIEnabled = isDetailAPIEnabled
+    }
 
     func fetchStudy(id: Study.ID) async throws -> StudyDetail {
+        guard isDetailAPIEnabled else { throw RepositoryError.unavailable }
         do {
             let study = try await client.fetchStudy(id: id).toDomain()
             try Task.checkCancellation()
@@ -15,6 +26,7 @@ struct Repository: RepositoryProtocol {
     }
 
     func fetchStudies(offset: Int) async throws -> StudyPage {
+        guard isListAPIEnabled else { throw RepositoryError.featureUnavailable }
         let limit = 20
         do {
             guard offset >= 0, offset <= Int(Int32.max) else {

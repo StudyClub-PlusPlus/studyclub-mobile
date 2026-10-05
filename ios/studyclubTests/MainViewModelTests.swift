@@ -35,6 +35,19 @@ final class MainViewModelTests: XCTestCase {
         await waitUntil { viewModel.currentState == .empty }
     }
 
+    func testUnavailableFeatureEndsLoadingWithDistinctState() async {
+        let repository = TestStudyRepository(behaviors: [.featureUnavailable])
+        let viewModel = MainViewModel(repository: repository, isListAPIEnabled: false)
+        await waitUntil { viewModel.currentState == .unavailable }
+        XCTAssertTrue(viewModel.items.isEmpty)
+        XCTAssertNil(viewModel.study(for: "selected"))
+        XCTAssertEqual(viewModel.pageState, .idle)
+        XCTAssertFalse(viewModel.isRefreshing)
+        XCTAssertNil(viewModel.refreshError)
+        let requests = await repository.requestCount
+        XCTAssertEqual(requests, 1)
+    }
+
     func testFailureEndsLoadingWithoutRetry() async {
         let repository = TestStudyRepository(behaviors: [.failure])
         let viewModel = MainViewModel(repository: repository)
@@ -109,6 +122,7 @@ private actor TestStudyRepository: RepositoryProtocol {
     enum Behavior: Sendable {
         case success([Study])
         case failure
+        case featureUnavailable
     }
 
     private(set) var requestCount = 0
@@ -126,6 +140,8 @@ private actor TestStudyRepository: RepositoryProtocol {
         switch behavior {
         case let .success(studies):
             return StudyPage(studies: studies, totalCount: studies.count, offset: offset)
+        case .featureUnavailable:
+            throw RepositoryError.featureUnavailable
         case .failure:
             throw RepositoryError.unavailable
 

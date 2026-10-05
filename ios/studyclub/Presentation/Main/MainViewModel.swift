@@ -4,7 +4,7 @@ import Foundation
 @MainActor
 final class MainViewModel {
     enum LoadState: Equatable {
-        case loading, content, empty, failure
+        case loading, content, empty, failure, unavailable
     }
 
     enum PageState: Equatable {
@@ -25,6 +25,7 @@ final class MainViewModel {
     var currentState: LoadState { stateSubject.value }
 
     private let repository: any RepositoryProtocol
+    let isListAPIEnabled: Bool
     private var studiesByID: [Study.ID: Study] = [:]
     private var nextOffset: Int?
     private var requestTask: Task<Void, Never>?
@@ -34,11 +35,15 @@ final class MainViewModel {
     private(set) var refreshError: String?
 
     convenience init() {
-        self.init(repository: RepositoryFactory.makeListRepository())
+        self.init(
+            repository: RepositoryFactory.makeListRepository(),
+            isListAPIEnabled: DevelopmentSettingsStore().isEnabled(FeatureFlag.studyListAPI.definition)
+        )
     }
 
-    init(repository: any RepositoryProtocol) {
+    init(repository: any RepositoryProtocol, isListAPIEnabled: Bool = true) {
         self.repository = repository
+        self.isListAPIEnabled = isListAPIEnabled
         fetch(.initial)
     }
 
@@ -47,17 +52,17 @@ final class MainViewModel {
     func study(for id: Study.ID) -> Study? { studiesByID[id] }
 
     func loadMore() {
-        guard requestTask == nil, pageState == .idle, let nextOffset else { return }
+        guard isListAPIEnabled, requestTask == nil, pageState == .idle, let nextOffset else { return }
         fetch(.more(nextOffset))
     }
 
     func retryPage() {
-        guard requestTask == nil, pageState == .failure, let nextOffset else { return }
+        guard isListAPIEnabled, requestTask == nil, pageState == .failure, let nextOffset else { return }
         fetch(.more(nextOffset))
     }
 
     func refresh() {
-        guard !isRefreshing else { return }
+        guard isListAPIEnabled, !isRefreshing else { return }
         requestTask?.cancel()
         fetch(.refresh)
     }
@@ -75,6 +80,16 @@ final class MainViewModel {
                 let page = try await repository.fetchStudies(offset: request.offset)
                 guard !Task.isCancelled, let self else { return }
                 self.apply(page, for: request)
+            } catch let error as RepositoryError where error == .featureUnavailable {
+                guard !Task.isCancelled, let self else { return }
+                self.items = []
+                self.studiesByID = [:]
+                self.nextOffset = nil
+                self.pageState = .idle
+                self.isRefreshing = false
+                self.refreshError = nil
+                self.requestTask = nil
+                self.stateSubject.send(.unavailable)
             } catch {
                 guard !Task.isCancelled, let self else { return }
                 self.handleFailure(for: request)
@@ -119,7 +134,7 @@ final class MainViewModel {
             }
             studiesByID[study.id] = study
         }
-        nextOffset = offset < page.totalCount && !page.studies.isEmpty ? offset : nil
+        nextOffset = isListAPIEnabled && offset < page.totalCount && !page.studies.isEmpty ? offset : nil
         pageState = .idle
         isRefreshing = false
         refreshError = nil

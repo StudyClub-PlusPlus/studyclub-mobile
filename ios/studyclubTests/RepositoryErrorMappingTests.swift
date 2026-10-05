@@ -6,6 +6,33 @@ import XCTest
 final class RepositoryErrorMappingTests: XCTestCase {
     private let repository = Repository()
 
+    func testListOFFReturnsFeatureUnavailableRegardlessOfDetailFlag() async {
+        for detailEnabled in [false, true] {
+            let repository = Repository(isListAPIEnabled: false, isDetailAPIEnabled: detailEnabled)
+            // An invalid offset would be invalidData on the enabled request path.
+            for offset in [0, -1] {
+                do {
+                    _ = try await repository.fetchStudies(offset: offset)
+                    XCTFail("Disabled list must not return API data")
+                } catch {
+                    XCTAssertEqual(error as? RepositoryError, .featureUnavailable)
+                }
+            }
+        }
+    }
+
+    func testDetailOFFPreservesUnavailableRegardlessOfListFlag() async {
+        for listEnabled in [false, true] {
+            let repository = Repository(isListAPIEnabled: listEnabled, isDetailAPIEnabled: false)
+            do {
+                _ = try await repository.fetchStudy(id: "18")
+                XCTFail("Disabled detail must not return API data")
+            } catch {
+                XCTAssertEqual(error as? RepositoryError, .unavailable)
+            }
+        }
+    }
+
     func testSwiftCancellationIsPreserved() {
         XCTAssertTrue(repository.mapError(CancellationError()) is CancellationError)
     }
@@ -15,7 +42,7 @@ final class RepositoryErrorMappingTests: XCTestCase {
     }
 
     func testRepositoryErrorMeaningIsPreserved() {
-        for error in [RepositoryError.invalidData, .unavailable, .notFound] {
+        for error in [RepositoryError.invalidData, .unavailable, .notFound, .featureUnavailable] {
             XCTAssertEqual(repository.mapError(error) as? RepositoryError, error)
         }
     }

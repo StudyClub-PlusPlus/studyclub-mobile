@@ -1,3 +1,4 @@
+#if DEBUG
 import Foundation
 
 struct MockRepository: RepositoryProtocol {
@@ -81,3 +82,4 @@ struct MockRepository: RepositoryProtocol {
         )
     }
 }
+#endif

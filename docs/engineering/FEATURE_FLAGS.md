@@ -2,18 +2,18 @@
 
 ## Current foundation
 
-The app catalog in `ios/studyclub/Domain/Configuration/FeatureFlag.swift` contains Ready study.detail-api (default ON) and InProgress study.list-api (default OFF). Ready defaults ON; InProgress defaults OFF. Both Debug and Release resolve persisted overrides before stage defaults. Only Debug exposes developer settings and mutation/reset methods. Repository mode alone differs: Debug follows its saved Mock/Real selection; Release uses Real when the feature is enabled.
+The app catalog in `ios/studyclub/Domain/Configuration/FeatureFlag.swift` contains Ready study.detail-api (default ON) and InProgress study.list-api (default OFF). Ready defaults ON; InProgress defaults OFF. Both Debug and Release resolve persisted overrides before stage defaults. Only Debug exposes developer settings and mutation/reset methods. Repository mode alone differs: Debug follows its saved Mock/Real selection; Release always uses Real. Feature flags never select Mock/Real.
 
-List and detail flags are checked when their ViewModel is created, in both configurations. OFF selects the trusted Domain MockRepository fallback without a real API request. ON uses Debug saved Mock/Real mode or Release Real. MockRepository is included in Release for flag-OFF fallback only. List-OFF also keeps its sample-ID details in that catalog; enabled live list/details require both flags ON.
+Feature flags select new versus previous behavior at the feature's Repository/ViewModel/View boundary, independently of Repository mode. Factory selects Debug saved Mock/Real or Release Real only. Real list OFF makes no API request and returns featureUnavailable; Main shows a distinct unavailable state. List OFF has no pagination, refresh or footer; Mock continues returning trusted Domain samples. Real detail OFF makes no API request and returns unavailable to preserve its previous failure presentation; ON calls the sc-93 API. Mock detail keeps its Domain samples. The list flag never changes detail behavior or implementation.
 
 ## Add a feature
 
 1. Add a real feature case to `FeatureFlag` and its `FeatureFlagDefinition` with a stable explicit ID, readable name and `.inProgress` stage. `CaseIterable` synthesizes the catalog; `FeatureFlag.definitions` maps it to the development rows.
 2. Read configuration through the concrete `DevelopmentSettingsStore`, which owns a private standard UserDefaults value without an injection initializer. Internal development settings have no automated unit suite; do not add a protocol or factory wrapper solely for tests. Query `store.isEnabled(FeatureFlag.yourFeature.definition)` at the relevant feature boundary.
 3. Guard the unfinished behavior and side effects, not only the visible entry button. Keep the existing OFF path usable. Test both ON and OFF paths before merging a small feature slice to trunk.
-4. Flag reads are live in both configurations. Specify when that feature reads its flag (screen creation, action or another explicit boundary). A settings toggle changes the next lookup; it does not automatically recreate every existing screen or cancel work.
-5. Move the same ID to `.ready` only when the ON path is intended as the app default, including Release. Renaming the display name or moving the stage must not change the storage ID. Existing persisted overrides remain until reset.
-6. Once the feature is stable and its fallback is no longer needed, remove the flag, old branch and obsolete tests in the same bounded change. Do not keep completed flags indefinitely.
+4. Store reads are live in both configurations. Real Repository and MainViewModel capture immutable feature values at creation; an existing screen keeps that snapshot. Specify when that feature reads its flag (screen creation, action or another explicit boundary). A settings toggle changes the next lookup; it does not automatically recreate every existing screen or cancel work.
+5. After QA for the intended deployment, move the same ID from `.inProgress` (default OFF) to `.ready` (default ON), including Release. This change does not change stages. Renaming the display name or moving the stage must not change the storage ID. Existing persisted overrides remain until reset.
+6. After stability is confirmed around a later deployment, remove the flag and its previous else branch together, with obsolete tests, in the same bounded change. This change does not remove flags. Do not keep completed flags indefinitely.
 
 ## Reset semantics
 

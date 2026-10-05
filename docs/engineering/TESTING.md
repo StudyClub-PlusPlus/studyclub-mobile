@@ -2,10 +2,12 @@
 
 ## Unit tests
 
+Feature-boundary tests directly verify Real OFF errors, distinct Main unavailable presentation and OFF suppression of repeated requests with immutable bool inputs. Existing ON pagination/refresh tests remain. These are feature behavior tests, not an internal settings suite. No Client injection or live endpoint tests are added.
+
 - DTO-to-Domain mapping, including optional/default handling and invalid member counts
 - pure response validation: requested list offset and requested detail identity; Main owns ID-based merging
 - pure error classification: cancellation preservation, Domain error preservation and transport/unexpected failure translation
-- ViewModel initialization triggers one request; loading-to-content/empty/failure transitions
+- ViewModel initialization triggers one request; loading-to-content/empty/failure/unavailable transitions
 - Display values are ready before notification and available to late subscribers
 - display formatting that contains non-trivial policy
 
@@ -35,7 +37,7 @@ Do not report a build, test, or visual pass from output produced before the last
 ## Development settings verification
 
 - Internal Development Settings, including Store and ViewModel, have no automated unit suite. Verify relevant changes manually: Ready/InProgress defaults, overrides, persistence, reset and preservation of unrelated preferences. The app catalog contains Ready `study.detail-api` and InProgress `study.list-api`.
-- For relevant changes, manually verify Main tab long press, rejected normal taps/Setting long press, SwiftUI hosting updates and Close. Verify Mock/Real selection rebuilds tabs and follows the saved mode after relaunch; Release must use Real for enabled features even when Debug saved Mock. Verify detail flag OFF uses Mock and ON follows the saved mode, plus reset and relaunch persistence; there are no launch-time flag fixtures.
+- For relevant changes, manually verify Main tab long press, rejected normal taps/Setting long press, SwiftUI hosting updates and Close. Verify Mock/Real selection rebuilds tabs and follows the saved mode after relaunch; Release must always use Real even when Debug saved Mock. Verify flags never change repository type: Real list OFF makes no request and shows unavailable; Real detail OFF makes no request and shows failure; Mock detail keeps its samples in every flag combination. Verify Main OFF requests once without refresh, pagination or footer and ON retains those behaviors, plus reset and relaunch persistence; there are no launch-time flag fixtures.
 
 Build the ordinary Release app. When this boundary changes, manually verify that Release has no Development Settings entry, ignores saved Repository mode, and applies the same saved FeatureFlag overrides as Debug.
 
@@ -45,4 +47,4 @@ Custom accessibility and large-text QA are deferred at this product stage. Do no
 
 Use Domain-only test repositories to control page completion. Check cursor advancement from raw count, within-page and cross-page duplicate updates, duplicate-trigger suppression, failed-page same-offset retry, refresh failure preservation, successful empty clearing, and cancelled success/error not changing a newer request. Verify actual decoding during API development; no maintained live tests, JSON fixture or Client injection is needed. Main UI needs fresh manual evidence for content, refresh, empty/failure pull gestures and footer recovery.
 
-MockRepository keeps 65 trusted Domain studies, paged in groups of 20, with matching-ID details. Use this ordinary Debug Mock mode for manual multi-page scrolling and end-of-list checks; no transport scenario or test-only app configuration is needed.
+MockRepository keeps 65 trusted Domain studies, paged in groups of 20, with matching-ID details. Use this ordinary Debug Mock mode with list ON for manual multi-page scrolling and end-of-list checks; list OFF displays the first page once without refresh or pagination; no transport scenario or test-only app configuration is needed.

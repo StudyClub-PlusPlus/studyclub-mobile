@@ -1,8 +1,10 @@
 # UI State Policy
 
-Main and Detail use loading/content/empty/failure. Display values are stored before a private CurrentValueSubject sends a read-only publisher notification. Views read the current values; late subscribers receive the current state. Detail requests once from init through a private method and retains its existing missing/invalid/mismatched-ID empty policy.
+Main uses loading/content/empty/failure/unavailable; Detail keeps loading/content/empty/failure. Main unavailable means the feature is not provided, rather than an empty response or request failure. Display values are stored before a private CurrentValueSubject sends a read-only publisher notification. Views read the current values; late subscribers receive the current state. Detail requests once from init through a private method and retains its existing missing/invalid/mismatched-ID empty policy.
 
 ## Main list requests
+
+Main captures the list flag at creation. The pagination/refresh rules below apply to ON. OFF requests once, disables refresh/loadMore/retryPage, omits the footer and refresh control, and hides collection content behind a state surface. Debug Mock shows its current trusted first-page samples. Real OFF returns featureUnavailable before transport, clears selection and ends loading with unavailable. Real detail OFF returns unavailable before transport and preserves its existing failure state; Mock detail and detail behavior are independent of the list flag.
 
 Main starts the first page from init. It also exposes loadMore, retryPage and refresh for infinite scrolling, failed-page retry and native pull-to-refresh. One stored Task owns the current request. Refresh cancels an older request; a cancelled Task must not mutate display values, requestTask or indicators in success, catch or completion. Repeated refresh and concurrent pagination are suppressed. There is no request generation counter or general request framework.
 

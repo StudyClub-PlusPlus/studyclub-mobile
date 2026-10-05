@@ -27,8 +27,9 @@ Main states:
 - Content: at least one study is visible.
 - Empty: the request succeeded with no study.
 - Failure: the request failed; error copy is shown without retry.
+- Unavailable: the Real list feature is OFF; no API request is made and neutral preparation copy is shown.
 
-Main requests a recruiting page from init, loads more automatically near the end, and supports native pull-to-refresh. One stored Task cancels and suppresses older results. Page failures keep content with same-offset retry. See STUDY_LIST_API_DESIGN.md for the current contract.
+Main captures study.list-api at creation. ON requests a recruiting page from init, loads more automatically near the end, and supports native pull-to-refresh. OFF has no refresh, pagination or footer: Debug Mock requests its trusted first-page samples once; Real returns featureUnavailable without an API request and shows “아직 제공되지 않는 기능이에요”. This unavailable state is distinct from successful empty results and request failure. One stored Task cancels and suppresses older results. Page failures keep content with same-offset retry. See STUDY_LIST_API_DESIGN.md for the current contract.
 
 Selecting an item opens Detail for that exact stable ID. Detail fetches independently by ID; the list payload is not its content source.
 
@@ -47,7 +48,7 @@ Detail starts loading when its ViewModel is initialized and exposes loading, con
 
 There is no join action, editing, or persistence.
 
-The client and repository expose separate list and detail operations: `fetchStudies(offset:)` and `fetchStudy(id:)`. Mock detail lookup uses an independent request. Live detail uses the public web API `GET /api/studies/{studyId}` without authentication. The Ready `study.detail-api` Feature Flag defaults ON. OFF uses MockRepository. List-OFF also keeps sample-ID details in the sample catalog. ON follows saved Mock/Real in Debug and Real in Release. Release uses Real for enabled features and reads the same saved FeatureFlag overrides as Debug. Real detail targets the public Production API. A 404 is mapped to the empty state. `StudyDetailDTO` stays in Data and maps to the separate `StudyDetail` Domain model; the list DTO is not reused because the server contracts differ.
+The client and repository expose separate list and detail operations: `fetchStudies(offset:)` and `fetchStudy(id:)`. Mock detail lookup uses an independent request. Live detail uses the public web API `GET /api/studies/{studyId}` without authentication. The Ready `study.detail-api` Feature Flag defaults ON and is captured by Real Repository at creation. Real OFF returns unavailable without an API request and preserves Detail failure; ON calls the existing API. Mock detail always uses its trusted samples. Factory follows saved Mock/Real in Debug and always Real in Release, independently of both flags. Release reads the same saved FeatureFlag overrides as Debug. Real detail targets the public Production API. A 404 is mapped to the empty state. `StudyDetailDTO` stays in Data and maps to the separate `StudyDetail` Domain model; the list DTO is not reused because the server contracts differ.
 
 The current backend detail response does not include the current applicant count, so Detail displays capacity without inventing a current-member value. Thumbnail loading and application actions are outside this issue.
 
@@ -62,6 +63,6 @@ The iOS and Android implementations may use different UI frameworks, but state m
 
 The backend Controller and StudyDetailResponse source, plus deployed Production responses, are the contract reference; the old get-single-study-contract.md describes a different historical response shape. Detail decodes a flat response, uses the current 11-category enum and five lifecycle statuses, and accepts null recruitStatus (omitting that display segment). Numeric ID is the only identity check; server slug and private links are not used.
 
-The detail flag is Ready (default ON). Persisted overrides are read in both Debug and Release. Repository mode still controls Mock/Real and keeps its existing Mock default. Real detail calls the public Production endpoint; there is no automatic fallback to Mock or Production on a Stage failure. StudyRouter owns the fixed Production BaseURL; Client/Session injection and Stage selection are not maintained. sc-92 connects the live paged list behind study.list-api. Sample list IDs stay in the sample detail catalog while the list flag is OFF; live list-to-detail requires both API flags ON.
+The detail flag is Ready (default ON). Persisted overrides are read in both Debug and Release. Repository mode still controls Mock/Real and keeps its existing Mock default. Real detail calls the public Production endpoint; there is no automatic fallback to Mock or Production on a Stage failure. StudyRouter owns the fixed Production BaseURL; Client/Session injection and Stage selection are not maintained. sc-92 connects the live paged list behind study.list-api. The list flag never changes detail behavior or repository type. Debug Mock sample IDs resolve through the same trusted detail catalog in either flag state. Normal live list-to-detail requires both APIs ON.
 
 Actual endpoint decoding and the installed list-to-detail path are checked during API development and recorded as dated evidence. Production-dependent XCTest cases and fixed live IDs are not maintained; unit tests use deterministic Domain inputs. Historical live-test evidence applies only to its recorded candidate.

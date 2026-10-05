@@ -9,19 +9,10 @@ enum RepositoryFactory {
     }
 
     static func makeListRepository() -> any RepositoryProtocol {
-        if !DevelopmentSettingsStore().isEnabled(FeatureFlag.studyListAPI.definition) {
-            return MockRepository()
-        }
-        return makeStudyRepository()
+        makeStudyRepository()
     }
 
     static func makeDetailRepository() -> any RepositoryProtocol {
-        let settings = DevelopmentSettingsStore()
-        // List-OFF cards carry sample IDs, so their detail must stay in the sample catalog.
-        if !settings.isEnabled(FeatureFlag.studyListAPI.definition)
-            || !settings.isEnabled(FeatureFlag.studyDetailAPI.definition) {
-            return MockRepository()
-        }
-        return makeStudyRepository()
+        makeStudyRepository()
     }
 }

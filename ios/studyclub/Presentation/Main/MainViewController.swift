@@ -39,7 +39,7 @@ final class MainViewController: UIViewController {
         super.viewDidLoad()
         configureView()
         configureDataSource()
-        configureFooter()
+        if viewModel.isListAPIEnabled { configureFooter() }
         bindViewModel()
     }
 
@@ -51,8 +51,13 @@ final class MainViewController: UIViewController {
 
         view.addSubview(collectionView)
         collectionView.delegate = self
-        collectionView.refreshControl = refreshControl
-        refreshControl.addTarget(self, action: #selector(refreshList), for: .valueChanged)
+        collectionView.setCollectionViewLayout(
+            Self.makeLayout(isListAPIEnabled: viewModel.isListAPIEnabled), animated: false
+        )
+        if viewModel.isListAPIEnabled {
+            collectionView.refreshControl = refreshControl
+            refreshControl.addTarget(self, action: #selector(refreshList), for: .valueChanged)
+        }
         NSLayoutConstraint.activate([
             collectionView.topAnchor.constraint(equalTo: view.topAnchor),
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -61,9 +66,11 @@ final class MainViewController: UIViewController {
         ])
 
         view.addSubview(stateView)
-        // The existing collection receives pull gestures even while a state surface is shown.
-        stateView.isUserInteractionEnabled = false
-        stateView.backgroundColor = .clear
+        if viewModel.isListAPIEnabled {
+            // ON keeps pull gestures available while a state surface is shown.
+            stateView.isUserInteractionEnabled = false
+            stateView.backgroundColor = .clear
+        }
         NSLayoutConstraint.activate([
             stateView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             stateView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -120,6 +127,25 @@ final class MainViewController: UIViewController {
     }
 
     private func updateViews() {
+        if !viewModel.isListAPIEnabled {
+            // OFF keeps the one-request surface; it has no refresh or pagination.
+            collectionView.isHidden = viewModel.currentState != .content
+            switch viewModel.currentState {
+            case .content:
+                stateView.isHidden = true
+                let items = viewModel.items
+                itemsByID = Dictionary(uniqueKeysWithValues: items.map { ($0.id, $0) })
+                var snapshot = NSDiffableDataSourceSnapshot<Section, Study.ID>()
+                snapshot.appendSections([.main])
+                snapshot.appendItems(items.map(\.id), toSection: .main)
+                dataSource.apply(snapshot, animatingDifferences: view.window != nil)
+            case .loading: stateView.updateViews(.loading)
+            case .empty: stateView.updateViews(.empty)
+            case .failure: stateView.updateViews(.failure)
+            case .unavailable: stateView.updateViews(.unavailable)
+            }
+            return
+        }
         if !viewModel.isRefreshing { refreshControl.endRefreshing() }
         navigationItem.prompt = viewModel.refreshError
         collectionView.isHidden = false
@@ -128,6 +154,7 @@ final class MainViewController: UIViewController {
         case .content: stateView.isHidden = true
         case .empty: stateView.updateViews(.empty)
         case .failure: stateView.updateViews(.failure)
+        case .unavailable: stateView.updateViews(.unavailable)
         }
         for case let footer as StudyListFooterView in collectionView.visibleSupplementaryViews(
             ofKind: UICollectionView.elementKindSectionFooter
@@ -164,13 +191,13 @@ final class MainViewController: UIViewController {
     }
 
     private func loadMoreIfNeeded() {
-        guard viewModel.currentState == .content else { return }
+        guard viewModel.isListAPIEnabled, viewModel.currentState == .content else { return }
         let remaining = collectionView.contentSize.height
             - collectionView.contentOffset.y - collectionView.bounds.height
         if remaining < collectionView.bounds.height { viewModel.loadMore() }
     }
 
-    private static func makeLayout() -> UICollectionViewLayout {
+    private static func makeLayout(isListAPIEnabled: Bool = true) -> UICollectionViewLayout {
         let itemSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1),
             heightDimension: .estimated(176)
@@ -178,13 +205,13 @@ final class MainViewController: UIViewController {
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
         let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
         let section = NSCollectionLayoutSection(group: group)
-        section.boundarySupplementaryItems = [
+        section.boundarySupplementaryItems = isListAPIEnabled ? [
             NSCollectionLayoutBoundarySupplementaryItem(
                 layoutSize: NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .estimated(72)),
                 elementKind: UICollectionView.elementKindSectionFooter,
                 alignment: .bottom
             )
-        ]
+        ] : []
         section.interGroupSpacing = AppTheme.Spacing.medium
         section.contentInsets = NSDirectionalEdgeInsets(
             top: AppTheme.Spacing.regular,

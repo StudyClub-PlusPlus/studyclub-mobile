@@ -4,6 +4,28 @@ import XCTest
 
 @MainActor
 final class MainPaginationTests: XCTestCase {
+    func testOFFRequestsFirstPageOnceAndIgnoresRefreshPaginationAndRetry() async {
+        let repository = ControlledListRepository()
+        let viewModel = MainViewModel(repository: repository, isListAPIEnabled: false)
+        await waitUntil { await repository.count == 1 }
+        // Calls while the initial request is active must not cancel or replace it.
+        viewModel.refresh()
+        viewModel.loadMore()
+        viewModel.retryPage()
+        await repository.complete(0, .success(page([study("1")], total: 65)))
+        await waitUntil { viewModel.currentState == .content }
+        viewModel.refresh()
+        viewModel.loadMore()
+        viewModel.retryPage()
+        for _ in 0..<10 { await Task.yield() }
+        let offsets = await repository.offsets
+        XCTAssertEqual(offsets, [0])
+        XCTAssertEqual(viewModel.items.map(\.id), ["1"])
+        XCTAssertNotNil(viewModel.study(for: "1"))
+        XCTAssertEqual(viewModel.pageState, .idle)
+        XCTAssertFalse(viewModel.isRefreshing)
+    }
+
     func testAutomaticNextPageUsesRawOffsetAndUpdatesDuplicateCard() async {
         let repository = ControlledListRepository()
         let viewModel = MainViewModel(repository: repository)
