@@ -37,7 +37,7 @@ Use the shared `AppTheme` source rather than one-off values. The selected values
 ## Main anatomy
 
 - The app root has two native tabs: “스터디” and “설정”, each with its own navigation stack. Tab switching retains the Main → Detail stack.
-- Setting contains a large “설정” title and an empty native list until settings content is specified.
+- Setting contains a large “설정” title. `auth.google-login` OFF keeps the empty native list. ON shows the account display states described below. Study/Settings tabs and public Main → Detail stay unchanged.
 
 - Large navigation title: “스터디”
 - No added hero or introduction in this slice
@@ -100,6 +100,18 @@ Check safe areas, card alignment, long Korean title/metadata wrapping, empty sum
 
 - No bespoke imagery or remote image loading in the architecture scaffold.
 - No iPad-specific multi-column composition yet; the one-column layout remains readable in regular width.
+
+## 설정 계정 영역 View · SC-56
+
+`SettingViewController`는 큰 “설정” 제목과 네이티브 insetGrouped 목록을 사용한다. `auth.google-login`은 InProgress이며 기본 OFF다. OFF에서는 계정 그룹과 로그인 진입을 숨긴다. ON에서는 기존 ViewModel의 표시 상태를 읽는다.
+
+- 비회원은 설명과 이동 표시가 있는 로그인 행을 표시한다. 확인 중에는 이름 없이 상태 설명과 네이티브 진행 표시를 보여 준다. 상태 확인 실패는 설명과 “다시 확인”을 같은 그룹에 둔다.
+- 회원은 확인된 닉네임과 “로그인됨”을 계정 그룹에 표시한다. 이름 행은 이동 표시·아바타·편집 동작이 없다. “로그아웃”은 제목이 없는 별도 행동 그룹이다.
+- 로그아웃 실패는 회원 정보를 유지한다. 별도 행동 그룹에 실패 설명과 “로그아웃 다시 시도”를 표시한다. 로그아웃 확인은 네이티브 알림의 취소·파괴적 로그아웃 동작을 유지한다.
+- 행은 내용에 맞춰 높이가 늘어나며 이름과 상태 문구는 여러 줄을 허용한다. section과 행은 안정적인 diffable 식별자를 사용한다. 선택은 현재 식별자로 처리하고 실행 전에 인증 플래그와 허용 동작을 다시 확인한다.
+- 디자인 플래그 ON은 기존 AppTheme의 cream 배경·흰 그룹·green 강조를 사용한다. OFF는 시스템 light/dark 색상을 따른다. 네이티브 목록·진행 표시·알림을 재사용한다.
+
+로그인·재확인·로그아웃은 기존 콜백만 전달한다. 연결되지 않은 콜백은 추가 안내 없이 동작하지 않는다. SC-52가 실제 세션 확인과 인증·로그아웃 결과를 연결하며 이 View 작업은 API·인증·저장을 수행하지 않는다. 제어된 native 렌더와 임시 호스트의 Simulator 조작은 실제 Google/API 동작·공개 인증 진입·최종 QA의 증거가 아니다.
 
 ## Development Settings
 
