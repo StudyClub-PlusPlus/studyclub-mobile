@@ -4,16 +4,25 @@
 
 - Start implementation from a matching Notion issue and a work branch. If no ticket exists, draft the purpose, change, scope, completion criteria and verification from the request; ask only for missing details or a consequential decision before creating the ticket. An explicit request to create the ticket and do the already-defined work does not need repeated confirmation.
 - Reuse an existing matching issue. Create new tickets in the team's existing issue database and read back the real issue number and URL before creating the branch. Never invent an issue number or use a GitHub issue/PR number in its place.
-- Use `sc-<Notion issue number>` for the work branch and `[sc-<number>]` for commit/PR prefixes (for example, branch `sc-145` and `[sc-145] refactor: UI 테스트 지원 제거`). Use the repository's integration base. In Orca, create the managed worktree, then verify or rename the generated branch to this exact key before implementation. Link the Notion URL in the worktree comment and ticket body; Orca's `--issue` flag refers to GitHub issues.
+- Use the issue as an epic and create linked implementation records in the existing Notion 작업 database. Use each task's actual generated ID for `junsu/sc-<task ID>` branches and `[sc-<task ID>]` commit/PR prefixes. The epic ID and GitHub PR number are separate identifiers. In Orca, verify or rename the generated branch before implementation. Link both the task and epic in the PR body; Orca's `--issue` flag refers to GitHub issues.
 - The installed `notion-ticket-branch` skill handles task intake, ticket reuse/creation and branch preparation. Ticket creation can reuse the user's existing explicit authorization; pushing, PR creation and merging remain separate actions.
-- Prefix commit messages with the Notion task issue number: `[sc-92] feat: 스터디 목록 빈 상태 화면 추가`.
-- Use the same issue-number prefix in the PR title and include the actual Notion issue URL in the PR body. The Notion issue number and GitHub PR number are separate identifiers.
-- Keep work branches short-lived and PRs small enough to review and integrate into trunk. One issue may have multiple PRs; link them back to that issue.
+- Prefix commit messages with the Notion task ID: `[sc-92] feat: 스터디 목록 빈 상태 화면 추가`.
+- Use the same task-ID prefix in the PR title and include both the task and epic URLs in the PR body. Task IDs, epic IDs and GitHub PR numbers are separate identifiers.
+- Keep one implementation task per PR and aim for one final commit per PR. Consolidate review fixes into that final commit. Keep branches short-lived. Independent tasks start from the latest remote main. A dependent task may branch from its unmerged prerequisite and target that branch in its PR; independent siblings may proceed in parallel. After the prerequisite merges, update the branch onto main and retarget its PR. Combine multiple prerequisite results only in the connection task.
+- Split feature work into flag creation, View implementation with hardcoded data, API work, View/API connection, and Ready transition. When a feature spans several screens, split the View implementation by screen. Name those tasks `로그인 View 구현`, for example; describe hardcoded data in the body rather than calling the screen a shell.
 - Follow [Feature flag workflow](FEATURE_FLAGS.md) for unfinished features, including behavior and side-effect guards and ON/OFF verification.
 - State the PR's completed scope, relevant flag/default, verification evidence, and shared-code impact. PR merge, issue completion, and enabling a feature by default are separate events.
 - Preserve issues completed within an agreed Mock scope. Link later API integration or design changes as follow-up issues.
 
-See the [PR template](../../.github/pull_request_template.md) and [AI handoff](AI_HANDOFF.md).
+See the [task workflow](TASK_WORKFLOW.md), [PR template](../../.github/pull_request_template.md) and [AI handoff](AI_HANDOFF.md). The five starting stages are not a fixed task count. Add independently reviewable feature tasks as needed, and update both the original and new scopes when moving work.
+
+Write the full PRD in the issue body. Keep each task to roughly one line of scope, one line of completion conditions, and a link to the issue PRD. Add design and API/reference links only when relevant; omit the design section when no design exists. Keep dependencies, branch/commit/PR rules and operational status in the common workflow document instead of repeating them in every task.
+
+## PRD and task writing
+
+Apply ASD-STE100 clarity principles approximately 80% in natural Korean: lead with the purpose or result, use familiar terms consistently, and keep one main point per sentence. This is a writing preference, not official STE certification. Use Mermaid for flows, state transitions and dependencies, and tables for comparisons. Include relevant failures, cancellation, flag conditions and unknowns. Distinguish saved diagram source from verified rendering.
+
+Keep PRDs at the product level: purpose, user flow, scope, major policies and completion conditions. Small tasks need only a short scope and completion conditions. Leave exhaustive copy, fonts, spacing, UIKit classes and server field mappings to design, API contracts and code. Use native Notion headings and lists; create native table blocks when needed rather than leaving Markdown pipe strings as text.
 
 ## Naming status
 

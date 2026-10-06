@@ -4,6 +4,8 @@ Use this contract when an AI-assisted task changes the repository. Keep it short
 
 Before implementation, prepare a matching Notion issue and work branch through the intake workflow in [Engineering Conventions](CONVENTIONS.md). Include the actual issue number and URL, branch/base, and any existing PR link in the handoff. Follow the commit/PR issue-number prefix. Do not invent a missing issue or PR number.
 
+The issue is the epic. Use the linked Notion task's actual ID for `junsu/sc-{task ID}` and `[sc-{task ID}]`. Include both task and epic links. Follow [Task workflow](TASK_WORKFLOW.md) when splitting View implementation or adding a separate feature task. Record moved scope, dependencies and the candidate's own verification; an earlier integrated candidate does not verify a later task PR.
+
 ## Required handoff
 
 1. **Outcome** — what now works, in user-facing terms.
