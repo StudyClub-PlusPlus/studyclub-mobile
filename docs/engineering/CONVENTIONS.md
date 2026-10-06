@@ -12,6 +12,7 @@
 - Split feature work into flag creation, View implementation with hardcoded data, API work, View/API connection, and Ready transition. When a feature spans several screens, split the View implementation by screen. Name those tasks `로그인 View 구현`, for example; describe hardcoded data in the body rather than calling the screen a shell.
 - Follow [Feature flag workflow](FEATURE_FLAGS.md) for unfinished features, including behavior and side-effect guards and ON/OFF verification.
 - State the PR's completed scope, relevant flag/default, verification evidence, and shared-code impact. Attach representative images to screen implementation PRs. PR merge, issue completion, and enabling a feature by default are separate events.
+- Keep dependent PRs as Draft while any required prerequisite PR is unmerged. After all prerequisites land in main, confirm the branch, owned diff and verification before marking Ready for review.
 - Preserve issues completed within an agreed Mock scope. Link later API integration or design changes as follow-up issues.
 
 See the [task workflow](TASK_WORKFLOW.md), [PR template](../../.github/pull_request_template.md) and [AI handoff](AI_HANDOFF.md). The five starting stages are not a fixed task count. Add independently reviewable feature tasks as needed, and update both the original and new scopes when moving work.
