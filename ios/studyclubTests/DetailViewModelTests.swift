@@ -116,9 +116,9 @@ private actor DetailRepositoryDouble: RepositoryProtocol {
         self.returnedID = returnedID
     }
 
-    func fetchStudies() async throws -> [Study] {
+    func fetchStudies(offset: Int) async throws -> StudyPage {
         XCTFail("Detail must not fetch the list")
-        return []
+        return StudyPage(studies: [], totalCount: 0, offset: offset)
     }
 
     func fetchStudy(id: Study.ID) async throws -> StudyDetail {

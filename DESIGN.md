@@ -39,6 +39,8 @@ Use the shared `AppTheme` source rather than one-off values.
 
 ## State anatomy
 
+Main list OFF omits pull-to-refresh, pagination and footer UI and keeps a one-request surface. Real OFF shows a neutral info symbol with “아직 제공되지 않는 기능이에요” and “스터디 목록은 준비 중이에요.”, separately from empty or failure. Debug Mock OFF shows its current trusted first-page samples. ON keeps pagination/refresh UI. Feature values are fixed when the screen is created. Detail Real OFF preserves its previous failure surface without an API request; Mock detail remains unchanged.
+
 - Loading: centered activity indicator and short Korean status label
 - Empty: neutral system symbol, “아직 열린 스터디가 없어요”, and supporting copy
 - Failure: error system symbol, “목록을 불러오지 못했어요”, and supporting copy
@@ -74,6 +76,7 @@ Enumerate and capture these surfaces after the last UI edit:
 3. Main empty
 4. Main failure
 5. Main loading
+6. Main Real list OFF unavailable and Debug Mock list OFF content, with no refresh or footer
 
 Check safe areas, card alignment, Korean wrapping, dark-mode semantics, state exclusivity, and correct Detail content. Any blocking finding must be fixed and re-captured before completion.
 

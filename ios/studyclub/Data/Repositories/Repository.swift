@@ -2,8 +2,19 @@ import Alamofire
 
 struct Repository: RepositoryProtocol {
     private let client = StudyAPIClient()
+    private let isListAPIEnabled: Bool
+    private let isDetailAPIEnabled: Bool
+
+    init(
+        isListAPIEnabled: Bool = DevelopmentSettingsStore().isEnabled(FeatureFlag.studyListAPI.definition),
+        isDetailAPIEnabled: Bool = DevelopmentSettingsStore().isEnabled(FeatureFlag.studyDetailAPI.definition)
+    ) {
+        self.isListAPIEnabled = isListAPIEnabled
+        self.isDetailAPIEnabled = isDetailAPIEnabled
+    }
 
     func fetchStudy(id: Study.ID) async throws -> StudyDetail {
+        guard isDetailAPIEnabled else { throw RepositoryError.unavailable }
         do {
             let study = try await client.fetchStudy(id: id).toDomain()
             try Task.checkCancellation()
@@ -14,11 +25,18 @@ struct Repository: RepositoryProtocol {
         }
     }
 
-    func fetchStudies() async throws -> [Study] {
+    func fetchStudies(offset: Int) async throws -> StudyPage {
+        guard isListAPIEnabled else { throw RepositoryError.featureUnavailable }
+        let limit = 20
         do {
-            let studies = try await client.fetchStudies().map { try $0.toDomain() }
-            try validateUniqueStudyIDs(studies)
-            return studies
+            guard offset >= 0, offset <= Int(Int32.max) else {
+                throw RepositoryError.invalidData
+            }
+            let response = try await client.fetchStudies(offset: offset, limit: limit)
+            try Task.checkCancellation()
+            try validatePage(response, expectedOffset: offset)
+            let studies = response.items.map { $0.toDomain() }
+            return StudyPage(studies: studies, totalCount: response.total, offset: response.offset)
         } catch {
             throw mapError(error)
         }
@@ -40,8 +58,8 @@ extension Repository {
         return RepositoryError.unavailable
     }
 
-    func validateUniqueStudyIDs(_ studies: [Study]) throws {
-        guard Set(studies.map(\.id)).count == studies.count else {
+    func validatePage(_ response: StudyListResponseDTO, expectedOffset: Int) throws {
+        guard response.offset == expectedOffset else {
             throw RepositoryError.invalidData
         }
     }

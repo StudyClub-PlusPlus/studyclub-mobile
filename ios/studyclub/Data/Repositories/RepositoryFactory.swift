@@ -8,12 +8,11 @@ enum RepositoryFactory {
         return Repository()
     }
 
+    static func makeListRepository() -> any RepositoryProtocol {
+        makeStudyRepository()
+    }
+
     static func makeDetailRepository() -> any RepositoryProtocol {
-        #if DEBUG
-        if !DevelopmentSettingsStore().isEnabled(FeatureFlag.studyDetailAPI.definition) {
-            return MockRepository()
-        }
-        #endif
-        return makeStudyRepository()
+        makeStudyRepository()
     }
 }

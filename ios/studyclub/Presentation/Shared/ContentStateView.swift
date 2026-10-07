@@ -9,6 +9,7 @@ final class ContentStateView: UIView {
         case loading
         case empty
         case failure
+        case unavailable
     }
 
     private let activityIndicator = {
@@ -86,6 +87,11 @@ final class ContentStateView: UIView {
             imageView.tintColor = AppTheme.Palette.secondaryText
             titleLabel.text = "아직 열린 스터디가 없어요"
             messageLabel.text = "등록된 스터디가 없어요."
+        case .unavailable:
+            imageView.image = UIImage(systemName: "info.circle")
+            imageView.tintColor = AppTheme.Palette.secondaryText
+            titleLabel.text = "아직 제공되지 않는 기능이에요"
+            messageLabel.text = "스터디 목록은 준비 중이에요."
         case .failure:
             imageView.image = UIImage(systemName: "exclamationmark.circle")
             imageView.tintColor = AppTheme.Palette.error
@@ -98,6 +104,9 @@ final class ContentStateView: UIView {
                 titleLabel.text = "스터디 상세를 불러오는 중이에요"
             case .failure:
                 titleLabel.text = "상세 정보를 불러오지 못했어요"
+                messageLabel.text = "이전 화면으로 돌아가 주세요."
+            case .unavailable:
+                titleLabel.text = "아직 제공되지 않는 기능이에요"
                 messageLabel.text = "이전 화면으로 돌아가 주세요."
             case .empty:
                 titleLabel.text = "스터디를 찾을 수 없어요"

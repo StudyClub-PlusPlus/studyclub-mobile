@@ -35,6 +35,19 @@ final class MainViewModelTests: XCTestCase {
         await waitUntil { viewModel.currentState == .empty }
     }
 
+    func testUnavailableFeatureEndsLoadingWithDistinctState() async {
+        let repository = TestStudyRepository(behaviors: [.featureUnavailable])
+        let viewModel = MainViewModel(repository: repository, isListAPIEnabled: false)
+        await waitUntil { viewModel.currentState == .unavailable }
+        XCTAssertTrue(viewModel.items.isEmpty)
+        XCTAssertNil(viewModel.study(for: "selected"))
+        XCTAssertEqual(viewModel.pageState, .idle)
+        XCTAssertFalse(viewModel.isRefreshing)
+        XCTAssertNil(viewModel.refreshError)
+        let requests = await repository.requestCount
+        XCTAssertEqual(requests, 1)
+    }
+
     func testFailureEndsLoadingWithoutRetry() async {
         let repository = TestStudyRepository(behaviors: [.failure])
         let viewModel = MainViewModel(repository: repository)
@@ -60,26 +73,30 @@ final class MainViewModelTests: XCTestCase {
         withExtendedLifetime(subscription) {}
     }
 
-    func testDuplicateIdentifiersTransitionToFailureInsteadOfCrashing() async {
-        let duplicate = makeStudy(id: "duplicate", title: "중복 스터디")
-        let repository = TestStudyRepository(behaviors: [.success([duplicate, duplicate])])
+    func testDuplicateIdentifiersKeepFirstPositionAndLatestValue() async {
+        let first = makeStudy(id: "duplicate", title: "이전 값")
+        let other = makeStudy(id: "other", title: "다른 스터디")
+        let latest = makeStudy(id: "duplicate", title: "최신 값")
+        let repository = TestStudyRepository(behaviors: [.success([first, other, latest])])
         let viewModel = MainViewModel(repository: repository)
 
-        await waitUntil { viewModel.currentState == .failure }
+        await waitUntil { viewModel.currentState == .content }
 
-        XCTAssertNil(viewModel.study(for: "duplicate"))
+        XCTAssertEqual(viewModel.items.map(\.id), ["duplicate", "other"])
+        XCTAssertEqual(viewModel.items.first?.title, latest.title)
+        XCTAssertEqual(viewModel.study(for: "duplicate"), latest)
     }
 
     private func makeStudy(id: String, title: String) -> Study {
         Study(
             id: id,
-            category: "테스트",
+            category: .software,
             title: title,
             summary: "테스트 요약",
-            currentMembers: 1,
-            maximumMembers: 4,
-            status: .recruiting,
-            topics: ["테스트"]
+            participantCount: 1,
+            capacity: 4,
+            phase: .recruiting,
+            closingSoon: false
         )
     }
 
@@ -105,6 +122,7 @@ private actor TestStudyRepository: RepositoryProtocol {
     enum Behavior: Sendable {
         case success([Study])
         case failure
+        case featureUnavailable
     }
 
     private(set) var requestCount = 0
@@ -114,14 +132,16 @@ private actor TestStudyRepository: RepositoryProtocol {
         self.behaviors = behaviors
     }
 
-    func fetchStudies() async throws -> [Study] {
+    func fetchStudies(offset: Int) async throws -> StudyPage {
         requestCount += 1
-        guard !behaviors.isEmpty else { return [] }
+        guard !behaviors.isEmpty else { return StudyPage(studies: [], totalCount: 0, offset: offset) }
         let behavior = behaviors.removeFirst()
 
         switch behavior {
         case let .success(studies):
-            return studies
+            return StudyPage(studies: studies, totalCount: studies.count, offset: offset)
+        case .featureUnavailable:
+            throw RepositoryError.featureUnavailable
         case .failure:
             throw RepositoryError.unavailable
 

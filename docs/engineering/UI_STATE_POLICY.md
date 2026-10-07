@@ -1,18 +1,17 @@
 # UI State Policy
 
-Main models loading, content, empty, and failure explicitly. Detail models loading, content, empty, and failure; a missing study is empty, while nullable cohort, schedule, and description fields are valid content.
+Main uses loading/content/empty/failure/unavailable; Detail keeps loading/content/empty/failure. Main unavailable means the feature is not provided, rather than an empty response or request failure. Display values are stored before a private CurrentValueSubject sends a read-only publisher notification. Views read the current values; late subscribers receive the current state. Detail requests once from init through a private method and retains its existing missing/invalid/mismatched-ID empty policy.
 
-- MainViewModel and DetailViewModel each start one request from init through a private fetch method.
-- No public load method, retry, refresh, request generation counter, or ViewModel Task cancellation is needed in this slice.
-- Tasks capture their ViewModel weakly. Requests may finish after the screen is closed.
-- Future retry and shared ErrorView work must define overlapping-request and cancellation policy when introduced.
-- ViewModels store display values before publishing a status notification through a private CurrentValueSubject and read-only publisher.
-- ViewControllers use notifications to call updateViews(), which reads the ViewModel's current values. CurrentValueSubject replays status to late subscribers.
-- Loading, content, empty, and failure surfaces are mutually exclusive.
-- Main content requires non-empty items. Empty is a valid successful response.
-- Select by stable diffable item identifier, never a stored array index. Missing, invalid or mismatched detail identity is empty; Main duplicate IDs remain failure.
-- Failure ends loading and shows human-readable copy; no retry or reload controls are offered yet.
+## Main list requests
 
-## Future stale-content policy
+Main captures the list flag at creation. The pagination/refresh rules below apply to ON. OFF requests once, disables refresh/loadMore/retryPage, omits the footer and refresh control, and hides collection content behind a state surface. Debug Mock shows its current trusted first-page samples. Real OFF returns featureUnavailable before transport, clears selection and ends loading with unavailable. Real detail OFF returns unavailable before transport and preserves its existing failure state; Mock detail and detail behavior are independent of the list flag.
 
-If refresh, caching, pagination, or retry is added, decide how existing content and overlapping requests behave before implementation.
+Main starts the first page from init. It also exposes loadMore, retryPage and refresh for infinite scrolling, failed-page retry and native pull-to-refresh. One stored Task owns the current request. Refresh cancels an older request; a cancelled Task must not mutate display values, requestTask or indicators in success, catch or completion. Repeated refresh and concurrent pagination are suppressed. There is no request generation counter or general request framework.
+
+Initial failure replaces the empty list with failure. Normal zero-result first pages are empty. Loading another page keeps content visible; an error keeps the same cursor and shows a retry footer. A zero-length page while offset<total stops automatic pagination and asks for refresh. Refresh keeps existing content until a successful first page replaces it. Failure preserves content and cursor. Successful empty refresh clears items, lookup dictionary and snapshot. Empty/failure still offer the collection's pull gesture.
+
+Responses use the raw item count to advance the cursor. Main merges IDs while storing each page: duplicates within or across pages keep their first position and receive the last value. Initial load and successful refresh clear the previous list before using the same merge path. No separate duplicate validation is needed; snapshots receive the resulting unique IDs. Content-to-content notifications must reach the controller, so Main does not remove duplicate status notifications. Changed cards with the same ID are explicitly reconfigured in the diffable snapshot. The controller applies snapshots only when IDs, their order or card values change (plus initial section setup). Loading/error indicators update independently. An unchanged successful page still checks whether another page is needed, since its raw cursor may have advanced.
+
+## Selection and screen ownership
+
+Selection uses stable diffable Study.ID, never a saved array index. Detail fetches independently. Back navigation retains the list and scroll position. Search owns a separate ViewModel/filter/snapshot and must not replace Main's list. No automatic refresh occurs on Detail return or search cancellation. UIKit/Combine observation and async Repository operations remain separate.

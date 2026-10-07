@@ -4,11 +4,6 @@ import XCTest
 final class StudyResponseValidationTests: XCTestCase {
     private let repository = Repository()
 
-    private func study(id: String) -> Study {
-        Study(id: id, category: "iOS", title: "Study", summary: "Summary",
-              currentMembers: 1, maximumMembers: 4, status: .recruiting, topics: [])
-    }
-
     private func detail(id: String) -> StudyDetail {
         StudyDetail(id: id, title: "Study", description: "Description", category: .software,
                     studyKind: .study, thumbnailURL: nil, deliveryFormat: .online,
@@ -16,18 +11,23 @@ final class StudyResponseValidationTests: XCTestCase {
                     recruitDeadlineAt: nil, startAt: nil, endAt: nil)
     }
 
-    func testEmptyListIsValid() throws {
-        try repository.validateUniqueStudyIDs([])
+    func testPageAcceptsChangingTotalAndServerPageSize() throws {
+        try repository.validatePage(
+            StudyListResponseDTO(items: Array(repeating: dto, count: 21), total: 0, offset: 20),
+            expectedOffset: 20
+        )
     }
 
-    func testDifferentIDsAreValid() throws {
-        try repository.validateUniqueStudyIDs([study(id: "first"), study(id: "second")])
-    }
-
-    func testDuplicateIDsAreRejected() {
-        XCTAssertThrowsError(try repository.validateUniqueStudyIDs([study(id: "same"), study(id: "same")])) {
+    func testPageRejectsDifferentRequestedOffset() {
+        let page = StudyListResponseDTO(items: [], total: 1, offset: 0)
+        XCTAssertThrowsError(try repository.validatePage(page, expectedOffset: 20)) {
             XCTAssertEqual($0 as? RepositoryError, .invalidData)
         }
+    }
+
+    private var dto: StudyDTO {
+        StudyDTO(studyId: 1, category: .software, title: "Study", oneLineSummary: "Summary",
+                 currentApplicants: 1, capacity: nil, phase: .recruiting, closingSoon: false)
     }
 
     func testRequestedStudyIdentityIsValid() throws {
