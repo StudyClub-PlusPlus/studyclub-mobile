@@ -22,14 +22,18 @@ final class DetailViewController: UIViewController {
         return view
     }()
     private let categoryContainer = UIView()
-    private let categoryLabel: InsetLabel = {
-        let categoryLabel = InsetLabel()
+    private let categoryLabel: UILabel = {
+        let categoryLabel: UILabel = AppTheme.isStudyDesignSystemEnabled ? UILabel() : InsetLabel()
         categoryLabel.font = .preferredFont(forTextStyle: .caption1)
-        categoryLabel.textColor = AppTheme.Palette.accent
-        categoryLabel.backgroundColor = AppTheme.Palette.accent.withAlphaComponent(0.10)
-        categoryLabel.layer.cornerRadius = AppTheme.Radius.control
-        categoryLabel.layer.cornerCurve = .continuous
-        categoryLabel.clipsToBounds = true
+        categoryLabel.textColor = AppTheme.isStudyDesignSystemEnabled
+            ? AppTheme.Palette.secondaryText : AppTheme.Palette.accent
+        if !AppTheme.isStudyDesignSystemEnabled {
+            categoryLabel.backgroundColor = AppTheme.Palette.accent.withAlphaComponent(0.10)
+            categoryLabel.layer.cornerRadius = AppTheme.Radius.control
+            categoryLabel.layer.cornerCurve = .continuous
+            categoryLabel.clipsToBounds = true
+        }
+        categoryLabel.numberOfLines = AppTheme.isStudyDesignSystemEnabled ? 0 : 1
         categoryLabel.translatesAutoresizingMaskIntoConstraints = false
         return categoryLabel
     }()
@@ -146,15 +150,20 @@ final class DetailViewController: UIViewController {
         ])
 
         contentView.addSubview(stackView)
-        stackView.addArrangedSubview(categoryContainer)
-        stackView.setCustomSpacing(AppTheme.Spacing.small, after: categoryContainer)
-        categoryContainer.addSubview(categoryLabel)
-        NSLayoutConstraint.activate([
-            categoryLabel.topAnchor.constraint(equalTo: categoryContainer.topAnchor),
-            categoryLabel.leadingAnchor.constraint(equalTo: categoryContainer.leadingAnchor),
-            categoryLabel.trailingAnchor.constraint(lessThanOrEqualTo: categoryContainer.trailingAnchor),
-            categoryLabel.bottomAnchor.constraint(equalTo: categoryContainer.bottomAnchor)
-        ])
+        if AppTheme.isStudyDesignSystemEnabled {
+            stackView.addArrangedSubview(categoryLabel)
+            stackView.setCustomSpacing(AppTheme.Spacing.small, after: categoryLabel)
+        } else {
+            stackView.addArrangedSubview(categoryContainer)
+            stackView.setCustomSpacing(AppTheme.Spacing.small, after: categoryContainer)
+            categoryContainer.addSubview(categoryLabel)
+            NSLayoutConstraint.activate([
+                categoryLabel.topAnchor.constraint(equalTo: categoryContainer.topAnchor),
+                categoryLabel.leadingAnchor.constraint(equalTo: categoryContainer.leadingAnchor),
+                categoryLabel.trailingAnchor.constraint(lessThanOrEqualTo: categoryContainer.trailingAnchor),
+                categoryLabel.bottomAnchor.constraint(equalTo: categoryContainer.bottomAnchor)
+            ])
+        }
 
         stackView.addArrangedSubview(titleLabel)
         stackView.setCustomSpacing(AppTheme.Spacing.small, after: titleLabel)
@@ -169,9 +178,18 @@ final class DetailViewController: UIViewController {
 
         stackView.addArrangedSubview(divider)
         stackView.setCustomSpacing(AppTheme.Spacing.xLarge, after: divider)
-        divider.heightAnchor.constraint(equalToConstant: 1 / max(traitCollection.displayScale, 1)).isActive = true
+        let dividerHeight = divider.heightAnchor.constraint(
+            equalToConstant: 1 / max(traitCollection.displayScale, 1)
+        )
+        if AppTheme.isStudyDesignSystemEnabled {
+            dividerHeight.priority = .defaultHigh
+        }
+        dividerHeight.isActive = true
 
         stackView.addArrangedSubview(curriculumTitleLabel)
+        if AppTheme.isStudyDesignSystemEnabled {
+            stackView.setCustomSpacing(AppTheme.Spacing.small, after: curriculumTitleLabel)
+        }
         stackView.addArrangedSubview(curriculumLabel)
         NSLayoutConstraint.activate([
             stackView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: AppTheme.Spacing.xLarge),
@@ -203,6 +221,7 @@ final class DetailViewController: UIViewController {
 
     private func updateViews() {
         categoryLabel.text = viewModel.category
+        categoryLabel.isHidden = AppTheme.isStudyDesignSystemEnabled && viewModel.category.isEmpty
         titleLabel.text = viewModel.title
         metadataLabel.text = [viewModel.metadataText, viewModel.recruitStatusText]
             .filter { !$0.isEmpty }
@@ -211,8 +230,24 @@ final class DetailViewController: UIViewController {
         scheduleLabel.isHidden = viewModel.scheduleText.isEmpty
         descriptionLabel.text = viewModel.descriptionText
         descriptionLabel.isHidden = viewModel.descriptionText.isEmpty
+        divider.isHidden = AppTheme.isStudyDesignSystemEnabled && viewModel.curriculum.isEmpty
         curriculumTitleLabel.isHidden = viewModel.curriculum.isEmpty
         curriculumLabel.text = viewModel.curriculum
         curriculumLabel.isHidden = viewModel.curriculum.isEmpty
+
+        guard AppTheme.isStudyDesignSystemEnabled else { return }
+
+        let curriculumFollowsMetadata = viewModel.scheduleText.isEmpty
+            && viewModel.descriptionText.isEmpty && !viewModel.curriculum.isEmpty
+        stackView.setCustomSpacing(
+            curriculumFollowsMetadata ? AppTheme.Spacing.xLarge
+                : (viewModel.scheduleText.isEmpty ? AppTheme.Spacing.regular : AppTheme.Spacing.small),
+            after: metadataLabel
+        )
+        stackView.setCustomSpacing(
+            viewModel.descriptionText.isEmpty && !viewModel.curriculum.isEmpty
+                ? AppTheme.Spacing.xLarge : AppTheme.Spacing.regular,
+            after: scheduleLabel
+        )
     }
 }

@@ -11,6 +11,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = scene as? UIWindowScene else { return }
 
         let window = UIWindow(windowScene: windowScene)
+        window.overrideUserInterfaceStyle = AppTheme.isStudyDesignSystemEnabled ? .light : .unspecified
         self.window = window
         window.rootViewController = MainTabBarController()
         window.makeKeyAndVisible()
