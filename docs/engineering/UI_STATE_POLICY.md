@@ -15,3 +15,7 @@ Responses use the raw item count to advance the cursor. Main merges IDs while st
 ## Selection and screen ownership
 
 Selection uses stable diffable Study.ID, never a saved array index. Detail fetches independently. Back navigation retains the list and scroll position. Search owns a separate ViewModel/filter/snapshot and must not replace Main's list. No automatic refresh occurs on Detail return or search cancellation. UIKit/Combine observation and async Repository operations remain separate.
+
+## MyPage
+
+Guest/loading/content/failure/expired are exclusive. The root-owned model requests once for an initial session and again only for explicit Mock demo entry. One retained Task is cancelled before logout clears repository/session/display fields; cancelled success and errors cannot restore identity. Unauthorized clears the session, ordinary failure preserves the session for logout. No retry or refresh is added.

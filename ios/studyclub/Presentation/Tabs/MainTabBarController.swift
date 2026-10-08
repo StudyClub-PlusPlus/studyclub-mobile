@@ -5,6 +5,27 @@ import SwiftUI
 
 @MainActor
 final class MainTabBarController: UITabBarController {
+    private var myPageViewModel: MyPageViewModel?
+
+    @objc private func openMyPage() {
+        guard let myPageViewModel, myPageViewModel.isEnabled,
+              let navigation = selectedViewController as? UINavigationController,
+              !(navigation.topViewController is MyPageViewController) else {
+            return
+        }
+        let controller = MyPageViewController(viewModel: myPageViewModel)
+        controller.onLogout = { [weak self] in
+            guard let self else {
+                return
+            }
+            for case let navigation as UINavigationController in self.viewControllers ?? [] {
+                navigation.popToRootViewController(animated: false)
+            }
+            self.selectedIndex = 0
+        }
+        navigation.pushViewController(controller, animated: true)
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         configureView()
@@ -34,7 +55,24 @@ final class MainTabBarController: UITabBarController {
             title: "설정", image: UIImage(systemName: "gearshape"), tag: 1
         )
 
-        viewControllers = [main, setting]
+        let accountViewModel = MyPageViewModel()
+        myPageViewModel = accountViewModel
+        if accountViewModel.isEnabled {
+            let myStudies = MyStudiesViewController(viewModel: accountViewModel)
+            myStudies.onProfile = { [weak self] in
+                self?.openMyPage()
+            }
+            let myNavigation = UINavigationController(rootViewController: myStudies)
+            myNavigation.tabBarItem = UITabBarItem(title: "내 스터디", image: UIImage(systemName: "calendar"), tag: 1)
+            for controller in [main.viewControllers[0], myStudies] {
+                controller.navigationItem.rightBarButtonItem = UIBarButtonItem(
+                    title: "프로필", style: .plain, target: self, action: #selector(openMyPage)
+                )
+            }
+            viewControllers = [main, myNavigation]
+        } else {
+            viewControllers = [main, setting]
+        }
         tabBar.tintColor = AppTheme.Palette.accent
 
     }
