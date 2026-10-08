@@ -23,3 +23,7 @@ Bundled terms text can be displayed. Consent switches and submission stay disabl
 ## Selection and screen ownership
 
 Selection uses stable diffable Study.ID, never a saved array index. Detail fetches independently. Back navigation retains the list and scroll position. Search owns a separate ViewModel/filter/snapshot and must not replace Main's list. No automatic refresh occurs on Detail return or search cancellation. UIKit/Combine observation and async Repository operations remain separate.
+
+## MyPage
+
+MyPage reads the existing SettingAccountViewModel's hidden/guest/checking/connectionFailure/member/logoutFailure states. It displays confirmed nickname only, keeps identity on logout failure, and provides explicit login/recheck/logout retry. SC52 owns authentication Tasks, cancellation and signup uncertainty; MyPage creates no session or network request. Profile and Settings share the same presentation/cleanup implementation. The profile's independent fullScreen stack never pops or replaces top-level tab stacks. Profile login completion/cancellation stays in the profile; gate login returns to the originating My Studies screen after the authentication sheet finishes safe dismissal.

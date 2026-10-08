@@ -1,0 +1,14 @@
+{
+  "capture_candidate": "58695ef54d7025f3a92edb415a799c491609418b",
+  "host_bundle": "studycub.studyclub.sc94closeprobe",
+  "sha256": {
+    "cleanup-failure-keeps-profile.png": "ccddf007fac0d169ce1ae0ee1d6f8e157dfcd8f446565199c4f3cd8d6120751f",
+    "member-success-stays-profile.png": "e2309d3ffc7fa711ebe4fabedff2257e174103256a90bc69516c63c01a766d91",
+    "gate-success-returns-origin.png": "f11decc1a5c5145630007734ecc8e3b8fcb4f5080d36215e8d246af93b9fde7a"
+  },
+  "original_capture_names": {
+    "cleanup-failure-keeps-profile.png": "40-close-v3-kept-profile-error.png",
+    "member-success-stays-profile.png": "46-success-stays-profile.png",
+    "gate-success-returns-origin.png": "50-success-gate-origin.png"
+  }
+}

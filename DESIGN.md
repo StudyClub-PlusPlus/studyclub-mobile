@@ -130,3 +130,9 @@ Debug-only SwiftUI modal hosted by UIHostingController, with its own NavigationS
 - 변경된 입력이나 제출 상태에서 닫기는 확인 창을 표시한다. 닫으면 입력을 지우고 닫힘 상태로 바꾸며 이후 표시 결과를 받지 않는다. 확인 창은 이미 보낸 요청의 취소를 약속하지 않는다.
 
 SC-52는 `onSubmit(Input)`·`onRecheck()`·`onClose()`를 실제 인증 흐름에 연결하고 실제 인증 흐름에서 사용할 정책 자료와 배포 계약을 연결한다. 기존 원문 출처와 개정일은 `AuthDocuments.swift`에 기록한다. SC-55의 로컬 스위치와 제출 표시를 실제 가입으로 해석하지 않는다. 상태별 제어된 렌더와 임시 호스트의 Simulator 조작은 공개 앱 진입점·실제 인증·최종 QA를 증명하지 않는다. 리드는 같은 최종 후보의 diff와 시각 자료를 검토한다.
+
+## MyPage preview · #94
+
+`account.mypage`는 InProgress·기본 OFF다. ON은 스터디/내 스터디 두 탭과 양 루트의 우측 프로필 버튼을 제공한다. 프로필은 별도 UINavigationController로 fullScreen 표시하며 닫으면 원래 탭·탐색 스택을 유지한다. 비회원도 프로필을 열 수 있고 명시적으로 로그인한다. 프로필에서 시작한 로그인 성공·취소는 프로필에 남으며, 내 스터디의 로그인 안내에서 시작하면 완료·안전한 취소 뒤 원래 목록으로 돌아간다.
+
+기존 AppTheme·시스템 글꼴·스크롤 카드·최대 560pt 읽기 폭·시스템 프로필 심볼을 유지한다. 닉네임은 확인된 값만 표시하고 별도 이메일·데모 계정 정보를 만들지 않는다. SC52의 hidden/guest/checking/connectionFailure/member/logoutFailure와 로그인·가입·정리 처리를 공유한다. 로그아웃 실패는 닉네임과 재시도를 유지한다. 원격 이미지·편집·캘린더는 제외한다. OFF는 기존 Main/Setting 구조다. 이 설명은 신선 화면 QA 완료를 뜻하지 않는다. [구현 범위](docs/product/MYPAGE_SPEC.md).
