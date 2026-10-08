@@ -104,3 +104,17 @@ Check safe areas, card alignment, long Korean title/metadata wrapping, empty sum
 ## Development Settings
 
 Debug-only SwiftUI modal hosted by UIHostingController, with its own NavigationStack title and Close button. Use an inset-grouped SwiftUI List with “기타”, “Ready”, “InProgress” headers. The miscellaneous section has a Repository button displaying Mock/Real and a separate Reset Flag to Default button. Repository opens a mode alert; a changed selection closes the modal and recreates the tab navigation stacks on Main. The saved mode applies to Debug only, while Release always uses Real. Flag rows use a wrapping name on the left and a labeled switch on the right; the full row is also tappable. Ready defaults ON and InProgress defaults OFF. Empty flag sections keep their headers. Reset updates switches in place without recreating the app root.
+
+## 가입 정보 입력 View · SC-55
+
+`OnboardingViewController`는 공개 앱 진입점에 연결하지 않은 UIKit 화면이다. 닉네임·시간대·동의를 하나의 스크롤 폼에 표시한다. AppTheme 색상과 간격, 최대 560pt 읽기 폭, 키보드 위 스크롤 영역을 사용한다. 입력·주요 버튼은 최소 50pt, 문서 버튼은 최소 44pt다.
+
+승인된 B 방향에 따라 닉네임과 시간대를 하나의 테두리 그룹에 두고 구분선으로 나눈다. 필수 동의와 선택 동의는 제목과 그룹을 각각 가진다. 각 동의는 줄바꿈하는 문구와 네이티브 UISwitch로 표시하며 문서 버튼은 해당 행 아래의 독립된 동작이다. 행 높이는 문구에 맞춰 늘어난다. 닉네임 오류는 입력 바로 아래에 기호와 설명으로 표시한다. 폼 끝의 상태 영역은 처리·재확인·실패 설명을 표시하고, 내용이 없으면 접힌다. 글꼴은 preferred text style, 색상은 기존 AppTheme ON의 green/cream과 OFF의 동적 시스템 색상을 사용한다. 시간대 목록도 같은 표면·문구·선택 색상을 사용한다.
+
+- 추천 닉네임은 하드코딩한 `스터디친구`다. 시간대는 유효한 기기 IANA 식별자를 사용하고 유효하지 않으면 `Etc/UTC`로 표시한다. 시간대 목록은 안정적인 식별자로 선택한다.
+- 필수 연령·이용약관·개인정보 동의와 선택 마케팅 동의는 모두 OFF로 시작한다. 필수 항목과 공백이 아닌 닉네임이 있어야 제출할 수 있다. 닉네임에 정규식·길이 제한·자동 공백 제거를 적용하지 않는다. 입력 중 한글 조합을 다시 대입하지 않는다.
+- 별도 문서 버튼은 engineering `core-front/src/lib/legal.ts`의 기존 이용약관·개인정보 처리방침 전문을 표시한다. 마케팅 안내는 같은 웹 가입 화면의 이메일 수신 문구를 사용한다. 개발용 임시 설명은 표시하지 않는다. 입력과 동의는 메모리에만 있으며 API·인증·가입 저장은 수행하지 않는다.
+- `OnboardingViewModel`은 편집·제출 중·완료 여부 불확실·재확인 중·닫힘을 표시한다. 제출 중에는 입력을 잠근다. 불확실하면 “다시 확인”만 제공하고 재제출하지 않는다. 명확한 실패 또는 미완료 확인을 전달받으면 입력을 유지한 편집 화면으로 돌아간다.
+- 변경된 입력이나 제출 상태에서 닫기는 확인 창을 표시한다. 닫으면 입력을 지우고 닫힘 상태로 바꾸며 이후 표시 결과를 받지 않는다. 확인 창은 이미 보낸 요청의 취소를 약속하지 않는다.
+
+SC-52는 `onSubmit(Input)`·`onRecheck()`·`onClose()`를 실제 인증 흐름에 연결하고 실제 인증 흐름에서 사용할 정책 자료와 배포 계약을 연결한다. 기존 원문 출처와 개정일은 `AuthDocuments.swift`에 기록한다. SC-55의 로컬 스위치와 제출 표시를 실제 가입으로 해석하지 않는다. 상태별 제어된 렌더와 임시 호스트의 Simulator 조작은 공개 앱 진입점·실제 인증·최종 QA를 증명하지 않는다. 리드는 같은 최종 후보의 diff와 시각 자료를 검토한다.
