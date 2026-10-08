@@ -48,3 +48,7 @@ Custom accessibility and large-text QA are deferred at this product stage. Do no
 Use Domain-only test repositories to control page completion. Check cursor advancement from raw count, within-page and cross-page duplicate updates, duplicate-trigger suppression, failed-page same-offset retry, refresh failure preservation, successful empty clearing, and cancelled success/error not changing a newer request. Verify actual decoding during API development; no maintained live tests, JSON fixture or Client injection is needed. Main UI needs fresh manual evidence for content, refresh, empty/failure pull gestures and footer recovery.
 
 MockRepository keeps 65 trusted Domain studies, paged in groups of 20, with matching-ID details. Use this ordinary Debug Mock mode with list ON for manual multi-page scrolling and end-of-list checks; list OFF displays the first page once without refresh or pagination; no transport scenario or test-only app configuration is needed.
+
+## MyPage
+
+MyPageTests directly cover DTO mapping and ViewModel flag OFF, demo/logout, unauthorized, ordinary failure and late-response cancellation with Domain repository doubles. No JSON parsing or thin transport suite is added. AccountRepositoryRulesTests directly test feature/session gates and pure error classification without transport injection or live calls. Manual app walkthrough and controlled states are recorded in ../evidence/sc-94-review/README.md; the controlled QA host stays outside the repository. Authenticated deployed API verification remains open.
