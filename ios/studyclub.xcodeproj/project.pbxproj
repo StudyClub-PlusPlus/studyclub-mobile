@@ -22,6 +22,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		C0F0000230220A4000B818BF /* Config.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
+		C0F0000330220A4000B818BF /* Config.local.xcconfig.example */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Config.local.xcconfig.example; sourceTree = "<group>"; };
 		F78127E730220A4000B818BF /* studyclub.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = studyclub.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F78127FD30220A4100B818BF /* studyclubTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = studyclubTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -72,11 +74,21 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		C0F0000130220A4000B818BF /* Configurations */ = {
+			isa = PBXGroup;
+			children = (
+				C0F0000230220A4000B818BF /* Config.xcconfig */,
+				C0F0000330220A4000B818BF /* Config.local.xcconfig.example */,
+			);
+			path = Configurations;
+			sourceTree = "<group>";
+		};
 		F78127DE30220A4000B818BF = {
 			isa = PBXGroup;
 			children = (
 				F78127E930220A4000B818BF /* studyclub */,
 				F781280030220A4100B818BF /* studyclubTests */,
+				C0F0000130220A4000B818BF /* Configurations */,
 				F78127E830220A4000B818BF /* Products */,
 			);
 			sourceTree = "<group>";
@@ -228,6 +240,7 @@
 /* Begin XCBuildConfiguration section */
 		F781281130220A4100B818BF /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = C0F0000230220A4000B818BF /* Config.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -258,6 +271,7 @@
 		};
 		F781281230220A4100B818BF /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = C0F0000230220A4000B818BF /* Config.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;

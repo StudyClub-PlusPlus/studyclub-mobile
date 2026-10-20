@@ -1,3 +1,4 @@
+import GoogleSignIn
 import UIKit
 
 final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
@@ -15,5 +16,12 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         self.window = window
         window.rootViewController = MainTabBarController()
         window.makeKeyAndVisible()
+    }
+
+    /// Delivers the Google OAuth redirect to the SDK. Other URLs are ignored.
+    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+        for context in URLContexts {
+            _ = GIDSignIn.sharedInstance.handle(context.url)
+        }
     }
 }
