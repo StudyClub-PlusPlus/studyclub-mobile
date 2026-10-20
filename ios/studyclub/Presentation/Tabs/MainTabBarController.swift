@@ -11,7 +11,7 @@ final class MainTabBarController: UITabBarController {
     }
 
     private func configureView() {
-        configureTabs()
+        installTabs()
 
         #if DEBUG
         let longPress = UILongPressGestureRecognizer(target: self, action: #selector(openDevelopmentSettings))
@@ -21,7 +21,21 @@ final class MainTabBarController: UITabBarController {
         #endif
     }
 
-    private func configureTabs() {
+    private func settingViewController() -> SettingViewController? {
+        viewControllers?
+            .compactMap { $0 as? UINavigationController }
+            .compactMap { $0.viewControllers.first as? SettingViewController }
+            .first
+    }
+
+    #if DEBUG
+    /// Saved repository mode still needs a new root after a failed invalidation.
+    private var pendingRepositoryRoot = false
+    private var installingRepositoryRoot = false
+    private var rootInstallFailureAlert: UIAlertController?
+    #endif
+
+    private func installTabs() {
         let main = UINavigationController(
             rootViewController: MainViewController(viewModel: MainViewModel())
         )
@@ -71,13 +85,84 @@ extension MainTabBarController: UIGestureRecognizerDelegate {
 
     @objc private func openDevelopmentSettings(_ gesture: UILongPressGestureRecognizer) {
         guard gesture.state == .began, presentedViewController == nil else { return }
-        let settings = DevelopmentSettingsView { [weak self] in
-            self?.dismiss(animated: true) { [weak self] in
-                self?.configureTabs()
-                self?.selectedIndex = 0
+        let settings = DevelopmentSettingsView(
+            onRepositoryChange: { [weak self] in
+                self?.dismiss(animated: true) { [weak self] in
+                    self?.scheduleRepositoryRootInstall()
+                }
+            },
+            onAuthFlagChange: { [weak self] in
+                self?.settingViewController()?.refreshFeatureVisibility()
             }
-        }
+        )
         present(UIHostingController(rootView: settings), animated: true)
+    }
+
+    private func scheduleRepositoryRootInstall() {
+        pendingRepositoryRoot = true
+        guard !installingRepositoryRoot else { return }
+        installingRepositoryRoot = true
+        Task { @MainActor in
+            await self.installPendingRepositoryRoot()
+            self.installingRepositoryRoot = false
+        }
+    }
+
+    private func installPendingRepositoryRoot() async {
+        guard pendingRepositoryRoot else { return }
+        let previous = settingViewController()
+        do {
+            try await previous?.invalidateAccountWorkflow()
+            dismissRootInstallFailure()
+            installTabs()
+            selectedIndex = 0
+            pendingRepositoryRoot = false
+        } catch {
+            previous?.onSessionSettled = { [weak self] state in
+                guard let self, self.pendingRepositoryRoot else { return }
+                switch state {
+                case .guest, .member, .hidden:
+                    self.scheduleRepositoryRootInstall()
+                default:
+                    break
+                }
+            }
+            presentRootInstallFailure()
+        }
+    }
+
+    /// The mode switch did not finish. Stay on the current root and ask Main to retry the same cleanup.
+    private func presentRootInstallFailure() {
+        guard pendingRepositoryRoot, rootInstallFailureAlert == nil, presentedViewController == nil else { return }
+        let alert = UIAlertController(
+            title: "화면을 바꾸지 못했어요.",
+            message: "이전 화면을 유지했어요. 지금 다시 시도하거나, 설정에서 나중에 다시 확인할 수 있어요.",
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "나중에", style: .cancel) { [weak self] _ in
+            self?.rootInstallFailureAlert = nil
+        })
+        alert.addAction(UIAlertAction(title: "다시 시도", style: .default) { [weak self] _ in
+            guard let self else { return }
+            self.rootInstallFailureAlert = nil
+            let retry: () -> Void = { [weak self] in
+                self?.scheduleRepositoryRootInstall()
+                return
+            }
+            if self.presentedViewController == nil {
+                retry()
+            } else {
+                self.dismiss(animated: false, completion: retry)
+            }
+        })
+        rootInstallFailureAlert = alert
+        present(alert, animated: true)
+    }
+
+    private func dismissRootInstallFailure() {
+        guard let alert = rootInstallFailureAlert else { return }
+        rootInstallFailureAlert = nil
+        alert.dismiss(animated: false)
     }
 }
 #endif

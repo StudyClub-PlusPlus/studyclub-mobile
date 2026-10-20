@@ -7,6 +7,7 @@ final class LoginViewController: UIViewController {
     private let viewModel: LoginViewModel
     private let onGoogleSignIn: (LoginViewController) -> Void
     private let onCancelSignIn: () -> Void
+    private let onRetryCleanup: () -> Void
     private let onClose: () -> Void
     private var subscriptions = Set<AnyCancellable>()
 
@@ -101,16 +102,28 @@ final class LoginViewController: UIViewController {
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
+    private let cleanupRetryButton: UIButton = {
+        let view = UIButton(type: .system)
+        var configuration = UIButton.Configuration.plain()
+        configuration.title = "정리 다시 시도"
+        view.configuration = configuration
+        view.tintColor = AppTheme.Palette.accent
+        view.contentHorizontalAlignment = .leading
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
 
     convenience init(
         onGoogleSignIn: @escaping (LoginViewController) -> Void,
         onCancelSignIn: @escaping () -> Void,
+        onRetryCleanup: @escaping () -> Void,
         onClose: @escaping () -> Void
     ) {
         self.init(
             viewModel: LoginViewModel(),
             onGoogleSignIn: onGoogleSignIn,
             onCancelSignIn: onCancelSignIn,
+            onRetryCleanup: onRetryCleanup,
             onClose: onClose
         )
     }
@@ -119,11 +132,13 @@ final class LoginViewController: UIViewController {
         viewModel: LoginViewModel,
         onGoogleSignIn: @escaping (LoginViewController) -> Void,
         onCancelSignIn: @escaping () -> Void,
+        onRetryCleanup: @escaping () -> Void,
         onClose: @escaping () -> Void
     ) {
         self.viewModel = viewModel
         self.onGoogleSignIn = onGoogleSignIn
         self.onCancelSignIn = onCancelSignIn
+        self.onRetryCleanup = onRetryCleanup
         self.onClose = onClose
         super.init(nibName: nil, bundle: nil)
     }
@@ -210,17 +225,23 @@ final class LoginViewController: UIViewController {
         providerGroup.addArrangedSubview(cancelButton)
         cancelButton.heightAnchor.constraint(greaterThanOrEqualToConstant: 50).isActive = true
         cancelButton.addTarget(self, action: #selector(requestCancellation), for: .touchUpInside)
+        providerGroup.addArrangedSubview(cleanupRetryButton)
+        cleanupRetryButton.heightAnchor.constraint(greaterThanOrEqualToConstant: 50).isActive = true
+        cleanupRetryButton.addTarget(self, action: #selector(requestCleanupRetry), for: .touchUpInside)
     }
 
     private func updateViews() {
-        let busy = viewModel.state == .signingIn
+        let signingIn = viewModel.state == .signingIn
+        let cleaning = viewModel.state == .cancelling
         googleButton.isEnabled = viewModel.canSignIn
         statusLabel.text = viewModel.statusMessage
         statusRow.isHidden = viewModel.statusMessage == nil
-        statusLabel.textColor = viewModel.state == .failure ? AppTheme.Palette.error : AppTheme.Palette.secondaryText
-        spinner.isHidden = !busy
-        if busy { spinner.startAnimating() } else { spinner.stopAnimating() }
-        cancelButton.isHidden = !busy
+        statusLabel.textColor = viewModel.state == .failure || viewModel.state == .cleanupFailed
+            ? AppTheme.Palette.error : AppTheme.Palette.secondaryText
+        spinner.isHidden = !(signingIn || cleaning)
+        if signingIn || cleaning { spinner.startAnimating() } else { spinner.stopAnimating() }
+        cancelButton.isHidden = !signingIn
+        cleanupRetryButton.isHidden = viewModel.state != .cleanupFailed
     }
 
     private func updateGoogleStyle() {
@@ -235,6 +256,10 @@ final class LoginViewController: UIViewController {
     @objc private func requestCancellation() {
         guard viewModel.requestCancellation() else { return }
         onCancelSignIn()
+    }
+
+    @objc private func requestCleanupRetry() {
+        onRetryCleanup()
     }
 
     @objc private func requestClose() {
