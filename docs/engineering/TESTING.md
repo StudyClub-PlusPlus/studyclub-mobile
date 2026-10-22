@@ -8,6 +8,7 @@ Feature-boundary tests directly verify Real OFF errors, distinct Main unavailabl
 - pure response validation: requested list offset and requested detail identity; Main owns ID-based merging
 - pure error classification: cancellation preservation, Domain error preservation and transport/unexpected failure translation
 - ViewModel initialization triggers one request; loading-to-content/empty/failure/unavailable transitions
+- Setting account transitions use an auth repository double: restore, login, signup, recheck, logout, flag OFF/ON, cancellation, unconfirmed-terms refusal, and a thrown `discardPendingSignup()` that stays retryable instead of a completed cancellation. They do not claim a real Google login.
 - Display values are ready before notification and available to late subscribers
 - display formatting that contains non-trivial policy
 

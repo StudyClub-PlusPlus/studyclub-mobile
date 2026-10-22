@@ -6,6 +6,7 @@ import Observation
 final class DevelopmentSettingsViewModel {
     private let store = DevelopmentSettingsStore()
     private let flags = FeatureFlag.definitions
+    private let onAuthFlagChange: () -> Void
     private(set) var repositoryMode: RepositoryMode
     private(set) var sections: [DevelopmentSettingSection] = []
 
@@ -25,19 +26,20 @@ final class DevelopmentSettingsViewModel {
         sections = [miscellaneous] + flagSections
     }
 
-    init() {
+    init(onAuthFlagChange: @escaping () -> Void = {}) {
+        self.onAuthFlagChange = onAuthFlagChange
         repositoryMode = store.repositoryMode
         updateSections()
     }
 
     func setFlag(id: String, isEnabled: Bool) {
         guard let flag = flags.first(where: { $0.id == id }) else { return }
-        store.setEnabled(isEnabled, for: flag)
+        store.setEnabled(isEnabled, for: flag, whenAuthFlagChanges: onAuthFlagChange)
         updateSections()
     }
 
     func resetFlagsToDefaults() {
-        store.resetToDefaults()
+        store.resetToDefaults(whenAuthFlagChanges: onAuthFlagChange)
         updateSections()
     }
 

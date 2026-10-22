@@ -17,6 +17,11 @@ struct AuthDocuments {
         }
     }
 
+    /// The pinned wording stays available for display and is not replaced here.
+    /// A shared consent version does not prove this copy is the current terms, so consent and
+    /// submission stay closed even when the login flag is on.
+    var allowsConsentAndSubmit: Bool { false }
+
     private static let terms = #"""
     이용약관
 

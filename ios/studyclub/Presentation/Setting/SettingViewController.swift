@@ -12,9 +12,17 @@ final class SettingViewController: UIViewController, UICollectionViewDelegate {
     }
 
     private let viewModel: SettingAccountViewModel
-    /// The connection slice presents login and owns its return path.
+    /// The account view model presents login and owns its return path.
     var onLoginRequested: (() -> Void)?
     var onAccountActionRequested: ((SettingAccountViewModel.Action) -> Void)?
+    private var accountNavigation: UINavigationController?
+    private var cleanupAlert: UIAlertController?
+    /// The user closed the hidden-cleanup alert without clearing the blocked cleanup.
+    private var cleanupDeferred = false
+    /// Settings tab was no longer selected after that close, so the next visit can offer retry.
+    private var cleanupLeftScreen = false
+    /// Tells the tab root that a failed repository swap can be retried.
+    var onSessionSettled: ((SettingAccountViewModel.State) -> Void)?
     private var subscriptions = Set<AnyCancellable>()
     private var dataSource: UICollectionViewDiffableDataSource<Section, Row>!
     private let listView: UICollectionView = {
@@ -39,6 +47,14 @@ final class SettingViewController: UIViewController, UICollectionViewDelegate {
     init(viewModel: SettingAccountViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
+        onLoginRequested = { [weak viewModel] in viewModel?.startLogin() }
+        onAccountActionRequested = { [weak viewModel] action in
+            switch action {
+            case .login: viewModel?.startLogin()
+            case .recheck: viewModel?.recheckSession()
+            case .logout: viewModel?.logout()
+            }
+        }
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
@@ -46,14 +62,102 @@ final class SettingViewController: UIViewController, UICollectionViewDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureView()
-        viewModel.statePublisher.sink { [weak self] _ in
+        viewModel.statePublisher.sink { [weak self] state in
             self?.updateViews()
+            self?.onSessionSettled?(state)
         }.store(in: &subscriptions)
+        viewModel.presentationPublisher.sink { [weak self] _ in
+            self?.updateAccountPresentation()
+        }.store(in: &subscriptions)
+        viewModel.cleanupBlockedPublisher.sink { [weak self] blocked in
+            self?.updateCleanupAlert(blocked)
+        }.store(in: &subscriptions)
+    }
+
+    private func updateCleanupAlert(_ blocked: Bool) {
+        guard blocked else {
+            cleanupDeferred = false
+            cleanupLeftScreen = false
+            guard let alert = cleanupAlert else { return }
+            cleanupAlert = nil
+            if presentedViewController === alert { dismiss(animated: false) }
+            return
+        }
+        presentCleanupAlertIfVisible()
+    }
+
+    private func presentCleanupAlertIfVisible() {
+        guard viewModel.cleanupBlocked, !cleanupDeferred, cleanupAlert == nil else { return }
+        guard isCleanupScreenVisible else { return }
+        let alert = UIAlertController(
+            title: "로그인 정리를 끝내지 못했어요.",
+            message: "계정 정보는 표시하지 않아요. 지금 다시 시도하거나, 나중에 설정에서 다시 확인할 수 있어요.",
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "나중에", style: .cancel) { [weak self] _ in
+            self?.cleanupAlert = nil
+            self?.cleanupDeferred = true
+        })
+        alert.addAction(UIAlertAction(title: "다시 시도", style: .default) { [weak self] _ in
+            self?.cleanupAlert = nil
+            self?.cleanupDeferred = false
+            self?.viewModel.retryHiddenCleanup()
+        })
+        cleanupAlert = alert
+        present(alert, animated: true)
+    }
+
+    private var isCleanupScreenVisible: Bool {
+        guard isViewLoaded, view.window != nil, presentedViewController == nil else { return false }
+        if let tab = tabBarController {
+            let selected = tab.selectedViewController
+            return selected === self || selected === navigationController
+        }
+        return true
+    }
+
+    func invalidateAccountWorkflow() async throws {
+        let navigation = accountNavigation
+        accountNavigation = nil
+        do {
+            try await viewModel.invalidate()
+        } catch {
+            if presentedViewController === navigation {
+                dismiss(animated: false)
+            }
+            throw error
+        }
+        if presentedViewController === navigation {
+            dismiss(animated: false)
+        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         refreshFeatureVisibility()
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        // Alert dismissal can omit appearance callbacks and still leaves Settings selected.
+        // Only a real tab change may arm the next visit.
+        guard cleanupDeferred, !isCleanupTabSelected else { return }
+        cleanupLeftScreen = true
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        if cleanupLeftScreen {
+            cleanupLeftScreen = false
+            cleanupDeferred = false
+        }
+        presentCleanupAlertIfVisible()
+    }
+
+    private var isCleanupTabSelected: Bool {
+        guard let tab = tabBarController else { return true }
+        let selected = tab.selectedViewController
+        return selected === self || selected === navigationController
     }
 
     func refreshFeatureVisibility() {
@@ -167,6 +271,49 @@ final class SettingViewController: UIViewController, UICollectionViewDelegate {
         let existingRows = Set(dataSource.snapshot().itemIdentifiers)
         snapshot.reconfigureItems(snapshot.itemIdentifiers.filter { existingRows.contains($0) })
         dataSource.apply(snapshot, animatingDifferences: false)
+    }
+
+    private func updateAccountPresentation() {
+        switch viewModel.presentation {
+        case .none:
+            guard let navigation = accountNavigation else { return }
+            accountNavigation = nil
+            if presentedViewController === navigation {
+                dismiss(animated: true)
+            }
+        case .login:
+            guard accountNavigation == nil, let loginViewModel = viewModel.loginViewModel else { return }
+            let login = LoginViewController(
+                viewModel: loginViewModel,
+                onGoogleSignIn: { [weak self] _ in self?.viewModel.signInWithGoogle() },
+                onCancelSignIn: { [weak self] in self?.viewModel.cancelSignIn() },
+                onRetryCleanup: { [weak self] in self?.viewModel.retryLoginCleanup() },
+                onClose: { [weak self] in self?.viewModel.closeLogin() }
+            )
+            presentAccount(login)
+        case .signup:
+            guard let onboardingViewModel = viewModel.onboardingViewModel else { return }
+            let onboarding = OnboardingViewController(
+                viewModel: onboardingViewModel,
+                onSubmit: { [weak self] input in self?.viewModel.submitSignup(input) },
+                onRecheck: { [weak self] in self?.viewModel.recheckSignup() },
+                onRetryCleanup: { [weak self] in self?.viewModel.retryAbandonSignup() },
+                onClose: { [weak self] in self?.viewModel.abandonSignup() }
+            )
+            if let navigation = accountNavigation {
+                navigation.setViewControllers([onboarding], animated: true)
+            } else {
+                presentAccount(onboarding)
+            }
+        }
+    }
+
+    private func presentAccount(_ root: UIViewController) {
+        let navigation = UINavigationController(rootViewController: root)
+        navigation.modalPresentationStyle = .fullScreen
+        navigation.isModalInPresentation = true
+        accountNavigation = navigation
+        present(navigation, animated: true)
     }
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {

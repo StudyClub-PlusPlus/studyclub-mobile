@@ -28,6 +28,8 @@ final class OnboardingViewModel {
         case submitting
         case unknownStatus
         case checkingStatus
+        case cancelling
+        case cleanupFailed
         case closed
     }
 
@@ -41,16 +43,28 @@ final class OnboardingViewModel {
     private let originalInput: Input
 
     var isEditing: Bool { state == .editing }
-    var isBusy: Bool { state == .submitting || state == .checkingStatus }
+    var isBusy: Bool { state == .submitting || state == .checkingStatus || state == .cancelling }
     var hasChanges: Bool { input != originalInput }
     var requiresStatusCheck: Bool { state == .unknownStatus || state == .checkingStatus }
-    var canSubmit: Bool { isEditing && input.hasNickname && input.hasRequiredConsents }
+    /// Closed unless a caller has an explicit confirmation that the displayed terms are current.
+    let allowsConsentAndSubmit: Bool
+    var canSubmit: Bool {
+        isEditing && allowsConsentAndSubmit && input.hasNickname && input.hasRequiredConsents
+    }
 
-    init(suggestedNickname: String = "스터디친구", deviceTimeZone: String = TimeZone.current.identifier) {
+    init(
+        suggestedNickname: String = "스터디친구",
+        deviceTimeZone: String = TimeZone.current.identifier,
+        allowsConsentAndSubmit: Bool = AuthDocuments().allowsConsentAndSubmit
+    ) {
+        self.allowsConsentAndSubmit = allowsConsentAndSubmit
         let zone = Self.timeZoneIdentifiers.contains(deviceTimeZone) ? deviceTimeZone : "Etc/UTC"
         let initial = Input(nickname: suggestedNickname, timeZone: zone)
         input = initial
         originalInput = initial
+        if !allowsConsentAndSubmit {
+            consentError = "확정된 약관이 없어 동의하거나 가입을 제출할 수 없어요."
+        }
     }
 
     func updateNickname(_ nickname: String) {
@@ -74,7 +88,7 @@ final class OnboardingViewModel {
     }
 
     func updateConsents(age: Bool, terms: Bool, privacy: Bool, marketing: Bool) {
-        guard isEditing else { return }
+        guard isEditing, allowsConsentAndSubmit else { return }
         input.age14Confirmed = age
         input.termsOfServiceAgreed = terms
         input.privacyPolicyAgreed = privacy
@@ -86,7 +100,7 @@ final class OnboardingViewModel {
 
     /// Returns local input once; does not send a request or complete signup.
     func submit() -> Input? {
-        guard isEditing else { return nil }
+        guard isEditing, allowsConsentAndSubmit else { return nil }
         nicknameError = input.hasNickname ? nil : "닉네임을 입력해 주세요."
         consentError = input.hasRequiredConsents ? nil : "필수 항목을 모두 확인해 주세요."
         errorMessage = nil
@@ -117,6 +131,32 @@ final class OnboardingViewModel {
         consentError = nil
         errorMessage = message
         stateSubject.send(.editing)
+    }
+
+    /// Keeps the entered input until discard succeeds.
+    func beginClose() {
+        guard state != .closed, state != .cancelling else { return }
+        errorMessage = nil
+        stateSubject.send(.cancelling)
+    }
+
+    @discardableResult
+    func requestCleanupRetry() -> Bool {
+        guard state == .cleanupFailed else { return false }
+        errorMessage = nil
+        stateSubject.send(.cancelling)
+        return true
+    }
+
+    func failClose() {
+        guard state == .cancelling else { return }
+        errorMessage = "가입 정리를 끝내지 못했어요. 다시 시도해 주세요."
+        stateSubject.send(.cleanupFailed)
+    }
+
+    func finishClose() {
+        guard state == .cancelling else { return }
+        close()
     }
 
     func close() {

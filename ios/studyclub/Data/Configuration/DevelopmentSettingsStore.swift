@@ -27,16 +27,30 @@ struct DevelopmentSettingsStore {
     }
 
     #if DEBUG
-    func setEnabled(_ isEnabled: Bool, for definition: FeatureFlagDefinition) {
+    func setEnabled(
+        _ enabled: Bool,
+        for definition: FeatureFlagDefinition,
+        whenAuthFlagChanges notify: () -> Void = {}
+    ) {
+        let authBefore = isEnabled(FeatureFlag.googleLogin.definition)
         var overrides = defaults.dictionary(forKey: Self.key) ?? [:]
-        overrides[definition.id] = isEnabled
+        overrides[definition.id] = enabled
         defaults.set(overrides, forKey: Self.key)
+        // Only the account flag reaches its owner. Other flags keep their existing capture policy.
+        if definition.id == FeatureFlag.googleLogin.definition.id,
+           authBefore != isEnabled(FeatureFlag.googleLogin.definition) {
+            notify()
+        }
     }
 
-    func resetToDefaults() {
+    func resetToDefaults(whenAuthFlagChanges notify: () -> Void = {}) {
         // Remove overrides instead of persisting today's defaults, including retired flag IDs.
         // Repository and other preferences have their own keys and remain untouched.
+        let authBefore = isEnabled(FeatureFlag.googleLogin.definition)
         defaults.removeObject(forKey: Self.key)
+        if authBefore != isEnabled(FeatureFlag.googleLogin.definition) {
+            notify()
+        }
     }
     #endif
 }

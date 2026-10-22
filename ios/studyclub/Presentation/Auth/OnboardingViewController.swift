@@ -6,6 +6,7 @@ final class OnboardingViewController: UIViewController, UITextFieldDelegate {
     private let viewModel: OnboardingViewModel
     private let onSubmit: ((OnboardingViewModel.Input) -> Void)?
     private let onRecheck: (() -> Void)?
+    private let onRetryCleanup: (() -> Void)?
     private let onClose: (() -> Void)?
     private var subscriptions = Set<AnyCancellable>()
 
@@ -129,10 +130,12 @@ final class OnboardingViewController: UIViewController, UITextFieldDelegate {
     init(viewModel: OnboardingViewModel,
          onSubmit: ((OnboardingViewModel.Input) -> Void)? = nil,
          onRecheck: (() -> Void)? = nil,
+         onRetryCleanup: (() -> Void)? = nil,
          onClose: (() -> Void)? = nil) {
         self.viewModel = viewModel
         self.onSubmit = onSubmit
         self.onRecheck = onRecheck
+        self.onRetryCleanup = onRetryCleanup
         self.onClose = onClose
         super.init(nibName: nil, bundle: nil)
     }
@@ -243,7 +246,8 @@ final class OnboardingViewController: UIViewController, UITextFieldDelegate {
         termsSwitch.isOn = input.termsOfServiceAgreed
         privacySwitch.isOn = input.privacyPolicyAgreed
         marketingSwitch.isOn = input.marketingAgreed
-        for control in [ageSwitch, termsSwitch, privacySwitch, marketingSwitch] { control.isEnabled = viewModel.isEditing }
+        let consentEnabled = viewModel.isEditing && viewModel.allowsConsentAndSubmit
+        for control in [ageSwitch, termsSwitch, privacySwitch, marketingSwitch] { control.isEnabled = consentEnabled }
         nicknameError.text = viewModel.nicknameError.map { "ⓘ \($0)" }
         nicknameError.isHidden = viewModel.nicknameError == nil
         consentError.text = viewModel.consentError.map { "ⓘ \($0)" }
@@ -252,6 +256,10 @@ final class OnboardingViewController: UIViewController, UITextFieldDelegate {
         failureLabel.isHidden = viewModel.errorMessage == nil
         switch viewModel.state {
         case .editing, .closed:
+            statusLabel.text = nil
+        case .cancelling:
+            statusLabel.text = "가입을 정리하는 중이에요."
+        case .cleanupFailed:
             statusLabel.text = nil
         case .submitting:
             statusLabel.text = "가입을 완료하고 있어요…"
@@ -264,8 +272,13 @@ final class OnboardingViewController: UIViewController, UITextFieldDelegate {
         stateArea.isHidden = statusLabel.text == nil && viewModel.errorMessage == nil
         spinner.isHidden = !viewModel.isBusy
         if viewModel.isBusy { spinner.startAnimating() } else { spinner.stopAnimating() }
-        submitButton.setTitle(viewModel.requiresStatusCheck ? "다시 확인" : "가입 완료", for: .normal)
-        submitButton.isEnabled = viewModel.canSubmit || viewModel.state == .unknownStatus
+        if viewModel.state == .cleanupFailed {
+            submitButton.setTitle("정리 다시 시도", for: .normal)
+            submitButton.isEnabled = true
+        } else {
+            submitButton.setTitle(viewModel.requiresStatusCheck ? "다시 확인" : "가입 완료", for: .normal)
+            submitButton.isEnabled = viewModel.canSubmit || viewModel.state == .unknownStatus
+        }
     }
 
     @objc private func nicknameChanged() { viewModel.updateNickname(nickname.text ?? "") }
@@ -287,7 +300,9 @@ final class OnboardingViewController: UIViewController, UITextFieldDelegate {
 
     private func submit() {
         view.endEditing(true)
-        if viewModel.requiresStatusCheck {
+        if viewModel.state == .cleanupFailed {
+            onRetryCleanup?()
+        } else if viewModel.requiresStatusCheck {
             if viewModel.beginStatusCheck() { onRecheck?() }
         } else if let input = viewModel.submit() {
             onSubmit?(input)
@@ -303,6 +318,7 @@ final class OnboardingViewController: UIViewController, UITextFieldDelegate {
 
     @objc private func requestClose() {
         view.endEditing(true)
+        guard viewModel.state != .cancelling, viewModel.state != .cleanupFailed else { return }
         let uncertain = viewModel.state == .submitting || viewModel.requiresStatusCheck
         guard uncertain || viewModel.hasChanges else { close(); return }
         let alert = UIAlertController(
@@ -315,10 +331,14 @@ final class OnboardingViewController: UIViewController, UITextFieldDelegate {
     }
 
     private func close() {
-        guard viewModel.state != .closed else { return }
-        viewModel.close()
-        if let onClose { onClose() }
-        else { (navigationController?.presentingViewController ?? presentingViewController)?.dismiss(animated: true) }
+        guard viewModel.state != .closed, viewModel.state != .cancelling else { return }
+        if let onClose {
+            viewModel.beginClose()
+            onClose()
+        } else {
+            viewModel.close()
+            (navigationController?.presentingViewController ?? presentingViewController)?.dismiss(animated: true)
+        }
     }
 
     private func openDocument(_ kind: AuthDocuments.Kind) {

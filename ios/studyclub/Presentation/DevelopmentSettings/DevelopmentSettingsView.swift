@@ -3,9 +3,16 @@ import SwiftUI
 
 struct DevelopmentSettingsView: View {
     let onRepositoryChange: () -> Void
+    let onAuthFlagChange: () -> Void
     @Environment(\.dismiss) private var dismiss
-    @State private var viewModel = DevelopmentSettingsViewModel()
+    @State private var viewModel: DevelopmentSettingsViewModel
     @State private var showsRepositoryPicker = false
+
+    init(onRepositoryChange: @escaping () -> Void, onAuthFlagChange: @escaping () -> Void = {}) {
+        self.onRepositoryChange = onRepositoryChange
+        self.onAuthFlagChange = onAuthFlagChange
+        _viewModel = State(initialValue: DevelopmentSettingsViewModel(onAuthFlagChange: onAuthFlagChange))
+    }
 
     var body: some View {
         NavigationStack {

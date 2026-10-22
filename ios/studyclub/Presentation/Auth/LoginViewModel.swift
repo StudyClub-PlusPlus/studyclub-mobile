@@ -7,7 +7,9 @@ final class LoginViewModel {
     enum State: Equatable {
         case idle
         case signingIn
+        case cancelling
         case cancelled
+        case cleanupFailed
         case failure
         case unavailable
     }
@@ -16,12 +18,19 @@ final class LoginViewModel {
 
     var state: State { stateSubject.value }
     var statePublisher: AnyPublisher<State, Never> { stateSubject.eraseToAnyPublisher() }
-    var canSignIn: Bool { state != .signingIn && state != .unavailable }
+    var canSignIn: Bool {
+        switch state {
+        case .idle, .cancelled, .failure: true
+        case .signingIn, .cancelling, .cleanupFailed, .unavailable: false
+        }
+    }
     var statusMessage: String? {
         switch state {
         case .idle: nil
         case .signingIn: "로그인 중이에요…"
+        case .cancelling: "로그인을 정리하는 중이에요."
         case .cancelled: "로그인을 취소했어요. 다시 시작할 수 있어요."
+        case .cleanupFailed: "로그인 정리를 끝내지 못했어요. 다시 시도해 주세요."
         case .failure: "로그인하지 못했어요. 다시 시도해 주세요."
         case .unavailable: "지금은 Google 로그인을 이용할 수 없어요. 잠시 후 다시 시도해 주세요."
         }
@@ -46,7 +55,15 @@ final class LoginViewModel {
     @discardableResult
     func requestCancellation() -> Bool {
         guard state == .signingIn else { return false }
-        update(state: .cancelled)
+        update(state: .cancelling)
+        return true
+    }
+
+    /// Repeats credential cleanup. It does not start Google sign-in.
+    @discardableResult
+    func requestCleanupRetry() -> Bool {
+        guard state == .cleanupFailed else { return false }
+        update(state: .cancelling)
         return true
     }
 }
