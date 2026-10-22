@@ -70,7 +70,7 @@ enum FeatureFlag: CaseIterable {
             FeatureFlagDefinition(
                 id: "study.my-studies",
                 name: "내 스터디 목록",
-                stage: .inProgress
+                stage: .ready
             )
         }
     }

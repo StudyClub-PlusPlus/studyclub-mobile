@@ -2,7 +2,7 @@
 
 [작업73](https://app.notion.com/p/benkang/8768d232c6b145ba9d194f7c4050e581)은 Google 설정 없이 로그인·가입·설정과 회원 영역을 시험할 수 있도록 한다. 기존 구현을 재사용하며 새 인증 API나 세션 저장소를 추가하지 않는다.
 
-Debug 개발 설정에서 Mock을 선택하고 `auth.google-login`을 켠다. `account.mypage`·`study.my-studies`를 함께 켜면 프로필과 내 스터디에서도 같은 계정 흐름을 확인할 수 있다. `auth.google-login`과 `account.mypage`는 Ready이고 `study.my-studies`는 InProgress다. 일반 Debug/Release의 기본값은 각각 ON과 OFF이고 STAGE는 모두 ON이다. 저장 override가 우선한다. Mock/Real 변경은 기존 탭 재구성 경로를 따른다.
+Debug 개발 설정에서 Mock을 선택하고 `auth.google-login`을 켠다. `account.mypage`·`study.my-studies`를 함께 켜면 프로필과 내 스터디에서도 같은 계정 흐름을 확인할 수 있다. 세 플래그는 Ready다. 일반 Debug/Release와 STAGE의 기본값은 모두 ON이다. 저장 override가 우선한다. Mock/Real 변경은 기존 탭 재구성 경로를 따른다.
 
 Mock 로그인은 기존 신규가입 분기를 연다. 로그인 화면과 가입 화면에 짧은 테스트 안내가 있다. 필수·선택 동의는 모두 OFF로 시작하며 필수 동의와 닉네임이 있어야 제출한다. 약관 원문은 기존 문서 버튼으로 읽는다. 이 동의는 실제 약관 승인이나 서버 가입 기록이 아니다.
 
