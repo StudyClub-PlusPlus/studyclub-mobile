@@ -1,4 +1,29 @@
 enum RepositoryFactory {
+    /// Concrete root-local graph for the actual account and private-list consumers.
+    struct MemberRepositories {
+        let auth: any AuthRepository
+        let myStudies: any MyStudiesRepository
+    }
+
+    static func makeMemberRepositories() -> MemberRepositories {
+        #if DEBUG
+        if DevelopmentSettingsStore().repositoryMode == .mock {
+            return MemberRepositories(
+                auth: MockAuthRepository(isFeatureEnabled: { DevelopmentSettingsStore().isEnabled(FeatureFlag.googleLogin.definition) }),
+                myStudies: MockMyStudiesRepository()
+            )
+        }
+        #endif
+        let auth = DefaultAuthRepository()
+        return MemberRepositories(
+            auth: auth,
+            myStudies: DefaultMyStudiesRepository(
+                authorization: auth,
+                isFeatureEnabled: DevelopmentSettingsStore().isEnabled(FeatureFlag.myStudies.definition)
+            )
+        )
+    }
+
     static func makeStudyRepository() -> any RepositoryProtocol {
         #if DEBUG
         if DevelopmentSettingsStore().repositoryMode == .mock {

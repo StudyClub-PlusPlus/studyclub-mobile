@@ -1,0 +1,16 @@
+{
+  "executed_origin": "93faaf1420a37391ef1315d68eb18254ce3928de",
+  "equivalent_source_alias": "d452a4534f2f260d0e5f5c81bc4de3bc87013ea5",
+  "ios_tree": "37639c9d4fec69612262183206c28b1bfa1ebc08",
+  "bundle": "studycub.studyclub.sc68root",
+  "sha256": {
+    "member-content.png": "853624f7a53f6b984c33585e8aa315ccc1503f0d57238893d0c9501d23f9f742",
+    "onboarding-instruction.png": "0b3868ff5f9f07bf97543b12e5293b3b6fe736752d71ac94e65a3598ea47be1e",
+    "refresh-failure-keeps-content.png": "73cc43b81eb71bd218449c6e49b6b01005d2e8d1c4dd89a25d4588fae2aa9319"
+  },
+  "original_capture_names": {
+    "member-content.png": "71-sc68-content-settled.png",
+    "onboarding-instruction.png": "77-sc68-onboarding-required.png",
+    "refresh-failure-keeps-content.png": "82-sc68-refresh-failure-single-connection.png"
+  }
+}
