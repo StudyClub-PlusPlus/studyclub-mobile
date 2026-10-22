@@ -6,6 +6,22 @@ struct DevelopmentSettingsStore {
 
     #if DEBUG
     private static let repositoryModeKey = "development.repositoryMode"
+    private static let mockSessionKey = "development.mockSession"
+
+    enum MockSession: String, CaseIterable {
+        case guest, member
+    }
+
+    var mockSession: MockSession {
+        get {
+            guard let value = defaults.string(forKey: Self.mockSessionKey),
+                  let session = MockSession(rawValue: value) else { return .guest }
+            return session
+        }
+        nonmutating set {
+            defaults.set(newValue.rawValue, forKey: Self.mockSessionKey)
+        }
+    }
 
     var repositoryMode: RepositoryMode {
         get {

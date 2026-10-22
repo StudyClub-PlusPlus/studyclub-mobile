@@ -115,6 +115,8 @@ Check safe areas, card alignment, long Korean title/metadata wrapping, empty sum
 
 ## Development Settings
 
+Mock 모드의 기타 그룹에는 `Mock 로그인 테스트`가 표시된다. 비회원·비로그인 또는 회원·로그인을 고르면 기존 화면 재구성 경로로 탭을 새로 만들고 스터디 탭으로 돌아간다. 선택 창은 실제 로그인이 아니라는 점, 재실행 유지와 별도 기능 플래그 설정을 설명한다. Real에서는 이 행을 숨기며 실제 인증을 유지한다.
+
 Debug-only SwiftUI modal hosted by UIHostingController, with its own NavigationStack title and Close button. Use an inset-grouped SwiftUI List with “기타”, “Ready”, “InProgress” headers. The miscellaneous section has a Repository button displaying Mock/Real and a separate Reset Flag to Default button. Repository opens a mode alert; a changed selection closes the modal and recreates the tab navigation stacks on Main. The saved mode applies to Debug only, while Release always uses Real. Flag rows use a wrapping name on the left and a labeled switch on the right; the full row is also tappable. Ready defaults ON and InProgress defaults OFF. Empty flag sections keep their headers. Reset updates switches in place without recreating the app root.
 
 ## 가입 정보 입력 View · SC-55

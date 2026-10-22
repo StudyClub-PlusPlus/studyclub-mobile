@@ -2,6 +2,7 @@
 struct DevelopmentSettingRow {
     enum ID: Hashable {
         case repository
+        case mockSession
         case resetFlags
         case featureFlag(String)
     }
@@ -14,6 +15,15 @@ struct DevelopmentSettingRow {
     let id: ID
     let title: String
     let kind: Kind
+}
+
+extension DevelopmentSettingsStore.MockSession {
+    var title: String {
+        switch self {
+        case .guest: "비회원 · 비로그인"
+        case .member: "회원 · 로그인"
+        }
+    }
 }
 
 struct DevelopmentSettingSection {
