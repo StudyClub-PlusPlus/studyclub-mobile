@@ -16,6 +16,10 @@ Feature flags select new versus previous behavior at the feature's Repository/Vi
 
 The `auth.google-login` definition stays InProgress (default OFF). Both Debug and Release resolve saved overrides before the stage default through the existing store. `DefaultAuthRepository` reads it at the start of each operation and again before changing credentials. OFF performs no auth request and keeps stored completed-member credentials. The flag does not choose Mock or Real. It stays InProgress until a real login, signup, restore and logout have passed. Settings reads the flag on appear and before an account action. Debug `setFlag` and `resetFlagsToDefaults` notify that screen only when `auth.google-login` changes, so an in-flight restore is invalidated without rebuilding tabs. Other flags keep their current capture behavior. A manual ON does not confirm terms: `AuthDocuments.allowsConsentAndSubmit` stays false, and onboarding then refuses consent changes and submission. The bundled terms text is unchanged and is not a legal approval.
 
+## My Studies list · SC65
+
+`study.my-studies` is InProgress (default OFF). SC65 registers the definition only; it adds no screen, navigation or API request. The existing development catalog, persisted overrides and reset behavior apply in both build configurations. Repository mode selection is unchanged. SC66/SC67 prepare the View and API, and SC68 owns their connection and side-effect guards. SC69 may move the same ID to Ready only after deployment-specific QA; a prepared Draft PR is not that approval. Calendar work is outside this flag's current scope.
+
 ## Add a feature
 
 1. Add a real feature case to `FeatureFlag` and its `FeatureFlagDefinition` with a stable explicit ID, readable name and `.inProgress` stage. `CaseIterable` synthesizes the catalog; `FeatureFlag.definitions` maps it to the development rows.
