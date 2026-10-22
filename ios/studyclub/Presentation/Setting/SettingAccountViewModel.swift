@@ -1,7 +1,7 @@
 import Combine
 import Foundation
 
-/// Settings owns one fresh auth repository and the login/onboarding display models.
+/// Owns the root's shared auth repository and the login/onboarding display models.
 /// View controllers receive those display models and callbacks, never the repository.
 @MainActor
 final class SettingAccountViewModel {
@@ -20,6 +20,7 @@ final class SettingAccountViewModel {
     private let stateSubject: CurrentValueSubject<State, Never>
     private let presentationSubject: CurrentValueSubject<Presentation, Never>
     private var accountTask: Task<Void, Never>?
+    private var sharedRecheckRequested = false
     /// Identity of the task that may still change account state.
     private var operationID: UUID?
     /// Root invalidation may publish only while this value is still current.
@@ -96,6 +97,7 @@ final class SettingAccountViewModel {
     }
 
     func invalidate() async throws {
+        sharedRecheckRequested = false
         accountTask?.cancel()
         accountTask = nil
         operationID = nil
@@ -249,6 +251,14 @@ final class SettingAccountViewModel {
         beginRestore(droppingPendingWork: false)
     }
 
+    /// A sibling member feature confirmed an authentication failure. Do not cancel an active
+    /// logout/signup operation; recheck after that operation settles instead.
+    func recheckSharedSession() {
+        guard isFeatureEnabled, presentation == .none else { return }
+        guard !isBusy else { sharedRecheckRequested = true; return }
+        beginRestore(droppingPendingWork: discardFailed)
+    }
+
     /// Retries the hidden cleanup started while the account flag is off.
     func retryHiddenCleanup() {
         guard !isFeatureEnabled, cleanupBlocked, !isBusy else { return }
@@ -326,6 +336,10 @@ final class SettingAccountViewModel {
             guard let self, self.isCurrent(operationID) else { return }
             self.accountTask = nil
             self.operationID = nil
+            if self.sharedRecheckRequested {
+                self.sharedRecheckRequested = false
+                self.recheckSharedSession()
+            }
         }
     }
 

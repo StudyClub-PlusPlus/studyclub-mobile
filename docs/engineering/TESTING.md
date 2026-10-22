@@ -53,3 +53,9 @@ MockRepository keeps 65 trusted Domain studies, paged in groups of 20, with matc
 ## MyPage
 
 The obsolete independent AccountRepository/MyPageViewModel and their tests are removed. Existing Auth/SettingAccountViewModel tests cover the shared session policy; new screen wiring still needs fresh manual evidence. Check both profile roots, guest explicit login, nickname, checking/recheck/logoutFailure, login/signup safe close and the fullScreen return contract without changing either tab's existing navigation stack. Old ../evidence/sc-94-review captures remain historical. Controlled hosts stay outside shipped source, and real OAuth/deployed account data remain separate unknowns. Do not add automated UI tests.
+
+## Shared member root integration
+
+MemberAreaViewModelTests uses Domain-only collaborators to check guest bootstrap, confirmed member loading and logout clearing, auth OFF with no restore/list request, and an authorization recheck while logout is explicitly suspended. MemberAuthorizationTests includes two continuation probes for final rejection followed by a late concurrent refresh, including deletion failure. MyStudiesListIntegrationTests covers session changes, cancellation, refresh preservation/empty replacement and onboarding rejection. These unit checks do not establish fullScreen return behavior, live OAuth or deployed server compatibility. Native root walkthroughs must bind the exact shipping source or identify every controlled-host difference and runtime mode. Legal consent guards stay intact.
+
+The final root regression uses a restore continuation and a one-shot state publisher to finish the same-member rejection check. It asserts one automatic list request and allows a second request only after explicit refresh. Separate root checks preserve the onboarding guest instruction and ensure sibling refresh cannot bypass failed cleanup. The pre-fix probe's second-request barrier is retained only in its archived candidate.

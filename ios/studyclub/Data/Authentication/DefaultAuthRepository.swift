@@ -64,6 +64,36 @@ actor DefaultAuthRepository: AuthRepository {
 
     // MARK: - AuthRepository
 
+    /// Data-only authorization seam for member repositories. Tokens never enter Domain or UI.
+    /// Shares the same invalidation clock, refresh and transactional storage as authentication.
+    func withAuthorization<Value: Sendable>(
+        _ request: @Sendable (String) async throws -> Value
+    ) async throws -> Value {
+        let epoch = try begin()
+        let tokens: AuthTokens
+        do {
+            guard let stored = try store.load() else { throw AuthError.authenticationInvalid }
+            tokens = stored
+            try tokens.validate()
+        } catch let error as AuthError {
+            throw error
+        } catch {
+            throw AuthError.unavailable
+        }
+        do {
+            let result = try await authorized(tokens, epoch: epoch, request)
+            try ensureCurrent(epoch)
+            if result.tokens != tokens { try saveCredentials(result.tokens, epoch: epoch) }
+            return result.value
+        } catch AuthRemoteError.unauthorized {
+            try ensureCurrent(epoch)
+            try deleteStoredSession()
+            throw AuthError.authenticationInvalid
+        } catch AuthRemoteError.connection {
+            throw AuthError.connectionFailure
+        }
+    }
+
     func restoreSession() async throws -> Member? {
         let epoch = try begin()
         let stored: AuthTokens
@@ -339,6 +369,9 @@ actor DefaultAuthRepository: AuthRepository {
 
     /// Deletes completed-member credentials. Failure stays a failure and leaves them in place.
     private func deleteStoredSession() throws {
+        // Rejection supersedes all concurrent consumers before synchronous storage work.
+        // A failed deletion still throws; it never becomes successful anonymous state.
+        invalidate()
         do {
             try store.delete()
         } catch {
