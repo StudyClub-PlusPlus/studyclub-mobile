@@ -20,6 +20,7 @@ enum FeatureFlag: CaseIterable {
     case studyDesignSystem
     case googleLogin
     case myPage
+    case myStudies
 
     static let definitions = allCases.map(\.definition)
 
@@ -49,6 +50,12 @@ enum FeatureFlag: CaseIterable {
             FeatureFlagDefinition(
                 id: "auth.google-login",
                 name: "Google 로그인",
+                stage: .inProgress
+            )
+        case .myStudies:
+            FeatureFlagDefinition(
+                id: "study.my-studies",
+                name: "내 스터디 목록",
                 stage: .inProgress
             )
         }
