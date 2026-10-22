@@ -27,3 +27,9 @@ Selection uses stable diffable Study.ID, never a saved array index. Detail fetch
 ## MyPage
 
 MyPage reads the existing SettingAccountViewModel's hidden/guest/checking/connectionFailure/member/logoutFailure states. It displays confirmed nickname only, keeps identity on logout failure, and provides explicit login/recheck/logout retry. SC52 owns authentication Tasks, cancellation and signup uncertainty; MyPage creates no session or network request. Profile and Settings share the same presentation/cleanup implementation. The profile's independent fullScreen stack never pops or replaces top-level tab stacks. Profile login completion/cancellation stays in the profile; gate login returns to the originating My Studies screen after the authentication sheet finishes safe dismissal.
+
+## My Studies shared session
+
+MemberAreaViewModel composes one account/list pair from a single RepositoryFactory graph. Checking hides private list data and selection; guest, hidden and connection failure become guest, unavailable and failure respectively. A confirmed nickname starts one member list request. Logout clears the list through the account publisher. The list asks the same account owner to recheck after authorization rejection or a retry while membership is unknown. An active logout/signup operation finishes before a queued recheck starts. A cancelled list result cannot restore old content. A refresh failure retains content; a successful empty response clears it. There is no pagination. The two tabs keep independent navigation stacks, and profile is fullScreen as described above.
+
+A list authorization rejection permits one automatic account recheck. If that recheck still confirms the same member, the list stays in failure until explicit refresh; membership alone does not authorize an already rejected resource. A guest result preserves the onboarding instruction. Shared rechecks repeat failed pending-signup cleanup before restore, matching Settings recovery.
