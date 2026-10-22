@@ -128,7 +128,8 @@ final class MyStudiesListViewController: UIViewController {
     }
 
     private func updateViews() {
-        refreshControl.endRefreshing()
+        if !viewModel.isRefreshing { refreshControl.endRefreshing() }
+        navigationItem.prompt = viewModel.state == .content ? viewModel.message : nil
         let state = viewModel.state
         let canRefresh = state == .content || state == .empty || state == .failure
         collectionView.refreshControl = canRefresh ? refreshControl : nil
@@ -157,7 +158,7 @@ final class MyStudiesListViewController: UIViewController {
         case .guest:
             stateImage.image = UIImage(systemName: "person.crop.circle")
             stateTitle.text = "로그인하고 내 스터디를 확인해 보세요."
-            stateMessage.text = "참여한 스터디를 한곳에서 볼 수 있어요."
+            stateMessage.text = viewModel.message ?? "참여한 스터디를 한곳에서 볼 수 있어요."
         case .unavailable:
             stateImage.image = UIImage(systemName: "info.circle")
             stateTitle.text = "아직 제공되지 않는 기능이에요"

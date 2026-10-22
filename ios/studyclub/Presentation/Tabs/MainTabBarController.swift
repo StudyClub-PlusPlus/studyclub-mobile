@@ -7,6 +7,7 @@ import SwiftUI
 @MainActor
 final class MainTabBarController: UITabBarController {
     private var accountViewModel: SettingAccountViewModel?
+    private var memberArea: MemberAreaViewModel?
     private var accountController: SettingViewController?
     private var accountSubscription: AnyCancellable?
     private var profileNavigation: UINavigationController?
@@ -100,7 +101,9 @@ final class MainTabBarController: UITabBarController {
             title: "스터디", image: UIImage(systemName: "books.vertical"), tag: 0
         )
 
-        let accountViewModel = SettingAccountViewModel()
+        let memberArea = MemberAreaViewModel()
+        self.memberArea = memberArea
+        let accountViewModel = memberArea.account
         self.accountViewModel = accountViewModel
         let settingController = SettingViewController(viewModel: accountViewModel)
         let setting = UINavigationController(rootViewController: settingController)
@@ -108,11 +111,16 @@ final class MainTabBarController: UITabBarController {
             title: "설정", image: UIImage(systemName: "gearshape"), tag: 1
         )
 
-        isMyPageEnabled = DevelopmentSettingsStore().isEnabled(FeatureFlag.myPage.definition)
+        isMyPageEnabled = memberArea.isMyPageEnabled
         if isMyPageEnabled {
-            let myStudies = MyStudiesViewController(viewModel: accountViewModel)
-            myStudies.onProfile = { [weak self] in
+            let myStudies = MyStudiesListViewController(viewModel: memberArea.myStudies)
+            myStudies.onLogin = { [weak self] in
                 self?.presentProfile(startLogin: true)
+            }
+            myStudies.onSelectStudy = { [weak myStudies] id in
+                myStudies?.navigationController?.pushViewController(
+                    DetailViewController(viewModel: DetailViewModel(studyID: id)), animated: true
+                )
             }
             let myNavigation = UINavigationController(rootViewController: myStudies)
             myNavigation.tabBarItem = UITabBarItem(title: "내 스터디", image: UIImage(systemName: "list.bullet"), tag: 1)
@@ -200,8 +208,9 @@ extension MainTabBarController: UIGestureRecognizerDelegate {
         guard pendingRepositoryRoot else { return }
         let previous = settingViewController()
         do {
+            memberArea?.myStudies.suspend(state: .loading)
             if let previous { try await previous.invalidateAccountWorkflow() }
-            else { try await accountViewModel?.invalidate() }
+            else { try await memberArea?.invalidate() }
             dismissRootInstallFailure()
             installTabs()
             selectedIndex = 0
