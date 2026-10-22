@@ -8,6 +8,15 @@ struct StudyCardCellViewModel: Identifiable, Hashable {
     let memberText: String
     let statusText: String
 
+    init(id: Study.ID, category: String, title: String, summary: String, memberText: String, statusText: String) {
+        self.id = id
+        self.category = category
+        self.title = title
+        self.summary = summary
+        self.memberText = memberText
+        self.statusText = statusText
+    }
+
     init(study: Study) {
         id = study.id
         category = study.category.displayText

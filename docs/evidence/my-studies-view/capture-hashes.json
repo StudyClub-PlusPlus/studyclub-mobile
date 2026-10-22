@@ -1,0 +1,11 @@
+{
+  "capture_candidate": "656cc1232b651848f8c72eec60306176e7987c26",
+  "sha256": {
+    "content.png": "41a00e3fa0318eb15829c076a8ac92939e3f64cd15ea9b57fddd6e16a87c1d95",
+    "guest.png": "c94be7d2dead7cee899e9cda3667a73720935b7926c53fc01c91857fae8a1048"
+  },
+  "source_files": {
+    "content.png": "08-sc66-host-initial-content.png",
+    "guest.png": "13-sc66-state-guest.png"
+  }
+}
