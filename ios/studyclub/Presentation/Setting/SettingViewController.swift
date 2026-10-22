@@ -2,7 +2,7 @@ import Combine
 import UIKit
 
 @MainActor
-final class SettingViewController: UIViewController, UICollectionViewDelegate {
+class SettingViewController: UIViewController, UICollectionViewDelegate {
     private enum Section: Hashable {
         case account, logout
     }
@@ -11,7 +11,8 @@ final class SettingViewController: UIViewController, UICollectionViewDelegate {
         case header, checking, login, member, logout, failure, retry, retryLogout
     }
 
-    private let viewModel: SettingAccountViewModel
+    let viewModel: SettingAccountViewModel
+    var onAccountFlowDismissed: (() -> Void)?
     /// The account view model presents login and owns its return path.
     var onLoginRequested: (() -> Void)?
     var onAccountActionRequested: ((SettingAccountViewModel.Action) -> Void)?
@@ -122,12 +123,12 @@ final class SettingViewController: UIViewController, UICollectionViewDelegate {
         do {
             try await viewModel.invalidate()
         } catch {
-            if presentedViewController === navigation {
+            if let navigation, presentedViewController === navigation {
                 dismiss(animated: false)
             }
             throw error
         }
-        if presentedViewController === navigation {
+        if let navigation, presentedViewController === navigation {
             dismiss(animated: false)
         }
     }
@@ -166,7 +167,7 @@ final class SettingViewController: UIViewController, UICollectionViewDelegate {
         )
     }
 
-    private func configureView() {
+    func configureView() {
         title = "설정"
         navigationItem.largeTitleDisplayMode = .always
         navigationController?.navigationBar.prefersLargeTitles = true
@@ -236,7 +237,7 @@ final class SettingViewController: UIViewController, UICollectionViewDelegate {
         cell.contentConfiguration = content
     }
 
-    private func updateViews() {
+    func updateViews() {
         let accountRows: [Row]
         let logoutRows: [Row]
         switch viewModel.state {
@@ -279,7 +280,9 @@ final class SettingViewController: UIViewController, UICollectionViewDelegate {
             guard let navigation = accountNavigation else { return }
             accountNavigation = nil
             if presentedViewController === navigation {
-                dismiss(animated: true)
+                dismiss(animated: true) { [weak self] in self?.onAccountFlowDismissed?() }
+            } else {
+                onAccountFlowDismissed?()
             }
         case .login:
             guard accountNavigation == nil, let loginViewModel = viewModel.loginViewModel else { return }
@@ -326,22 +329,24 @@ final class SettingViewController: UIViewController, UICollectionViewDelegate {
             guard viewModel.allows(.login), presentedViewController == nil else { return }
             onLoginRequested?()
         case .logout, .retryLogout:
-            guard viewModel.allows(.logout), presentedViewController == nil else { return }
-            let alert = UIAlertController(title: "로그아웃할까요?", message: nil, preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "취소", style: .cancel))
-            alert.addAction(UIAlertAction(title: "로그아웃", style: .destructive) { [weak self] _ in
-                self?.requestAccountAction(.logout)
-            })
-            present(alert, animated: true)
+            confirmLogout()
         case .retry:
             requestAccountAction(.recheck)
         default: break
         }
     }
 
-    private func requestAccountAction(_ action: SettingAccountViewModel.Action) {
+    func requestAccountAction(_ action: SettingAccountViewModel.Action) {
         refreshFeatureVisibility()
         guard viewModel.allows(action) else { return }
         onAccountActionRequested?(action)
+    }
+
+    func confirmLogout() {
+        guard viewModel.allows(.logout), presentedViewController == nil else { return }
+        let alert = UIAlertController(title: "로그아웃할까요?", message: nil, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "취소", style: .cancel))
+        alert.addAction(UIAlertAction(title: "로그아웃", style: .destructive) { [weak self] _ in self?.requestAccountAction(.logout) })
+        present(alert, animated: true)
     }
 }

@@ -1,3 +1,4 @@
+import Combine
 import UIKit
 #if DEBUG
 import SwiftUI
@@ -5,6 +6,65 @@ import SwiftUI
 
 @MainActor
 final class MainTabBarController: UITabBarController {
+    private var accountViewModel: SettingAccountViewModel?
+    private var accountController: SettingViewController?
+    private var accountSubscription: AnyCancellable?
+    private var profileNavigation: UINavigationController?
+    private var isMyPageEnabled = false
+    private var closingProfile = false
+
+    @objc private func openMyPage() {
+        presentProfile(startLogin: false)
+    }
+
+    private func presentProfile(startLogin: Bool) {
+        guard isMyPageEnabled, let accountViewModel, presentedViewController == nil else { return }
+        let controller = MyPageViewController(viewModel: accountViewModel)
+        controller.navigationItem.rightBarButtonItem = UIBarButtonItem(
+            barButtonSystemItem: .close, target: self, action: #selector(closeProfile)
+        )
+        if startLogin {
+            controller.onAccountFlowDismissed = { [weak self] in self?.dismissProfile() }
+        }
+        accountController = controller
+        let navigation = UINavigationController(rootViewController: controller)
+        navigation.modalPresentationStyle = .fullScreen
+        navigation.isModalInPresentation = true
+        profileNavigation = navigation
+        present(navigation, animated: true) {
+            if startLogin { accountViewModel.startLogin() }
+        }
+    }
+
+    @objc private func closeProfile() {
+        guard let accountViewModel, !closingProfile else { return }
+        guard accountViewModel.cleanupBlocked || accountViewModel.presentation != .none else {
+            dismissProfile()
+            return
+        }
+        closingProfile = true
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            defer { self.closingProfile = false }
+            do {
+                try await self.accountController?.invalidateAccountWorkflow()
+                self.dismissProfile()
+            } catch {
+                let alert = UIAlertController(title: "계정 정리를 끝내지 못했어요.", message: "이 화면을 유지했어요. 다시 닫기를 눌러 시도해 주세요.", preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "확인", style: .default))
+                self.profileNavigation?.present(alert, animated: true)
+            }
+        }
+    }
+
+    private func dismissProfile() {
+        guard let profileNavigation, presentedViewController === profileNavigation else { return }
+        dismiss(animated: true) { [weak self] in
+            self?.profileNavigation = nil
+            self?.accountController = nil
+        }
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         configureView()
@@ -22,10 +82,7 @@ final class MainTabBarController: UITabBarController {
     }
 
     private func settingViewController() -> SettingViewController? {
-        viewControllers?
-            .compactMap { $0 as? UINavigationController }
-            .compactMap { $0.viewControllers.first as? SettingViewController }
-            .first
+        accountController
     }
 
     #if DEBUG
@@ -43,14 +100,43 @@ final class MainTabBarController: UITabBarController {
             title: "스터디", image: UIImage(systemName: "books.vertical"), tag: 0
         )
 
-        let setting = UINavigationController(rootViewController: SettingViewController())
+        let accountViewModel = SettingAccountViewModel()
+        self.accountViewModel = accountViewModel
+        let settingController = SettingViewController(viewModel: accountViewModel)
+        let setting = UINavigationController(rootViewController: settingController)
         setting.tabBarItem = UITabBarItem(
             title: "설정", image: UIImage(systemName: "gearshape"), tag: 1
         )
 
-        viewControllers = [main, setting]
+        isMyPageEnabled = DevelopmentSettingsStore().isEnabled(FeatureFlag.myPage.definition)
+        if isMyPageEnabled {
+            let myStudies = MyStudiesViewController(viewModel: accountViewModel)
+            myStudies.onProfile = { [weak self] in
+                self?.presentProfile(startLogin: true)
+            }
+            let myNavigation = UINavigationController(rootViewController: myStudies)
+            myNavigation.tabBarItem = UITabBarItem(title: "내 스터디", image: UIImage(systemName: "list.bullet"), tag: 1)
+            for controller in [main.viewControllers[0], myStudies] {
+                controller.navigationItem.rightBarButtonItem = UIBarButtonItem(
+                    title: "프로필", style: .plain, target: self, action: #selector(openMyPage)
+                )
+            }
+            viewControllers = [main, myNavigation]
+            accountController = nil
+        } else {
+            viewControllers = [main, setting]
+            accountController = settingController
+        }
         tabBar.tintColor = AppTheme.Palette.accent
-
+        #if DEBUG
+        accountSubscription = accountViewModel.statePublisher.sink { [weak self] state in
+            guard let self, self.pendingRepositoryRoot else { return }
+            switch state {
+            case .guest, .member, .hidden: self.scheduleRepositoryRootInstall()
+            default: break
+            }
+        }
+        #endif
     }
 }
 
@@ -92,7 +178,9 @@ extension MainTabBarController: UIGestureRecognizerDelegate {
                 }
             },
             onAuthFlagChange: { [weak self] in
-                self?.settingViewController()?.refreshFeatureVisibility()
+                self?.accountViewModel?.updateFeatureVisibility(
+                    isEnabled: DevelopmentSettingsStore().isEnabled(FeatureFlag.googleLogin.definition)
+                )
             }
         )
         present(UIHostingController(rootView: settings), animated: true)
@@ -112,7 +200,8 @@ extension MainTabBarController: UIGestureRecognizerDelegate {
         guard pendingRepositoryRoot else { return }
         let previous = settingViewController()
         do {
-            try await previous?.invalidateAccountWorkflow()
+            if let previous { try await previous.invalidateAccountWorkflow() }
+            else { try await accountViewModel?.invalidate() }
             dismissRootInstallFailure()
             installTabs()
             selectedIndex = 0
