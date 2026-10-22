@@ -1,0 +1,10 @@
+// Checked-in default configuration for Google OAuth.
+// Values are intentionally safe defaults to avoid accidental credential leaks.
+// Empty client IDs and the non-secret placeholder scheme guarantee that unconfigured builds
+// fail gracefully with AuthError.configurationMissing instead of presenting sign-in or crashing.
+GID_CLIENT_ID =
+GID_SERVER_CLIENT_ID =
+GID_REVERSED_CLIENT_ID = studyclub.oauth-unconfigured
+
+// Optional developer/QA local override (git-ignored)
+#include? "Config.local.xcconfig"

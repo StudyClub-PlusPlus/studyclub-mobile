@@ -14,7 +14,7 @@ ON/OFF native comparison and an ordinary Release build cover this slice. Automat
 
 Feature flags select new versus previous behavior at the feature's Repository/ViewModel/View boundary, independently of Repository mode. Factory selects Debug saved Mock/Real or Release Real only. Real list OFF makes no API request and returns featureUnavailable; Main shows a distinct unavailable state. List OFF has no pagination, refresh or footer; Mock continues returning trusted Domain samples. Real detail OFF makes no API request and returns unavailable to preserve its previous failure presentation; ON calls the sc-93 API. Mock detail keeps its Domain samples. The list flag never changes detail behavior or implementation.
 
-The `auth.google-login` definition is InProgress (default OFF). Both Debug and Release resolve saved overrides before the stage default through the existing store. This slice registers the flag only.
+The `auth.google-login` definition stays InProgress (default OFF). Both Debug and Release resolve saved overrides before the stage default through the existing store. `DefaultAuthRepository` reads it at the start of each operation and again before changing credentials. OFF performs no auth request and keeps stored completed-member credentials. The flag does not choose Mock or Real. It stays InProgress until a real login, signup, restore and logout have passed.
 
 ## Add a feature
 

@@ -24,6 +24,23 @@ Main owns one Task for initial page, automatic additional pages and pull-to-refr
 
 During API integration, verify actual page decoding and selected-ID detail lookup and retain dated evidence; no production-dependent XCTest suite is maintained. Mapper, page/error helpers and Main state tests remain separate. Automated UI tests, JSON fixtures and thin transport doubles are not added. A source change or green test does not prove manual scrolling/rendering; fresh evidence for this candidate is reported separately.
 
+## Authentication (sc-51)
+
+The source contract is studyclub-engineering `origin/main` `e9b58021`, checked by SC54. Historical mobile auth notes are not the contract.
+
+`AuthRouter` calls the production host root, not `StudyRouter`'s `/api/` base:
+
+| Method | Path | Auth |
+|---|---|---|
+| POST | `/auth/social-login` | none |
+| GET | `/auth/me` | Bearer access token |
+| POST | `/auth/refresh` | none; body `refreshToken` |
+| POST | `/accounts/onboarding` | Bearer access token |
+
+Social login body is `code`, `provider` (`google`) and `platform` (`CORE`). `redirectUri` is omitted, so the server uses its configured web callback. Exchanging a native authorization code against that callback is not verified. Login and onboarding return `AccountView`. `GET /auth/me` returns `AccountSelfView`, which adds optional `discordNickname`. Account identity must be positive, nickname must be present and usable, and the completion key is required. Explicit `onboardingCompletedAt: null` is incomplete; a non-null value must be a valid UTC Instant with server precision (up to nanoseconds). Missing or malformed fields are not incomplete accounts. Signup responses/rechecks must retain the login account ID, and access/refresh tokens must be nonempty before use. Time zone validation on this source revision is `ZoneId.of`, not a four-zone list. Logout has no server endpoint; the client deletes the Keychain item. The first 401 may refresh once. Refresh returns a new access token and does not rotate the refresh token. A 401 from refresh is confirmed invalid authentication.
+
+No iOS client ID, server client ID or terms legal sign-off is in this candidate. OAuth configuration is wired through `ios/Configurations/Config.xcconfig` into `Info.plist` (`GIDClientID`, `GIDServerClientID`, and `CFBundleURLTypes` scheme). Checked-in defaults safely define empty client IDs and a non-secret placeholder scheme (`studyclub.oauth-unconfigured`), so unconfigured builds produce `AuthError.configurationMissing` without presenting Google sign-in. Local developer/QA credentials can be provided via `Config.local.xcconfig` (ignored by git; template provided in `Config.local.xcconfig.example`). Unit tests verify configuration requirements and rejection of unconfigured/placeholder values without calling Google or the live server. Production-dependent XCTest cases are not added.
+
 ## Current sc-92 verification (2026-10-05)
 
 The app source in `dd1b4c56a8e8861b08a316cc0e071ec16e882d51` passed 45 serial XCTest cases with no failures on the existing iPhone 17 Pro / iOS 26.5 Simulator. Ordinary Debug and Release builds succeeded with Xcode 27.0. The subsequent documentation change does not change that app source.

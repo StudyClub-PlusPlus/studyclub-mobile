@@ -1,0 +1,6 @@
+// Local configuration example for Google OAuth.
+// Copy this file to Config.local.xcconfig and replace values with actual test credentials.
+// Do NOT commit Config.local.xcconfig.
+GID_CLIENT_ID = fake-client-id.apps.googleusercontent.com
+GID_SERVER_CLIENT_ID = fake-server-client-id.apps.googleusercontent.com
+GID_REVERSED_CLIENT_ID = com.googleusercontent.apps.fake-client-id
