@@ -204,4 +204,5 @@ private actor ControlledListRepository: RepositoryProtocol {
     }
 
     func fetchStudy(id: Study.ID) async throws -> StudyDetail { throw RepositoryError.unavailable }
+    func fetchMyStudies() async throws -> [MyStudy] { throw RepositoryError.unavailable }
 }

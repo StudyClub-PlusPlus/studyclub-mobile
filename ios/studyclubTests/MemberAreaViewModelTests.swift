@@ -31,7 +31,7 @@ final class MemberAreaViewModelTests: XCTestCase {
     func testAuthOffKeepsBothAccountAndPrivateListUnavailable() async {
         let auth = RootAuthStub(member: Member(nickname: "회원"))
         let list = RootListStub()
-        let model = MemberAreaViewModel(authRepository: auth, myStudiesRepository: list,
+        let model = MemberAreaViewModel(authRepository: auth, studiesRepository: list,
                                         isAuthEnabled: false, isListEnabled: true, isMyPageEnabled: true)
         XCTAssertEqual(model.account.state, .hidden)
         XCTAssertEqual(model.myStudies.state, .unavailable)
@@ -121,7 +121,7 @@ final class MemberAreaViewModelTests: XCTestCase {
     }
 
     private func root(_ auth: RootAuthStub, _ list: RootListStub) -> MemberAreaViewModel {
-        .init(authRepository: auth, myStudiesRepository: list,
+        .init(authRepository: auth, studiesRepository: list,
               isAuthEnabled: true, isListEnabled: true, isMyPageEnabled: true)
     }
 
@@ -201,15 +201,17 @@ private actor RootAuthStub: AuthRepository {
     }
 }
 
-private actor RootListStub: MyStudiesRepository {
+private actor RootListStub: RepositoryProtocol {
     private(set) var count = 0
-    private var failure: MyStudiesError?
+    private var failure: RepositoryError?
     private let additionalGate: Suspension?
-    init(failure: MyStudiesError? = nil, additionalGate: Suspension? = nil) {
+    init(failure: RepositoryError? = nil, additionalGate: Suspension? = nil) {
         self.failure = failure
         self.additionalGate = additionalGate
     }
-    func setFailure(_ error: MyStudiesError?) { failure = error }
+    func setFailure(_ error: RepositoryError?) { failure = error }
+    func fetchStudies(offset: Int) async throws -> StudyPage { throw RepositoryError.unavailable }
+    func fetchStudy(id: Study.ID) async throws -> StudyDetail { throw RepositoryError.unavailable }
     func fetchMyStudies() async throws -> [MyStudy] {
         count += 1
         if count > 1, let additionalGate { await additionalGate.suspend() }

@@ -68,9 +68,9 @@ final class MemberAuthorizationTests: XCTestCase {
     func testOnboardingRequiredDoesNotRefreshOrDeleteCredentials() async {
         let h = Harness()
         do {
-            let _: Int = try await h.auth.withAuthorization { _ in throw MyStudiesError.onboardingRequired }
+            let _: Int = try await h.auth.withAuthorization { _ in throw RepositoryError.onboardingRequired }
             XCTFail("Expected onboardingRequired")
-        } catch { XCTAssertEqual(error as? MyStudiesError, .onboardingRequired) }
+        } catch { XCTAssertEqual(error as? RepositoryError, .onboardingRequired) }
         XCTAssertEqual(h.store.tokens, AuthFixtures.sessionTokens)
         XCTAssertEqual(h.api.count(of: "refresh"), 0)
     }
@@ -123,9 +123,9 @@ final class MemberAuthorizationTests: XCTestCase {
 
     func testListOffStopsBeforeSharedAuthorization() async {
         let h = Harness()
-        let repository = DefaultMyStudiesRepository(authorization: h.auth, isFeatureEnabled: false)
+        let repository = Repository(authorization: h.auth, isMyStudiesAPIEnabled: false)
         do { _ = try await repository.fetchMyStudies(); XCTFail("Expected featureUnavailable") }
-        catch { XCTAssertEqual(error as? MyStudiesError, .featureUnavailable) }
+        catch { XCTAssertEqual(error as? RepositoryError, .featureUnavailable) }
         XCTAssertTrue(h.api.recordedCalls.isEmpty)
         XCTAssertEqual(h.store.tokens, AuthFixtures.sessionTokens)
     }

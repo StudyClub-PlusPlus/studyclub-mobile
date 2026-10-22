@@ -16,6 +16,19 @@ struct MockRepository: RepositoryProtocol {
                                curriculum: "함께 읽기\n실습과 토론\n결과 공유")
     }
 
+    func fetchMyStudies() async throws -> [MyStudy] {
+        [
+            MyStudy(id: "12", title: "DDIA 함께 읽기", category: .software, studyKind: .study,
+                    startAt: nil, endAt: nil, relation: .ongoing, participantStatus: .active,
+                    participantRole: .member, discordChannelUrl: nil, driveUrl: nil,
+                    attendanceRate: nil, meetings: []),
+            MyStudy(id: "24", title: "Swift로 배우는 앱 개발과 함께 나누는 긴 스터디 제목", category: .software, studyKind: .study,
+                    startAt: nil, endAt: nil, relation: .upcoming, participantStatus: .active,
+                    participantRole: .leader, discordChannelUrl: nil, driveUrl: nil,
+                    attendanceRate: nil, meetings: [])
+        ]
+    }
+
     private static let defaultStudy = Study(
         id: "1", category: .software, title: "UIKit 아키텍처 같이 읽기",
         summary: "작은 예제를 만들며 MVVM과 Repository의 책임을 함께 정리해요.",

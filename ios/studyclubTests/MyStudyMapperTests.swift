@@ -98,48 +98,48 @@ final class MyStudyMapperTests: XCTestCase {
 
     func testRejectsInvalidStudyId() {
         XCTAssertThrowsError(try makeDTO(studyId: 0).toDomain()) { error in
-            XCTAssertEqual(error as? MyStudiesError, .invalidData)
+            XCTAssertEqual(error as? RepositoryError, .invalidData)
         }
         XCTAssertThrowsError(try makeDTO(studyId: -1).toDomain()) { error in
-            XCTAssertEqual(error as? MyStudiesError, .invalidData)
+            XCTAssertEqual(error as? RepositoryError, .invalidData)
         }
     }
 
     func testRejectsEmptyOrWhitespaceTitle() {
         XCTAssertThrowsError(try makeDTO(title: "").toDomain()) { error in
-            XCTAssertEqual(error as? MyStudiesError, .invalidData)
+            XCTAssertEqual(error as? RepositoryError, .invalidData)
         }
         XCTAssertThrowsError(try makeDTO(title: "   \n\t  ").toDomain()) { error in
-            XCTAssertEqual(error as? MyStudiesError, .invalidData)
+            XCTAssertEqual(error as? RepositoryError, .invalidData)
         }
     }
 
     func testRejectsInvalidAttendanceRate() {
         XCTAssertThrowsError(try makeDTO(attendanceRate: -0.01).toDomain()) { error in
-            XCTAssertEqual(error as? MyStudiesError, .invalidData)
+            XCTAssertEqual(error as? RepositoryError, .invalidData)
         }
         XCTAssertThrowsError(try makeDTO(attendanceRate: 1.01).toDomain()) { error in
-            XCTAssertEqual(error as? MyStudiesError, .invalidData)
+            XCTAssertEqual(error as? RepositoryError, .invalidData)
         }
     }
 
     func testRejectsInvalidDateFormat() {
         XCTAssertThrowsError(try makeDTO(startAt: "not-a-valid-date").toDomain()) { error in
-            XCTAssertEqual(error as? MyStudiesError, .invalidData)
+            XCTAssertEqual(error as? RepositoryError, .invalidData)
         }
         XCTAssertThrowsError(try makeDTO(endAt: "invalid-end-date").toDomain()) { error in
-            XCTAssertEqual(error as? MyStudiesError, .invalidData)
+            XCTAssertEqual(error as? RepositoryError, .invalidData)
         }
     }
 
     func testRejectsMalformedCalendarDatesThatFormatterMightNormalize() {
         // February 30th does not exist; calendar round trip must reject it
         XCTAssertThrowsError(try makeDTO(startAt: "2026-02-30T00:00:00Z").toDomain()) { error in
-            XCTAssertEqual(error as? MyStudiesError, .invalidData)
+            XCTAssertEqual(error as? RepositoryError, .invalidData)
         }
         // November 31st does not exist
         XCTAssertThrowsError(try makeDTO(endAt: "2026-11-31T00:00:00Z").toDomain()) { error in
-            XCTAssertEqual(error as? MyStudiesError, .invalidData)
+            XCTAssertEqual(error as? RepositoryError, .invalidData)
         }
     }
 
@@ -154,7 +154,7 @@ final class MyStudyMapperTests: XCTestCase {
             countedInRate: false
         )
         XCTAssertThrowsError(try makeDTO(meetings: [invalidIdMeeting]).toDomain()) { error in
-            XCTAssertEqual(error as? MyStudiesError, .invalidData)
+            XCTAssertEqual(error as? RepositoryError, .invalidData)
         }
 
         let invalidSeqMeeting = MyStudyMeetingDTO(
@@ -167,7 +167,7 @@ final class MyStudyMapperTests: XCTestCase {
             countedInRate: false
         )
         XCTAssertThrowsError(try makeDTO(meetings: [invalidSeqMeeting]).toDomain()) { error in
-            XCTAssertEqual(error as? MyStudiesError, .invalidData)
+            XCTAssertEqual(error as? RepositoryError, .invalidData)
         }
     }
 

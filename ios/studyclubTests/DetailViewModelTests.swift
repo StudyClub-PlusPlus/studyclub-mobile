@@ -141,4 +141,6 @@ private actor DetailRepositoryDouble: RepositoryProtocol {
             endAt: try! Date("2026-12-15T00:00:00Z", strategy: .iso8601)
         )
     }
+
+    func fetchMyStudies() async throws -> [MyStudy] { throw RepositoryError.unavailable }
 }
