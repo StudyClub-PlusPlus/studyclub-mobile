@@ -1,8 +1,8 @@
 #if DEBUG
 import Foundation
 
-/// Debug-only trusted session samples for screen QA. Nothing is persisted and no network or Google
-/// SDK is used, so it proves no live login behavior. A new sign-in always needs signup.
+/// Debug-only trusted session samples. The saved development choice seeds each new instance;
+/// no credentials, network or Google SDK are used. A new sign-in still needs signup.
 actor MockAuthRepository: AuthRepository {
     private let isFeatureEnabled: @Sendable () -> Bool
     private var member: Member?
@@ -10,6 +10,7 @@ actor MockAuthRepository: AuthRepository {
 
     init(isFeatureEnabled: @escaping @Sendable () -> Bool) {
         self.isFeatureEnabled = isFeatureEnabled
+        member = DevelopmentSettingsStore().mockSession == .member ? Member(nickname: "테스트 회원") : nil
     }
 
     func restoreSession() async throws -> Member? {

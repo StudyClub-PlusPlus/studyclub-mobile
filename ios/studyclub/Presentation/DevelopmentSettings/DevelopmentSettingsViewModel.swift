@@ -11,10 +11,14 @@ final class DevelopmentSettingsViewModel {
     private(set) var sections: [DevelopmentSettingSection] = []
 
     private func updateSections() {
-        let miscellaneous = DevelopmentSettingSection(id: .miscellaneous, rows: [
-            .init(id: .repository, title: "Repository", kind: .button(value: repositoryMode.title)),
-            .init(id: .resetFlags, title: "Reset Flag to Default", kind: .button(value: nil))
-        ])
+        var rows: [DevelopmentSettingRow] = [
+            .init(id: .repository, title: "Repository", kind: .button(value: repositoryMode.title))
+        ]
+        if repositoryMode == .mock {
+            rows.append(.init(id: .mockSession, title: "Mock 로그인 테스트", kind: .button(value: store.mockSession.title)))
+        }
+        rows.append(.init(id: .resetFlags, title: "Reset Flag to Default", kind: .button(value: nil)))
+        let miscellaneous = DevelopmentSettingSection(id: .miscellaneous, rows: rows)
         let flagSections = FeatureFlagStage.allCases.map { stage in
             DevelopmentSettingSection(
                 id: stage == .ready ? .ready : .inProgress,
@@ -48,6 +52,14 @@ final class DevelopmentSettingsViewModel {
         store.repositoryMode = mode
         repositoryMode = mode
         updateSections()
+        return true
+    }
+
+    func selectMockSession(_ session: DevelopmentSettingsStore.MockSession) -> Bool {
+        guard repositoryMode == .mock else { return false }
+        store.mockSession = session
+        updateSections()
+        // Selecting the saved choice again deliberately restores that sample after a mock logout.
         return true
     }
 }
