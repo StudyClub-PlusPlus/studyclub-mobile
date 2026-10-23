@@ -44,6 +44,8 @@ Detail presents:
 - curriculum when supplied
 - standard back navigation
 
+2026-10-23 contract correction (SC77): backend main `61d46fb1` removed `deliveryFormat` from `StudyDetailResponse`, and the deployed public response omits it. Delivery format is optional in Data and Domain. An absent/null format omits that metadata segment; a supplied valid format retains its existing display. Do not infer online/offline from schedule or supply a default. Unknown values/types and required identity errors remain failures under the existing validation policy.
+
 Detail starts loading when its ViewModel is initialized and exposes loading, content, empty, and failure without retry. A missing or mismatched study is empty and shows “스터디를 찾을 수 없어요”. Network and server errors are failure and show a short instruction to return to the previous screen. Nullable cohort, schedule, and description fields do not make the state empty; the remaining detail content is shown. Retry and common ErrorView work are deferred. Detail does not manage request cancellation or request generations: a request may finish after navigating back.
 
 There is no join action, editing, or persistence.

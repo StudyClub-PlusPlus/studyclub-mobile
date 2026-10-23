@@ -59,6 +59,8 @@ Main list OFF omits pull-to-refresh, pagination and footer UI and keeps a one-re
 
 ## Detail anatomy
 
+SC77: 현재 공개 상세 응답이 진행 방식(deliveryFormat)을 제공하지 않으면 해당 메타데이터만 생략한다. 제공된 유효한 값은 기존처럼 표시하며 온라인/오프라인을 추정하지 않는다. 제목·설명·종류와 제공된 나머지 메타데이터는 유지한다.
+
 - Standard back navigation and inline title
 - Scrollable readable column
 - Neutral wrapping category, full study title, existing kind/format/capacity/recruitment metadata, optional schedule, description and curriculum

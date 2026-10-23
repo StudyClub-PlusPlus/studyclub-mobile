@@ -67,7 +67,8 @@ final class DetailViewModel {
     }
 
     private static func metadataText(for study: StudyDetail) -> String {
-        var values = [study.studyKind.displayText, study.deliveryFormat.displayText]
+        var values = [study.studyKind.displayText]
+        if let format = study.deliveryFormat { values.append(format.displayText) }
         if let capacity = study.capacity {
             values.append("정원 \(capacity)명")
         }

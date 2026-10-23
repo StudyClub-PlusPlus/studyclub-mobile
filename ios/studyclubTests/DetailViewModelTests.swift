@@ -4,6 +4,17 @@ import XCTest
 
 @MainActor
 final class DetailViewModelTests: XCTestCase {
+    func testMissingDeliveryFormatOmitsOnlyThatMetadata() async {
+        let repository = DetailRepositoryDouble(deliveryFormat: nil)
+        let model = DetailViewModel(studyID: "selected", repository: repository)
+        let content = expectation(description: "content without delivery format")
+        let subscription = model.statePublisher.filter { $0 == .content }.prefix(1).sink { _ in content.fulfill() }
+        await fulfillment(of: [content], timeout: 2)
+        XCTAssertEqual(model.title, "상세 응답")
+        XCTAssertEqual(model.metadataText, "스터디  ·  정원 8명")
+        withExtendedLifetime(subscription) {}
+    }
+
     func testDisplayValuesAreReadyWhenContentIsPublishedAndInitialLoadRunsOnce() async {
         let repository = DetailRepositoryDouble()
         let model = DetailViewModel(studyID: "selected", repository: repository)
@@ -110,10 +121,13 @@ private actor DetailRepositoryDouble: RepositoryProtocol {
     private(set) var requestedIDs: [Study.ID] = []
     let error: RepositoryError?
     let returnedID: Study.ID?
+    let deliveryFormat: DeliveryFormat?
 
-    init(shouldFail: Bool = false, error: RepositoryError? = nil, returnedID: Study.ID? = nil) {
+    init(shouldFail: Bool = false, error: RepositoryError? = nil, returnedID: Study.ID? = nil,
+         deliveryFormat: DeliveryFormat? = .online) {
         self.error = error ?? (shouldFail ? .unavailable : nil)
         self.returnedID = returnedID
+        self.deliveryFormat = deliveryFormat
     }
 
     func fetchStudies(offset: Int) async throws -> StudyPage {
@@ -131,7 +145,7 @@ private actor DetailRepositoryDouble: RepositoryProtocol {
             category: .software,
             studyKind: .study,
             thumbnailURL: nil,
-            deliveryFormat: .online,
+            deliveryFormat: deliveryFormat,
             status: .open,
             recruitStatus: .recruiting,
             curriculum: "",

@@ -7,7 +7,7 @@ struct StudyDetailDTO: Decodable, Sendable {
     let category: StudyCategory
     let studyKind: StudyKind
     let thumbnailURL: URL?
-    let deliveryFormat: DeliveryFormat
+    let deliveryFormat: DeliveryFormat?
     let status: StudyStatus
     let recruitStatus: RecruitStatus?
     let curriculum: String?
