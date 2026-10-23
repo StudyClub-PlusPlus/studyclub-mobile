@@ -14,4 +14,12 @@ final class StudyAPIClient: Sendable {
             .serializingDecodable(StudyDetailDTO.self)
             .value
     }
+
+    func fetchMyStudies(accessToken: String) async throws -> MyStudyListResponseDTO {
+        try Task.checkCancellation()
+        return try await AF.request(StudyRouter.myStudies(accessToken: accessToken))
+            .validate()
+            .serializingDecodable(MyStudyListResponseDTO.self)
+            .value
+    }
 }

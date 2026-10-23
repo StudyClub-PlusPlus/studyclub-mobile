@@ -12,16 +12,16 @@ final class MemberAreaViewModel {
     convenience init() {
         let repositories = RepositoryFactory.makeMemberRepositories()
         let settings = DevelopmentSettingsStore()
-        self.init(authRepository: repositories.auth, myStudiesRepository: repositories.myStudies,
+        self.init(authRepository: repositories.auth, studiesRepository: repositories.studies,
                   isAuthEnabled: settings.isEnabled(FeatureFlag.googleLogin.definition),
                   isListEnabled: settings.isEnabled(FeatureFlag.myStudies.definition),
                   isMyPageEnabled: settings.isEnabled(FeatureFlag.myPage.definition))
     }
 
-    init(authRepository: any AuthRepository, myStudiesRepository: any MyStudiesRepository,
+    init(authRepository: any AuthRepository, studiesRepository: any RepositoryProtocol,
          isAuthEnabled: Bool, isListEnabled: Bool, isMyPageEnabled: Bool) {
         let account = SettingAccountViewModel(repository: authRepository, isFeatureEnabled: isAuthEnabled)
-        let list = MyStudiesListViewModel(repository: myStudiesRepository, isFeatureEnabled: isListEnabled, member: nil)
+        let list = MyStudiesListViewModel(repository: studiesRepository, isFeatureEnabled: isListEnabled, member: nil)
         self.account = account
         self.myStudies = list
         self.isMyPageEnabled = isMyPageEnabled

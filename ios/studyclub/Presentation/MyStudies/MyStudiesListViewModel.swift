@@ -8,7 +8,7 @@ final class MyStudiesListViewModel {
     private let stateSubject: CurrentValueSubject<State, Never>
     private(set) var state: State
     private(set) var items: [StudyCardCellViewModel]
-    private let repository: (any MyStudiesRepository)?
+    private let repository: (any RepositoryProtocol)?
     private let isFeatureEnabled: Bool
     private var member: Member?
     private var requestTask: Task<Void, Never>?
@@ -21,14 +21,14 @@ final class MyStudiesListViewModel {
 
     convenience init() {
         self.init(
-            repository: RepositoryFactory.makeMemberRepositories().myStudies,
+            repository: RepositoryFactory.makeMemberRepositories().studies,
             isFeatureEnabled: DevelopmentSettingsStore().isEnabled(FeatureFlag.myStudies.definition),
             member: nil
         )
     }
 
     /// Scoped Domain injection: a test/member owner supplies confirmed membership, never tokens.
-    init(repository: any MyStudiesRepository, isFeatureEnabled: Bool, member: Member?) {
+    init(repository: any RepositoryProtocol, isFeatureEnabled: Bool, member: Member?) {
         self.repository = repository
         self.isFeatureEnabled = isFeatureEnabled
         self.member = member
@@ -117,7 +117,7 @@ final class MyStudiesListViewModel {
                 guard !Task.isCancelled, let self else { return }
                 self.requestTask = nil
                 self.isRefreshing = false
-                switch error as? MyStudiesError {
+                switch error as? RepositoryError {
                 case .unauthorized:
                     self.member = nil
                     self.update(state: .guest)

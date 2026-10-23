@@ -4,6 +4,7 @@ import Foundation
 enum StudyRouter: URLRequestConvertible {
     case studies(offset: Int, limit: Int)
     case study(id: Study.ID)
+    case myStudies(accessToken: String)
 
     private static let baseURL = URL(string: "https://api.studyclub-plusplus.com/api/")!
 
@@ -12,6 +13,7 @@ enum StudyRouter: URLRequestConvertible {
     private var path: String {
         switch self {
         case .studies, .study: "studies"
+        case .myStudies: "me/studies"
         }
     }
 
@@ -34,6 +36,11 @@ enum StudyRouter: URLRequestConvertible {
         var request = URLRequest(url: url)
         request.method = method
         request.headers = headers
+        if case let .myStudies(accessToken) = self {
+            let token = accessToken.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !token.isEmpty else { throw RepositoryError.unauthorized }
+            request.headers.add(.authorization(bearerToken: token))
+        }
         return request
     }
 }

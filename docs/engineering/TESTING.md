@@ -1,5 +1,7 @@
 # Testing Policy
 
+Read [Simulator test storage](SIMULATOR_TESTING.md) before running XCTest. The specific task may set stricter limits.
+
 ## Unit tests
 
 Feature-boundary tests directly verify Real OFF errors, distinct Main unavailable presentation and OFF suppression of repeated requests with immutable bool inputs. Existing ON pagination/refresh tests remain. These are feature behavior tests, not an internal settings suite. No Client injection or live endpoint tests are added.

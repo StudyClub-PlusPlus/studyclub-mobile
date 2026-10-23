@@ -51,7 +51,7 @@ final class MyStudiesListIntegrationTests: XCTestCase {
         await repository.waitForRequests(2)
         await repository.complete(1, .success([study("24")]))
         await waitUntil { model.state == .content }
-        await repository.complete(0, .failure(MyStudiesError.unauthorized))
+        await repository.complete(0, .failure(RepositoryError.unauthorized))
         for _ in 0..<20 { await Task.yield() }
         XCTAssertEqual(model.state, .content)
         XCTAssertEqual(model.items.map(\.id), ["24"])
@@ -68,7 +68,7 @@ final class MyStudiesListIntegrationTests: XCTestCase {
         await repository.waitForRequests(2)
         let count = await repository.count
         XCTAssertEqual(count, 2)
-        await repository.complete(1, .failure(MyStudiesError.unavailable))
+        await repository.complete(1, .failure(RepositoryError.unavailable))
         await waitUntil { !model.isRefreshing }
         XCTAssertEqual(model.items.map(\.id), ["12"])
         XCTAssertNotNil(model.message)
@@ -86,7 +86,7 @@ final class MyStudiesListIntegrationTests: XCTestCase {
         var rechecks = 0
         model.onAuthenticationRequired = { rechecks += 1 }
         await repository.waitForRequests(1)
-        await repository.complete(0, .failure(MyStudiesError.onboardingRequired))
+        await repository.complete(0, .failure(RepositoryError.onboardingRequired))
         await waitUntil { model.state == .guest }
         XCTAssertEqual(rechecks, 1)
         XCTAssertEqual(model.message, "가입 정보를 확인한 뒤 다시 로그인해 주세요.")
@@ -113,7 +113,7 @@ final class MyStudiesListIntegrationTests: XCTestCase {
     }
 }
 
-private actor ControlledMyStudiesRepository: MyStudiesRepository {
+private actor ControlledMyStudiesRepository: RepositoryProtocol {
     private var requests: [CheckedContinuation<[MyStudy], Error>?] = []
     private var waiters: [(Int, CheckedContinuation<Void, Never>)] = []
     var count: Int { requests.count }
@@ -126,6 +126,9 @@ private actor ControlledMyStudiesRepository: MyStudiesRepository {
             ready.forEach { $0.1.resume() }
         }
     }
+
+    func fetchStudies(offset: Int) async throws -> StudyPage { throw RepositoryError.unavailable }
+    func fetchStudy(id: Study.ID) async throws -> StudyDetail { throw RepositoryError.unavailable }
 
     func waitForRequests(_ count: Int) async {
         guard requests.count < count else { return }
