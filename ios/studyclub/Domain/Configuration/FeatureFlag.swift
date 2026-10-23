@@ -17,6 +17,7 @@ struct FeatureFlagDefinition: Hashable, Sendable {
 enum FeatureFlag: CaseIterable {
     case studyDetailAPI
     case studyListAPI
+    case studySearch
     case studyDesignSystem
     case googleLogin
     case myPage
@@ -26,6 +27,12 @@ enum FeatureFlag: CaseIterable {
 
     var definition: FeatureFlagDefinition {
         switch self {
+        case .studySearch:
+            FeatureFlagDefinition(
+                id: "study.search",
+                name: "스터디 검색 · 화면 재진입",
+                stage: .inProgress
+            )
         case .studyListAPI:
             FeatureFlagDefinition(
                 id: "study.list-api",

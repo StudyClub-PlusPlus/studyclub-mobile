@@ -1,5 +1,7 @@
 # Feature flag workflow
 
+`study.search`는 로그인·목록 API 플래그와 독립적인 검색 플래그다. InProgress·기본 OFF이며 Debug와 Release 모두 기존 저장 override를 읽는다. 이 등록 작업은 검색 UI나 요청을 추가하지 않는다. 후속 검색 화면과 Repository는 생성 시 값을 고정하고 OFF에서 진입과 검색 요청을 차단한다. 실제 검색 경로와 배포별 QA 전에는 Ready로 전환하지 않는다.
+
 ## Current foundation
 
 The app catalog in `ios/studyclub/Domain/Configuration/FeatureFlag.swift` contains Ready study.detail-api, study.list-api and study.design-system (default ON). Ready defaults ON; InProgress defaults OFF. Both Debug and Release resolve persisted overrides before stage defaults. Only Debug exposes developer settings and mutation/reset methods. Repository mode alone differs: Debug follows its saved Mock/Real selection; Release always uses Real. Feature flags never select Mock/Real.
