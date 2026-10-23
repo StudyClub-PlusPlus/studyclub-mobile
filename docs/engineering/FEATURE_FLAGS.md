@@ -2,13 +2,15 @@
 
 ## Current foundation
 
-The app catalog in `ios/studyclub/Domain/Configuration/FeatureFlag.swift` contains Ready study.detail-api (default ON) and InProgress study.list-api and study.design-system (default OFF). Ready defaults ON; InProgress defaults OFF. Both Debug and Release resolve persisted overrides before stage defaults. Only Debug exposes developer settings and mutation/reset methods. Repository mode alone differs: Debug follows its saved Mock/Real selection; Release always uses Real. Feature flags never select Mock/Real.
+The app catalog in `ios/studyclub/Domain/Configuration/FeatureFlag.swift` contains Ready study.detail-api, study.list-api and study.design-system (default ON). Ready defaults ON; InProgress defaults OFF. Both Debug and Release resolve persisted overrides before stage defaults. Only Debug exposes developer settings and mutation/reset methods. Repository mode alone differs: Debug follows its saved Mock/Real selection; Release always uses Real. Feature flags never select Mock/Real.
+
+On 2026-10-23, the user explicitly selected default ON for study.list-api and study.design-system (SC72). This rollout decision changes their stage to Ready; it is not new evidence of deployment-specific QA. Existing saved overrides remain effective until reset. Login, MyPage and My Studies remain InProgress/default OFF.
 
 ## Design-system rollout
 
 `study.design-system` gates the sc-116 palette, card anatomy, Detail polish and light-only window as one feature. OFF uses the previous system palette/layout and OS appearance. ON uses the selected Figma green/cream design. It does not gate API requests or change Repository mode.
 
-AppTheme creates the existing concrete DevelopmentSettingsStore and resolves the flag once per app process. This visual boundary deliberately keeps one immutable choice: a Debug toggle or Reset changes the next cold launch, not currently visible screens or a Repository-triggered root rebuild. The switch name includes the restart requirement. This avoids combining old/new palettes and layouts while the app runs, without adding a mutable global override, DI layer or theme framework. Release uses the same saved override / stage default as Debug; without an override, this InProgress feature remains OFF. The settings UI and mutation methods remain Debug-only. Promote the same ID to Ready only when the redesigned UI is intended as the Release default.
+AppTheme creates the existing concrete DevelopmentSettingsStore and resolves the flag once per app process. This visual boundary deliberately keeps one immutable choice: a Debug toggle or Reset changes the next cold launch, not currently visible screens or a Repository-triggered root rebuild. The switch name includes the restart requirement. This avoids combining old/new palettes and layouts while the app runs, without adding a mutable global override, DI layer or theme framework. Release uses the same saved override / stage default as Debug; without an override, this Ready feature is ON. The settings UI and mutation methods remain Debug-only.
 
 ON/OFF native comparison and an ordinary Release build cover this slice. Automatic UI and internal settings tests/scenarios are not added for the rollout; controlled render evidence must remain distinguished from installed-app flag behavior.
 
