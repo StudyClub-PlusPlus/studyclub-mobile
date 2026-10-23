@@ -116,6 +116,10 @@ final class MainViewModelTests: XCTestCase {
 }
 
 private actor TestStudyRepository: RepositoryProtocol {
+    func searchStudies(query: StudySearchQuery, offset: Int) async throws -> StudyPage {
+        throw RepositoryError.unavailable
+    }
+
     func fetchStudy(id: Study.ID) async throws -> StudyDetail {
         throw RepositoryError.unavailable
     }

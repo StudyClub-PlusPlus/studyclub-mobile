@@ -3,6 +3,7 @@ import Foundation
 
 enum StudyRouter: URLRequestConvertible {
     case studies(offset: Int, limit: Int)
+    case searchStudies(query: StudySearchQuery, offset: Int, limit: Int)
     case study(id: Study.ID)
     case myStudies(accessToken: String)
 
@@ -12,7 +13,7 @@ enum StudyRouter: URLRequestConvertible {
 
     private var path: String {
         switch self {
-        case .studies, .study: "studies"
+        case .studies, .searchStudies, .study: "studies"
         case .myStudies: "me/studies"
         }
     }
@@ -31,6 +32,22 @@ enum StudyRouter: URLRequestConvertible {
                 URLQueryItem(name: "offset", value: String(offset)),
                 URLQueryItem(name: "limit", value: String(limit))
             ]
+            url = components.url!
+        }
+        if case let .searchStudies(query, offset, limit) = self {
+            var components = URLComponents(url: url, resolvingAgainstBaseURL: false)!
+            var items = [
+                URLQueryItem(name: "keyword", value: query.keyword),
+                URLQueryItem(name: "offset", value: String(offset)),
+                URLQueryItem(name: "limit", value: String(limit))
+            ]
+            if let phase = query.phase {
+                items.append(URLQueryItem(name: "status", value: phase.rawValue))
+            }
+            if let category = query.category {
+                items.append(URLQueryItem(name: "category", value: category.rawValue))
+            }
+            components.queryItems = items
             url = components.url!
         }
         var request = URLRequest(url: url)

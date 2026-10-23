@@ -2,6 +2,17 @@
 import Foundation
 
 struct MockRepository: RepositoryProtocol {
+    func searchStudies(query: StudySearchQuery, offset: Int) async throws -> StudyPage {
+        let matches = (Self.studies + [Self.closedStudy]).filter { study in
+            (query.phase == nil || study.phase == query.phase)
+                && (query.category == nil || study.category == query.category)
+                && (study.title.localizedCaseInsensitiveContains(query.keyword)
+                    || study.summary.localizedCaseInsensitiveContains(query.keyword))
+        }
+        return StudyPage(studies: Array(matches.dropFirst(offset).prefix(20)),
+                         totalCount: matches.count, offset: offset)
+    }
+
     func fetchStudies(offset: Int) async throws -> StudyPage {
         StudyPage(studies: Array(Self.studies.dropFirst(offset).prefix(20)),
                   totalCount: Self.studies.count, offset: offset)
@@ -9,11 +20,12 @@ struct MockRepository: RepositoryProtocol {
 
     func fetchStudy(id: Study.ID) async throws -> StudyDetail {
         if let detail = Self.details[id] { return detail }
-        guard let study = Self.studies.first(where: { $0.id == id }) else {
+        guard let study = (Self.studies + [Self.closedStudy]).first(where: { $0.id == id }) else {
             throw RepositoryError.notFound
         }
         return Self.makeDetail(study: study, category: study.category,
-                               curriculum: "함께 읽기\n실습과 토론\n결과 공유")
+                               curriculum: "함께 읽기\n실습과 토론\n결과 공유",
+                               recruitStatus: study.phase == .recruiting ? .recruiting : .closed)
     }
 
     func fetchMyStudies() async throws -> [MyStudy] {
@@ -33,6 +45,13 @@ struct MockRepository: RepositoryProtocol {
         id: "1", category: .software, title: "UIKit 아키텍처 같이 읽기",
         summary: "작은 예제를 만들며 MVVM과 Repository의 책임을 함께 정리해요.",
         participantCount: 5, capacity: 8, phase: .recruiting, closingSoon: false
+    )
+
+    // Public search also includes studies absent from the recruiting browse list.
+    private static let closedStudy = Study(
+        id: "9001", category: .software, title: "UIKit 지난 스터디",
+        summary: "함께 만든 앱을 돌아보는 종료된 스터디예요.",
+        participantCount: 8, capacity: 8, phase: .closed, closingSoon: false
     )
 
     private static let studies: [Study] = [

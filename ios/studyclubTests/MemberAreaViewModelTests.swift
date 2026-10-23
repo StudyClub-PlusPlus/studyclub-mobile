@@ -267,6 +267,10 @@ private actor RootAuthStub: AuthRepository {
 }
 
 private actor RootListStub: RepositoryProtocol {
+    func searchStudies(query: StudySearchQuery, offset: Int) async throws -> StudyPage {
+        throw RepositoryError.unavailable
+    }
+
     private(set) var count = 0
     private var failure: RepositoryError?
     private let additionalGate: Suspension?

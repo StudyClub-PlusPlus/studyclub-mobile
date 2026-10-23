@@ -189,6 +189,10 @@ final class MainPaginationTests: XCTestCase {
 }
 
 private actor ControlledListRepository: RepositoryProtocol {
+    func searchStudies(query: StudySearchQuery, offset: Int) async throws -> StudyPage {
+        throw RepositoryError.unavailable
+    }
+
     private var continuations: [Int: CheckedContinuation<StudyPage, any Error>] = [:]
     private(set) var offsets: [Int] = []
     var count: Int { offsets.count }

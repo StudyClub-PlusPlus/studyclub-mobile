@@ -1,6 +1,14 @@
 import Alamofire
 
 final class StudyAPIClient: Sendable {
+    func searchStudies(query: StudySearchQuery, offset: Int, limit: Int) async throws -> StudyListResponseDTO {
+        try Task.checkCancellation()
+        return try await AF.request(StudyRouter.searchStudies(query: query, offset: offset, limit: limit))
+            .validate()
+            .serializingDecodable(StudyListResponseDTO.self)
+            .value
+    }
+
     func fetchStudies(offset: Int, limit: Int) async throws -> StudyListResponseDTO {
         try await AF.request(StudyRouter.studies(offset: offset, limit: limit))
             .validate()

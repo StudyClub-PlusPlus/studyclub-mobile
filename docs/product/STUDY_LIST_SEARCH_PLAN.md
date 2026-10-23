@@ -2,6 +2,20 @@
 
 상태: 기획 의도 및 병행 개발 계획을 기록한 초안이며, 기능의 구현이나 배포 완료를 뜻하지 않는다.
 
+## 2026-10-23 구현 계약 갱신 · #96 / SC74–76
+
+검색은 로그인과 독립적이다. `study.search`는 InProgress·기본 OFF이며 목록·인증 플래그와 별도로 적용한다. 아래 2026-09-18의 OPEN/cohort 및 14개 카테고리 설명은 당시 소스 기록이다. 현재 요청은 `GET /api/studies?keyword=<text>&offset=0&limit=20`이고, 필터를 고르면 `status=RECRUITING|ONGOING|CLOSED`, `category=<11개 StudyCategory>`를 보낸다. 전체는 해당 파라미터를 생략한다. 인증 헤더·별도 검색 endpoint·DTO를 추가하지 않는다.
+
+현재 서버 근거는 [main 61d46fb1의 Controller](https://github.com/StudyClub-PlusPlus/studyclub-engineering/blob/61d46fb1d78a7b4744cb4aaa40c07ebfbc8791e7/backend/api/src/main/java/com/studyclub/api/study/StudyController.java), [DAO](https://github.com/StudyClub-PlusPlus/studyclub-engineering/blob/61d46fb1d78a7b4744cb4aaa40c07ebfbc8791e7/backend/api/src/main/java/com/studyclub/api/study/StudyListJpqlDao.java), [카테고리](https://github.com/StudyClub-PlusPlus/studyclub-engineering/blob/61d46fb1d78a7b4744cb4aaa40c07ebfbc8791e7/backend/domain/src/main/java/com/studyclub/domain/study/StudyCategory.java)다. 공개·숨김 아님·DRAFT 제외이며 최신 기수로 묶지 않는다. 키워드는 제목·한 줄 소개를 검색한다. 예전 최신 기수 제한 문제는 현재 소스에서 제거됐다. 소스 확인은 배포 API 검증과 구분한다.
+
+기존 RepositoryProtocol/Repository와 page DTO·Mapper를 재사용한다. 검색은 offset 기반 20건 페이지를 사용하며 raw 응답 개수로 다음 offset을 계산한다. 필터 기본값은 전체다. 네이티브 메뉴 두 개를 검색창 아래에 두고 같은 컨트롤러가 살아 있는 동안 선택을 유지한다. 상태 메뉴는 전체·모집 중·진행 중·종료다. 기존 목록의 snapshot·필터·스크롤과 공유하지 않는다. 초기 빈 입력은 네트워크와 EmptyView를 만들지 않는다.
+
+- [SC74 플래그](https://app.notion.com/p/benkang/bc3ca14ace214695b1f0f6fdc2a5d300)
+- [SC75 API](https://app.notion.com/p/benkang/0a7a5b87384e449f927a571f25bc7f6b)
+- [SC76 화면·연결](https://app.notion.com/p/benkang/b04d98d0e7434be9b8e54402acc2424a)
+
+이 갱신은 구현 방향을 기록하며 UI·실서버·Ready QA 완료를 뜻하지 않는다.
+
 ## 1. 두 피처의 책임 분리
 
 | 피처 | 담당 영역 및 책임 | 아키텍처 규칙 |

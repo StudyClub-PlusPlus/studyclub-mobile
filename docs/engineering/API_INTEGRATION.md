@@ -4,6 +4,10 @@
 
 Search native QA found HTTP200 detail ID86 ending in empty. At `2026-10-23T12:24:09Z`, decoding its deployed response with the prior DTO reproduced `keyNotFound(deliveryFormat)`. Refetched backend main `61d46fb1d78a7b4744cb4aaa40c07ebfbc8791e7`'s StudyDetailResponse has removed that field. Data/Domain now make it optional and Detail omits only that metadata when absent/null. It preserves provided valid values, rejects invalid supplied types/enums and retains required ID/title/capacity/date validation. No online default or new server field is introduced. Native rerun and candidate-specific tests are recorded separately; this source correction alone is not a QA pass.
 
+## Public search · SC75
+
+검색은 기존 `RepositoryProtocol.searchStudies(query:offset:)` → `StudyAPIClient` → `StudyRouter`의 공개 `/api/studies` 경로를 사용한다. `StudySearchQuery`는 keyword·optional StudyPhase/category만 전달하며 페이지 응답·Mapper는 목록과 같다. 인증이나 로그인 플래그를 읽지 않는다. `study.search` OFF는 transport 전에 featureUnavailable, ON의 빈 키워드는 invalidData로 중단한다. UI는 빈 입력에 이 메서드를 호출하지 않는다. 현재 서버 소스 계약과 과거 cohort 메모의 차이는 [검색 계획](../product/STUDY_LIST_SEARCH_PLAN.md)에 고정했다. 실제 endpoint·디코딩·화면 연결 결과는 후보별 증거로 별도 기록한다.
+
 sc-145 removes API Client Mock/scenario support and UI tests. Debug sample output comes from a Domain-model MockRepository selected through Development Settings. The merged [detail integration PR #1 (sc-93)](https://github.com/StudyClub-PlusPlus/studyclub-mobile/pull/1), included in main `c2fea74614f96210f8b9c01e32a12b389d7e84c9`, is preserved in the rebased sc-145 source. sc-92 connects the paged recruiting list below.
 
 ## Current detail implementation
