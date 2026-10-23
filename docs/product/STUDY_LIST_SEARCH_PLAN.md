@@ -18,6 +18,8 @@ UISearchController 결과 화면·ViewModel·필터·snapshot을 구현했다. M
 
 Debug Real에서 인증 OFF 검색, 초기 빈 화면·0건·내용·상태/분야 필터·다음 페이지·종료 ID86 상세·지움·필터 유지와 취소 후 목록 위치를 확인했다. 한글 문자열은 AX setValue로 입력했으므로 실제 markedTextRange 조합 검증은 아니다. 실제 한글 IME 조합과 배포별 QA는 Ready 전 조건으로 남긴다. Mock·제어된 실패 화면·실제 공개 서버와 단위 테스트 근거를 구분한 최종 후보 기록은 `docs/evidence/sc-76-search/`에 둔다. 이 구현 확인은 Ready 전환을 뜻하지 않는다.
 
+SC78 후속에서 검색 취소 후 offset을 복원한 다음 navigation bar layout을 갱신해 접힌 제목도 복원한다. 실제17e 한국어 화면 키 입력·확정·삭제, ordinary Release의 override 없는 기본 OFF·검색 ON·상세 복귀, 검색 전용 client transport 실패와 동일 조건 실제 배포 재시도를 확인했다. 이 한국어 입력기는 updater·editingChanged·다음 실행 차례 모두 marked range를 nil로 제공했다. native marked!=nil·sub300ms 연타를 관측했다고 확대하지 않으며, 해당 취소/조합 guard는 deterministic 테스트와 구분한다. 상세 후보·관측 한계는 [SC78 증거](../evidence/sc-78-search-qa/README.md)를 따른다. InProgress·기본 OFF 및 별도 Ready 전환 원칙은 유지한다.
+
 ## 이하 2026-09-18 초기 계획 · 역사 기록
 
 ## 1. 두 피처의 책임 분리

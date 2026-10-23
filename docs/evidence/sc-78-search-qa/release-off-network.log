@@ -1,0 +1,14 @@
+2026-10-23T15:03:21Z Release final OFF observation start
+2026-10-23T15:04:21Z Release final OFF observation end after termination
+
+{
+    "development.featureFlags" =     {
+        "auth.google-login" = 0;
+    };
+    "development.repositoryMode" = real;
+}
+
+2026-10-24 00:03:23.565 Df studyclub[98422:577bd02] [com.apple.CFNetwork:Default] Task <FA2B872F-622D-40AB-91D3-6F63E5BF1233>.<1> resuming, timeouts(60.0, 604800.0) qos(0x19) voucher(<OS_voucher: 0x105e14320>) activity(00000000-0000-0000-0000-000000000000)
+2026-10-24 00:03:23.687 Df studyclub[98422:577bcf6] [com.apple.CFNetwork:Default] Task <FA2B872F-622D-40AB-91D3-6F63E5BF1233>.<1> sent request, body N 0
+2026-10-24 00:03:24.102 Df studyclub[98422:577bd02] [com.apple.CFNetwork:Default] Task <FA2B872F-622D-40AB-91D3-6F63E5BF1233>.<1> received response, status 200 content K
+2026-10-24 00:03:24.103 Df studyclub[98422:577bd02] [com.apple.CFNetwork:Summary] Task <FA2B872F-622D-40AB-91D3-6F63E5BF1233>.<1> summary for task success {transaction_duration_ms=535, response_status=200, connection=1, protocol="h2", domain_lookup_duration_ms=1, connect_duration_ms=97, secure_connection_duration_ms=51, private_relay=false, request_start_ms=118, request_duration_ms=0, response_start_ms=534, response_duration_ms=0, request_bytes=203, request_throughput_kbps=11515, response_bytes=2131, response_throughput_kbps=29293, cache_hit=false}

@@ -1,0 +1,85 @@
+1792766690.03964 uptime=958554.6850466668 MAIN start offset=0
+1792766708.9697862 uptime=958573.6150172917 BEGIN offset=(0.0, 5.0) inset=UIEdgeInsets(top: 161.0, left: 0.0, bottom: 83.0, right: 0.0) ids=["21", "20", "19", "18"]
+1792766708.9790301 uptime=958573.6242618334 INPUT text= marked=nil
+1792766709.172059 uptime=958573.8172897084 NEXT text= marked=false
+1792766716.986891 uptime=958581.6320515 WILLDISMISS offset=(0.0, 5.0) navHidden=false
+1792766717.425653 uptime=958582.0708076668 DISMISS offset=(0.0, 5.0) inset=UIEdgeInsets(top: 161.0, left: 0.0, bottom: 83.0, right: 0.0) title=스터디 ids=["21", "20", "19", "18"]
+1792766717.428642 uptime=958582.073796625 NAV hidden=false frame=(0.0, 47.0, 390.0, 114.0)
+1792766751.029169 uptime=958615.6740195834 BEGIN offset=(0.0, 5.0) inset=UIEdgeInsets(top: 161.0, left: 0.0, bottom: 83.0, right: 0.0) ids=["21", "20", "19", "18"]
+1792766751.0325909 uptime=958615.677440125 INPUT text= marked=nil
+1792766751.0839682 uptime=958615.7288185834 NEXT text= marked=false
+1792766779.151062 uptime=958643.7956571667 INPUT text=ㅅ marked=nil
+1792766779.153125 uptime=958643.7977206667 EDITING text=ㅅ marked=false lang=ko-KR correction=1
+1792766779.15836 uptime=958643.8029586667 NEXT text=ㅅ marked=false
+1792766779.476577 uptime=958644.1211714167 SEARCH start keyword=ㅅ offset=0
+1792766779.973351 uptime=958644.6179391667 SEARCH end status=200 bytes=44 count=0 total=0 failed=false
+1792766792.307956 uptime=958656.9524331667 INPUT text=스 marked=nil
+1792766792.309814 uptime=958656.9542909167 EDITING text=스 marked=false lang=ko-KR correction=1
+1792766792.314019 uptime=958656.9584959167 NEXT text=스 marked=false
+1792766792.638822 uptime=958657.283299625 SEARCH start keyword=스 offset=0
+1792766793.0355191 uptime=958657.6799875834 SEARCH end status=200 bytes=7956 count=20 total=46 failed=false
+1792766798.800045 uptime=958663.444463 INPUT text=슽 marked=nil
+1792766798.802069 uptime=958663.4464854167 EDITING text=슽 marked=false lang=ko-KR correction=1
+1792766798.8190799 uptime=958663.4634977084 NEXT text=슽 marked=false
+1792766799.133672 uptime=958663.7780904584 SEARCH start keyword=슽 offset=0
+1792766799.451396 uptime=958664.0958060834 SEARCH end status=200 bytes=44 count=0 total=0 failed=false
+1792766805.739891 uptime=958670.3842457084 INPUT text=스터 marked=nil
+1792766805.741602 uptime=958670.3859545001 EDITING text=스터 marked=false lang=ko-KR correction=1
+1792766805.7443361 uptime=958670.3886905 NEXT text=스터 marked=false
+1792766806.063767 uptime=958670.70812225 SEARCH start keyword=스터 offset=0
+1792766806.472468 uptime=958671.1168145834 SEARCH end status=200 bytes=7854 count=20 total=38 failed=false
+1792766812.9285421 uptime=958677.5728312084 INPUT text=스턷 marked=nil
+1792766812.930636 uptime=958677.5749239167 EDITING text=스턷 marked=false lang=ko-KR correction=1
+1792766812.933017 uptime=958677.5773056251 NEXT text=스턷 marked=false
+1792766813.244316 uptime=958677.8886043334 SEARCH start keyword=스턷 offset=0
+1792766813.54864 uptime=958678.1929227083 SEARCH end status=200 bytes=44 count=0 total=0 failed=false
+1792766818.589542 uptime=958683.2337787084 INPUT text=스터디 marked=nil
+1792766818.59095 uptime=958683.2351855834 EDITING text=스터디 marked=false lang=ko-KR correction=1
+1792766818.594621 uptime=958683.2388579583 NEXT text=스터디 marked=false
+1792766818.9061031 uptime=958683.55034175 SEARCH start keyword=스터디 offset=0
+1792766819.325008 uptime=958683.9692381667 SEARCH end status=200 bytes=7854 count=20 total=38 failed=false
+1792766837.990497 uptime=958702.634558625 INPUT text=스터디  marked=nil
+1792766837.9910731 uptime=958702.63513325 EDITING text=스터디  marked=false lang=ko-KR correction=1
+1792766837.9928942 uptime=958702.6369548334 NEXT text=스터디  marked=false
+1792766886.5584831 uptime=958751.2021058333 SEARCH start keyword=스터디 offset=0
+1792766886.5605369 uptime=958751.2041587917 FAULT notConnectedToInternet url=https://api.studyclub-plusplus.com/api/studies?keyword=%EC%8A%A4%ED%84%B0%EB%94%94&offset=0&limit=20&status=CLOSED
+1792766886.564345 uptime=958751.2079670001 SEARCH end status=-1 bytes=0 count=-1 total=-1 failed=true
+1792766907.200344 uptime=958771.8437837501 SEARCH start keyword=스터디 offset=0
+1792766907.771432 uptime=958772.4148602501 SEARCH end status=200 bytes=7587 count=20 total=34 failed=false
+1792767033.332056 uptime=958897.9743514584 MAIN start offset=0
+1792767042.829793 uptime=958907.4719987084 BEGIN offset=(0.0, -213.0) inset=UIEdgeInsets(top: 213.0, left: 0.0, bottom: 83.0, right: 0.0) ids=["21", "20", "19", "18"]
+1792767042.838876 uptime=958907.4810804584 INPUT text= marked=nil
+1792767043.009708 uptime=958907.6519123334 NEXT text= marked=false
+1792767052.878708 uptime=958917.5208235834 INPUT text=ㅅ marked=nil
+1792767052.883891 uptime=958917.5260057084 EDITING text=ㅅ marked=false lang=ko-KR correction=1
+1792767052.888875 uptime=958917.5309890417 NEXT text=ㅅ marked=false
+1792767053.2085 uptime=958917.8506125833 SEARCH start keyword=ㅅ phase=nil category=nil offset=0
+1792767053.6148 uptime=958918.2569055001 SEARCH end status=200 bytes=44 count=0 total=0 failed=false
+1792767054.787837 uptime=958919.4299342084 INPUT text=스 marked=nil
+1792767054.78953 uptime=958919.4316260834 EDITING text=스 marked=false lang=ko-KR correction=1
+1792767054.7923841 uptime=958919.4344802084 NEXT text=스 marked=false
+1792767055.1088781 uptime=958919.7509759167 SEARCH start keyword=스 phase=nil category=nil offset=0
+1792767055.48916 uptime=958920.1312494584 SEARCH end status=200 bytes=7956 count=20 total=46 failed=false
+1792767056.236683 uptime=958920.8787654584 INPUT text=슽 marked=nil
+1792767056.238694 uptime=958920.8807757917 EDITING text=슽 marked=false lang=ko-KR correction=1
+1792767056.241158 uptime=958920.8832396667 NEXT text=슽 marked=false
+1792767056.560868 uptime=958921.2029533751 SEARCH start keyword=슽 phase=nil category=nil offset=0
+1792767056.842606 uptime=958921.4846830417 SEARCH end status=200 bytes=44 count=0 total=0 failed=false
+1792767057.5783849 uptime=958922.22045625 INPUT text=스터 marked=nil
+1792767057.5801392 uptime=958922.2222082084 EDITING text=스터 marked=false lang=ko-KR correction=1
+1792767057.583514 uptime=958922.2255842917 NEXT text=스터 marked=false
+1792767057.898107 uptime=958922.5401764584 SEARCH start keyword=스터 phase=nil category=nil offset=0
+1792767058.274219 uptime=958922.9162825834 SEARCH end status=200 bytes=7854 count=20 total=38 failed=false
+1792767058.9334311 uptime=958923.5754895417 INPUT text=스턷 marked=nil
+1792767058.9352288 uptime=958923.5772869167 EDITING text=스턷 marked=false lang=ko-KR correction=1
+1792767058.938075 uptime=958923.5801335417 NEXT text=스턷 marked=false
+1792767059.258214 uptime=958923.9002736667 SEARCH start keyword=스턷 phase=nil category=nil offset=0
+1792767059.537854 uptime=958924.1799066667 SEARCH end status=200 bytes=44 count=0 total=0 failed=false
+1792767060.3402162 uptime=958924.9822620001 INPUT text=스터디 marked=nil
+1792767060.341677 uptime=958924.9837215417 EDITING text=스터디 marked=false lang=ko-KR correction=1
+1792767060.34415 uptime=958924.9861957501 NEXT text=스터디 marked=false
+1792767060.665705 uptime=958925.3077537917 SEARCH start keyword=스터디 phase=nil category=nil offset=0
+1792767061.0854201 uptime=958925.7274580001 SEARCH end status=200 bytes=7854 count=20 total=38 failed=false
+1792767103.447554 uptime=958968.10322275 INPUT text= marked=nil
+1792767103.450099 uptime=958968.1057688751 EDITING text= marked=false lang=ko-KR correction=1
+1792767103.478621 uptime=958968.1343020834 NEXT text= marked=false

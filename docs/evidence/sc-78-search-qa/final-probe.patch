@@ -1,0 +1,92 @@
+diff --git a/ios/studyclub/Data/Network/StudyAPIClient.swift b/ios/studyclub/Data/Network/StudyAPIClient.swift
+index d975755..b4244ea 100644
+--- a/ios/studyclub/Data/Network/StudyAPIClient.swift
++++ b/ios/studyclub/Data/Network/StudyAPIClient.swift
+@@ -1,16 +1,22 @@
+ import Alamofire
++import Foundation
+ 
+ final class StudyAPIClient: Sendable {
+     func searchStudies(query: StudySearchQuery, offset: Int, limit: Int) async throws -> StudyListResponseDTO {
+         try Task.checkCancellation()
+-        return try await AF.request(StudyRouter.searchStudies(query: query, offset: offset, limit: limit))
++        SC78Probe.record("SEARCH start keyword=\(query.keyword) phase=\(query.phase?.rawValue ?? "nil") category=\(query.category?.rawValue ?? "nil") offset=\(offset)")
++        let response = await SC78Probe.session.request(StudyRouter.searchStudies(query: query, offset: offset, limit: limit))
+             .validate()
+             .serializingDecodable(StudyListResponseDTO.self)
+-            .value
++            .response
++        let decoded = try? response.result.get()
++        SC78Probe.record("SEARCH end status=\(response.response?.statusCode ?? -1) bytes=\(response.data?.count ?? 0) count=\(decoded?.items.count ?? -1) total=\(decoded?.total ?? -1) failed=\(response.error != nil)")
++        return try response.result.get()
+     }
+ 
+     func fetchStudies(offset: Int, limit: Int) async throws -> StudyListResponseDTO {
+-        try await AF.request(StudyRouter.studies(offset: offset, limit: limit))
++        SC78Probe.record("MAIN start offset=\(offset)")
++        return try await AF.request(StudyRouter.studies(offset: offset, limit: limit))
+             .validate()
+             .serializingDecodable(StudyListResponseDTO.self)
+             .value
+diff --git a/ios/studyclub/Presentation/Main/MainViewController.swift b/ios/studyclub/Presentation/Main/MainViewController.swift
+index d337f12..1828d2c 100644
+--- a/ios/studyclub/Presentation/Main/MainViewController.swift
++++ b/ios/studyclub/Presentation/Main/MainViewController.swift
+@@ -61,6 +61,7 @@ final class MainViewController: UIViewController {
+         controller.obscuresBackgroundDuringPresentation = false
+         controller.automaticallyShowsSearchResultsController = false
+         controller.searchBar.placeholder = "스터디 검색"
++        controller.searchBar.searchTextField.addTarget(self, action: #selector(probeEditingChanged(_:)), for: .editingChanged)
+         navigationItem.searchController = controller
+         navigationItem.hidesSearchBarWhenScrolling = false
+         definesPresentationContext = true
+@@ -73,6 +74,10 @@ final class MainViewController: UIViewController {
+         navigationController?.pushViewController(detail, animated: true)
+     }
+ 
++    @objc private func probeEditingChanged(_ field: UITextField) {
++        SC78Probe.record("EDITING text=\(field.text ?? "") marked=\(field.markedTextRange != nil) lang=\(field.textInputMode?.primaryLanguage ?? "nil") correction=\(field.autocorrectionType.rawValue)")
++    }
++
+     private func configureView() {
+         title = "스터디"
+         navigationItem.largeTitleDisplayMode = .always
+@@ -272,6 +277,7 @@ extension MainViewController: UICollectionViewDelegate {
+ 
+ extension MainViewController: UISearchResultsUpdating, UISearchControllerDelegate, UISearchBarDelegate {
+     func searchBarShouldBeginEditing(_ searchBar: UISearchBar) -> Bool {
++        SC78Probe.record("BEGIN offset=\(collectionView.contentOffset) inset=\(collectionView.adjustedContentInset) ids=\(dataSource.snapshot().itemIdentifiers)")
+         // Capture before UISearchController changes the host navigation bar's insets.
+         if browseOffsetBeforeSearch == nil {
+             browseOffsetBeforeSearch = collectionView.contentOffset
+@@ -283,6 +289,11 @@ extension MainViewController: UISearchResultsUpdating, UISearchControllerDelegat
+         guard searchController.isActive else { return }
+         searchController.showsSearchResultsController = true
+         let field = searchController.searchBar.searchTextField
++        let marked = field.markedTextRange.map { "\(field.offset(from: field.beginningOfDocument, to: $0.start)):\(field.offset(from: field.beginningOfDocument, to: $0.end))" } ?? "nil"
++        SC78Probe.record("INPUT text=\(field.text ?? "") marked=\(marked)")
++        Task { @MainActor in
++            SC78Probe.record("NEXT text=\(field.text ?? "") marked=\(field.markedTextRange != nil)")
++        }
+         searchResultsController?.updateInput(field.text ?? "", isComposing: field.markedTextRange != nil)
+     }
+ 
+@@ -291,6 +302,7 @@ extension MainViewController: UISearchResultsUpdating, UISearchControllerDelegat
+     }
+ 
+     func willDismissSearchController(_ searchController: UISearchController) {
++        SC78Probe.record("WILLDISMISS offset=\(collectionView.contentOffset) navHidden=\(navigationController?.isNavigationBarHidden ?? true)")
+         searchResultsController?.endSearch()
+         searchController.searchBar.text = ""
+     }
+@@ -300,6 +312,10 @@ extension MainViewController: UISearchResultsUpdating, UISearchControllerDelegat
+             collectionView.setContentOffset(offset, animated: false)
+         }
+         browseOffsetBeforeSearch = nil
++        navigationController?.navigationBar.setNeedsLayout()
++        navigationController?.navigationBar.layoutIfNeeded()
++        SC78Probe.record("DISMISS offset=\(collectionView.contentOffset) inset=\(collectionView.adjustedContentInset) title=\(title ?? "nil") ids=\(dataSource.snapshot().itemIdentifiers)")
++        SC78Probe.record("NAV hidden=\(navigationController?.isNavigationBarHidden ?? true) frame=\(navigationController?.navigationBar.frame ?? .zero)")
+         if let id = pendingSearchSelection {
+             pendingSearchSelection = nil
+             // Search IDs are public identities; they need not occur in the recruiting browse list.
