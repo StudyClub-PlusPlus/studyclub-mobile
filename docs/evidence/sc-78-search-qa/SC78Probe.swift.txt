@@ -1,0 +1,44 @@
+import Alamofire
+import Foundation
+
+// Temporary native QA probe. Removed before ordinary builds.
+enum SC78Probe {
+    private static let lock = NSLock()
+    static let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+    static let session: Session = {
+        let configuration = URLSessionConfiguration.default
+        configuration.protocolClasses = [SC78SearchFault.self] + (configuration.protocolClasses ?? [])
+        return Session(configuration: configuration)
+    }()
+
+    static func record(_ event: String) {
+        lock.lock()
+        defer { lock.unlock() }
+        let line = "\(Date().timeIntervalSince1970) uptime=\(ProcessInfo.processInfo.systemUptime) \(event)\n"
+        let url = documents.appendingPathComponent("sc78-probe.log")
+        if !FileManager.default.fileExists(atPath: url.path) {
+            FileManager.default.createFile(atPath: url.path, contents: nil)
+        }
+        if let handle = try? FileHandle(forWritingTo: url) {
+            defer { try? handle.close() }
+            try? handle.seekToEnd()
+            try? handle.write(contentsOf: Data(line.utf8))
+        }
+    }
+}
+
+final class SC78SearchFault: URLProtocol {
+    override class func canInit(with request: URLRequest) -> Bool {
+        guard request.httpMethod == "GET", let url = request.url,
+              url.host == "api.studyclub-plusplus.com", url.path == "/api/studies",
+              URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?.contains(where: { $0.name == "keyword" }) == true
+        else { return false }
+        return FileManager.default.fileExists(atPath: SC78Probe.documents.appendingPathComponent("sc78-search-network-fault").path)
+    }
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
+    override func startLoading() {
+        SC78Probe.record("FAULT notConnectedToInternet url=\(request.url!.absoluteString)")
+        client?.urlProtocol(self, didFailWithError: URLError(.notConnectedToInternet))
+    }
+    override func stopLoading() {}
+}

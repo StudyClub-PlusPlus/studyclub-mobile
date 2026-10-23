@@ -1,5 +1,7 @@
 # SC76 검색 구현·검증 · 2026-10-23
 
+후속 실제 키보드·ordinary Release OFF/ON·검색 전용 transport 복구·제목 수정 근거는 [SC78](../sc-78-search-qa/README.md)에 있다. 아래 SC76 당시 기록과 미검증 범위는 원문으로 유지한다.
+
 검색은 로그인과 독립적인 `study.search` InProgress·기본 OFF로 구현했다. SC74/75/77은 각각 PR20/21/24로 main에 반영됐다. SC76은 main `ec7bd5e80e18aba47dc895304797f9caf7b6f13f` 위 1커밋이다. Ready 전환은 하지 않았다.
 
 ## 후보와 환경

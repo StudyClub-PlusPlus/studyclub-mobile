@@ -300,6 +300,9 @@ extension MainViewController: UISearchResultsUpdating, UISearchControllerDelegat
             collectionView.setContentOffset(offset, animated: false)
         }
         browseOffsetBeforeSearch = nil
+        // Recompute the collapsed title after search restores the browse offset.
+        navigationController?.navigationBar.setNeedsLayout()
+        navigationController?.navigationBar.layoutIfNeeded()
         if let id = pendingSearchSelection {
             pendingSearchSelection = nil
             // Search IDs are public identities; they need not occur in the recruiting browse list.
