@@ -15,6 +15,10 @@ final class LoginViewModel {
     }
 
     private let stateSubject: CurrentValueSubject<State, Never>
+    let isMock: Bool
+    var introduction: String {
+        isMock ? "Mock 로그인 테스트예요. 실제 Google 계정이나 서버를 사용하지 않아요." : "Google 계정으로 스터디클럽에 로그인하세요."
+    }
 
     var state: State { stateSubject.value }
     var statePublisher: AnyPublisher<State, Never> { stateSubject.eraseToAnyPublisher() }
@@ -36,7 +40,8 @@ final class LoginViewModel {
         }
     }
 
-    init(state: State = .idle) {
+    init(state: State = .idle, isMock: Bool = false) {
+        self.isMock = isMock
         stateSubject = CurrentValueSubject(state)
     }
 

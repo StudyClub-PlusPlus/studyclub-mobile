@@ -203,6 +203,7 @@ final class LoginViewController: UIViewController {
         content.addArrangedSubview(heading)
         content.setCustomSpacing(AppTheme.Spacing.medium, after: heading)
         content.addArrangedSubview(introduction)
+        introduction.text = viewModel.introduction
 
         content.addArrangedSubview(providerGroup)
         providerGroup.addArrangedSubview(googleContainer)

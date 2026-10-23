@@ -1,0 +1,7 @@
+13b73d65be7dd1fb509395856d88246f2cca847640ac5171ec5a246ca1e4e844  docs/evidence/sc-73/native-consent-ready.png
+64917a55dc5639dfd044a2376a3f353ed37c6df723d0752dc8aabd1e461acddc  docs/evidence/sc-73/native-guest-after-logout.png
+b6776999022c46289abb49b63638b40d5a571d8c87a0985c40e0cea4a3ef3688  docs/evidence/sc-73/native-mock-login.png
+8208d785b6b3b30504f6c3737698ca61edd0f028bfa5b1139e0c39efd7445a58  docs/evidence/sc-73/native-mock-signup.png
+eb243b09cbdf740b08b439e3ba4ff148bbe50258c76260fa41926f62ac7a2450  docs/evidence/sc-73/native-privacy.png
+91c90ce4f85ddf86714c3d759381859a67be781c1007cefdca99262c0ab5c483  docs/evidence/sc-73/native-real-unconfigured.png
+52bc24971282bfc37b98b3653343c0069211be9a556dd6c1a45ca6f71070b4dd  docs/evidence/sc-73/native-terms.png

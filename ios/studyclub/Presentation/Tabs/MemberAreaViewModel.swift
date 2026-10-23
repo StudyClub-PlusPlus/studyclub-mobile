@@ -15,12 +15,13 @@ final class MemberAreaViewModel {
         self.init(authRepository: repositories.auth, studiesRepository: repositories.studies,
                   isAuthEnabled: settings.isEnabled(FeatureFlag.googleLogin.definition),
                   isListEnabled: settings.isEnabled(FeatureFlag.myStudies.definition),
-                  isMyPageEnabled: settings.isEnabled(FeatureFlag.myPage.definition))
+                  isMyPageEnabled: settings.isEnabled(FeatureFlag.myPage.definition),
+                  isMock: repositories.isMock)
     }
 
     init(authRepository: any AuthRepository, studiesRepository: any RepositoryProtocol,
-         isAuthEnabled: Bool, isListEnabled: Bool, isMyPageEnabled: Bool) {
-        let account = SettingAccountViewModel(repository: authRepository, isFeatureEnabled: isAuthEnabled)
+         isAuthEnabled: Bool, isListEnabled: Bool, isMyPageEnabled: Bool, isMock: Bool = false) {
+        let account = SettingAccountViewModel(repository: authRepository, isFeatureEnabled: isAuthEnabled, isMock: isMock)
         let list = MyStudiesListViewModel(repository: studiesRepository, isFeatureEnabled: isListEnabled, member: nil)
         self.account = account
         self.myStudies = list

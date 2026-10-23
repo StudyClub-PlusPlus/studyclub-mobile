@@ -1,0 +1,7 @@
+Test Case '-[studyclubTests.MemberAreaViewModelTests testMockSignupCloseDiscardsAttemptAndRequiresConsentAgain]' passed (0.003 seconds).
+Test Case '-[studyclubTests.MemberAreaViewModelTests testMockSignupConsentCompletesSharedMemberAreaAndLogoutClearsIt]' passed (0.001 seconds).
+	 Executed 194 tests, with 0 failures (0 unexpected) in 4.404 (4.501) seconds
+Test Suite 'All tests' passed at 2026-10-23 20:43:47.054.
+	 Executed 194 tests, with 0 failures (0 unexpected) in 4.404 (4.502) seconds
+** TEST SUCCEEDED **
+** BUILD SUCCEEDED **
