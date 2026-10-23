@@ -71,6 +71,16 @@ SC77: 현재 공개 상세 응답이 진행 방식(deliveryFormat)을 제공하�
 
 ## Interaction
 
+### 검색 · #96
+
+`study.search`는 InProgress·기본 OFF이며 Main 생성 시 고정한다. 개발 설정의 변경은 앱 재실행 또는 기존 Repository 모드 변경에 따른 루트 재생성 후 적용한다. ON은 UISearchController로 독립 결과 화면을 연다. 로그인과 기본 목록 플래그에 의존하지 않는다.
+
+검색창 플레이스홀더는 “스터디 검색”이다. 아래에는 상태·분야 네이티브 메뉴를 두고 기본값은 전체다. 상태는 전체·모집 중·진행 중·종료이며 분야는 기존 11개 category를 사용한다. 같은 결과 컨트롤러 수명 동안 필터를 유지하며 취소는 검색어·결과만 지운다. 빈 입력과 IME 조합 중에는 필터만 표시하고 검색·EmptyView를 만들지 않는다.
+
+유효 입력은 300ms 디바운스 뒤 자동 검색한다. 결과는 기존 StudyCardCell을 사용한다. 0건은 “검색 결과가 없어요”, 요청 실패는 “검색 결과를 불러오지 못했어요”와 다시 검색 버튼을 표시한다. 20건 다음 페이지는 “더 보기”로 요청하며 실패는 해당 offset을 다시 시도한다. 진행할 수 없는 빈 페이지는 처음부터 다시 검색한다. 키보드는 결과 스크롤로 닫을 수 있다.
+
+결과의 Study.ID를 직접 상세로 전달한다. 검색 snapshot은 Main과 분리되며 취소·선택 후 Main의 원래 스크롤 위치를 복원한다. 검색 중에는 Main의 자동 추가 페이지 요청을 시작하지 않는다. 앱 화면·IME·스크롤과 필터 유지 확인은 후보별 신선 캡처로 증명하며 이 문단 자체는 QA 결과가 아니다.
+
 - In Debug builds only, holding the Main tab item for 0.7 seconds opens Development Settings in a modal navigation stack with a Close button. Normal taps and holding Setting do not open it. Release compiles out the gesture and screen.
 
 - Main and Detail each start one request when their ViewModel is initialized.

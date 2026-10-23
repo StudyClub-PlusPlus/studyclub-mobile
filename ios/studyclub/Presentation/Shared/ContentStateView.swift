@@ -4,6 +4,7 @@ final class ContentStateView: UIView {
     enum Context {
         case main
         case detail
+        case search
     }
     enum State {
         case loading
@@ -111,6 +112,21 @@ final class ContentStateView: UIView {
             case .empty:
                 titleLabel.text = "스터디를 찾을 수 없어요"
                 messageLabel.text = "이전 화면으로 돌아가 주세요."
+            }
+        }
+        if context == .search {
+            switch state {
+            case .loading:
+                titleLabel.text = "스터디를 검색하고 있어요"
+            case .empty:
+                imageView.image = UIImage(systemName: "magnifyingglass")
+                titleLabel.text = "검색 결과가 없어요"
+                messageLabel.text = "검색어나 필터를 바꿔 보세요."
+            case .failure:
+                titleLabel.text = "검색 결과를 불러오지 못했어요"
+                messageLabel.text = "다시 검색해 주세요."
+            case .unavailable:
+                messageLabel.text = "스터디 검색은 준비 중이에요."
             }
         }
     }

@@ -1,0 +1,15 @@
+#if DEBUG
+import Foundation
+
+// Temporary screenshot host only. Never checked into the application target.
+struct SearchCaptureRepository: RepositoryProtocol {
+    func searchStudies(query: StudySearchQuery, offset: Int) async throws -> StudyPage {
+        try await Task.sleep(for: .seconds(4))
+        if query.keyword == "failure" { throw RepositoryError.unavailable }
+        return StudyPage(studies: [], totalCount: 0, offset: offset)
+    }
+    func fetchStudies(offset: Int) async throws -> StudyPage { throw RepositoryError.unavailable }
+    func fetchStudy(id: Study.ID) async throws -> StudyDetail { throw RepositoryError.notFound }
+    func fetchMyStudies() async throws -> [MyStudy] { throw RepositoryError.unavailable }
+}
+#endif

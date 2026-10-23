@@ -24,6 +24,10 @@ final class MainViewController: UIViewController {
     private var dataSource: UICollectionViewDiffableDataSource<Section, Study.ID>!
     private var itemsByID: [Study.ID: StudyCardCellViewModel] = [:]
     private var cancellables = Set<AnyCancellable>()
+    private var studySearchController: UISearchController?
+    private var searchResultsController: SearchResultsViewController?
+    private var pendingSearchSelection: Study.ID?
+    private var browseOffsetBeforeSearch: CGPoint?
 
     init(viewModel: MainViewModel) {
         self.viewModel = viewModel
@@ -41,6 +45,32 @@ final class MainViewController: UIViewController {
         configureDataSource()
         if viewModel.isListAPIEnabled { configureFooter() }
         bindViewModel()
+        if viewModel.isSearchEnabled { configureSearch() }
+    }
+
+    private func configureSearch() {
+        let results = SearchResultsViewController(viewModel: StudySearchViewModel())
+        let controller = UISearchController(searchResultsController: results)
+        results.onSelectStudy = { [weak self, weak controller] id in
+            self?.pendingSearchSelection = id
+            controller?.isActive = false
+        }
+        controller.searchResultsUpdater = self
+        controller.delegate = self
+        controller.searchBar.delegate = self
+        controller.obscuresBackgroundDuringPresentation = false
+        controller.automaticallyShowsSearchResultsController = false
+        controller.searchBar.placeholder = "스터디 검색"
+        navigationItem.searchController = controller
+        navigationItem.hidesSearchBarWhenScrolling = false
+        definesPresentationContext = true
+        studySearchController = controller
+        searchResultsController = results
+    }
+
+    private func showDetail(studyID: Study.ID) {
+        let detail = DetailViewController(viewModel: DetailViewModel(studyID: studyID))
+        navigationController?.pushViewController(detail, animated: true)
     }
 
     private func configureView() {
@@ -191,7 +221,8 @@ final class MainViewController: UIViewController {
     }
 
     private func loadMoreIfNeeded() {
-        guard viewModel.isListAPIEnabled, viewModel.currentState == .content else { return }
+        guard studySearchController?.isActive != true,
+              viewModel.isListAPIEnabled, viewModel.currentState == .content else { return }
         let remaining = collectionView.contentSize.height
             - collectionView.contentOffset.y - collectionView.bounds.height
         if remaining < collectionView.bounds.height { viewModel.loadMore() }
@@ -235,8 +266,44 @@ extension MainViewController: UICollectionViewDelegate {
             return
         }
 
-        let detailViewModel = DetailViewModel(studyID: studyID)
-        let detailViewController = DetailViewController(viewModel: detailViewModel)
-        navigationController?.pushViewController(detailViewController, animated: true)
+        showDetail(studyID: studyID)
+    }
+}
+
+extension MainViewController: UISearchResultsUpdating, UISearchControllerDelegate, UISearchBarDelegate {
+    func searchBarShouldBeginEditing(_ searchBar: UISearchBar) -> Bool {
+        // Capture before UISearchController changes the host navigation bar's insets.
+        if browseOffsetBeforeSearch == nil {
+            browseOffsetBeforeSearch = collectionView.contentOffset
+        }
+        return true
+    }
+
+    func updateSearchResults(for searchController: UISearchController) {
+        guard searchController.isActive else { return }
+        searchController.showsSearchResultsController = true
+        let field = searchController.searchBar.searchTextField
+        searchResultsController?.updateInput(field.text ?? "", isComposing: field.markedTextRange != nil)
+    }
+
+    func willPresentSearchController(_ searchController: UISearchController) {
+        searchController.showsSearchResultsController = true
+    }
+
+    func willDismissSearchController(_ searchController: UISearchController) {
+        searchResultsController?.endSearch()
+        searchController.searchBar.text = ""
+    }
+
+    func didDismissSearchController(_ searchController: UISearchController) {
+        if let offset = browseOffsetBeforeSearch {
+            collectionView.setContentOffset(offset, animated: false)
+        }
+        browseOffsetBeforeSearch = nil
+        if let id = pendingSearchSelection {
+            pendingSearchSelection = nil
+            // Search IDs are public identities; they need not occur in the recruiting browse list.
+            showDetail(studyID: id)
+        }
     }
 }
