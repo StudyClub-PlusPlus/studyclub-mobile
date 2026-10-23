@@ -26,6 +26,8 @@ Verify the actual endpoint, response decoding and list-to-detail connection when
 
 ## Manual Simulator checks
 
+Search tests use a suspended Domain Repository and request/state expectations for blank/OFF/composition gating, debounce replacement, cancelled old responses, deletion/dismissal, filter changes during pagination, raw offsets, duplicate IDs, empty, failure/retry and stalled pages. They contain no sleep/yield polling. These checks do not prove UIKit IME callbacks, rendered menus, search dismissal, actual browsing scroll restoration or live selected-ID navigation. Walk those paths with `study.search` ON and OFF, capture initial/loading/content/empty/failure and filter states, and identify Mock versus public Real evidence. The flag remains InProgress/default OFF.
+
 Automated UI tests and their Xcode target are not maintained at this product stage. UI changes still require a walkthrough and fresh screenshots of every changed state. Unit-test results do not prove rendered layout or interaction.
 
 For Main/Detail changes, verify stable-ID selection, matching Detail content, back navigation, safe areas and normal-size interaction. Cover loading, empty and failure presentation when those states change. Release and Debug Real mode use Alamofire; Debug Mock mode uses Domain sample studies; the current integration gap is documented in [API integration status](API_INTEGRATION.md). If a changed state needs a controlled local QA setup, keep it out of shipped source, label the evidence and restore the ordinary setup afterward.

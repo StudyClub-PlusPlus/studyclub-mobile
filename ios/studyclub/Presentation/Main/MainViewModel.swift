@@ -26,6 +26,7 @@ final class MainViewModel {
 
     private let repository: any RepositoryProtocol
     let isListAPIEnabled: Bool
+    let isSearchEnabled: Bool
     private var studiesByID: [Study.ID: Study] = [:]
     private var nextOffset: Int?
     private var requestTask: Task<Void, Never>?
@@ -37,13 +38,15 @@ final class MainViewModel {
     convenience init() {
         self.init(
             repository: RepositoryFactory.makeListRepository(),
-            isListAPIEnabled: DevelopmentSettingsStore().isEnabled(FeatureFlag.studyListAPI.definition)
+            isListAPIEnabled: DevelopmentSettingsStore().isEnabled(FeatureFlag.studyListAPI.definition),
+            isSearchEnabled: DevelopmentSettingsStore().isEnabled(FeatureFlag.studySearch.definition)
         )
     }
 
-    init(repository: any RepositoryProtocol, isListAPIEnabled: Bool = true) {
+    init(repository: any RepositoryProtocol, isListAPIEnabled: Bool = true, isSearchEnabled: Bool = false) {
         self.repository = repository
         self.isListAPIEnabled = isListAPIEnabled
+        self.isSearchEnabled = isSearchEnabled
         fetch(.initial)
     }
 

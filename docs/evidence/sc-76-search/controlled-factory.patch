@@ -1,0 +1,13 @@
+diff --git a/ios/studyclub/Presentation/Search/StudySearchViewModel.swift b/ios/studyclub/Presentation/Search/StudySearchViewModel.swift
+index 80f46a7..7449282 100644
+--- a/ios/studyclub/Presentation/Search/StudySearchViewModel.swift
++++ b/ios/studyclub/Presentation/Search/StudySearchViewModel.swift
+@@ -20,7 +20,7 @@ final class StudySearchViewModel {
+     var canLoadMore: Bool { nextOffset != nil }
+ 
+     convenience init() {
+-        self.init(repository: RepositoryFactory.makeStudyRepository(),
++        self.init(repository: SearchCaptureRepository(),
+                   isSearchEnabled: DevelopmentSettingsStore().isEnabled(FeatureFlag.studySearch.definition))
+     }
+ 

@@ -30,7 +30,7 @@ enum FeatureFlag: CaseIterable {
         case .studySearch:
             FeatureFlagDefinition(
                 id: "study.search",
-                name: "스터디 검색 · 화면 재진입",
+                name: "스터디 검색 · 앱 재실행",
                 stage: .inProgress
             )
         case .studyListAPI:

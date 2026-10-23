@@ -22,6 +22,8 @@ Bundled terms text can be displayed. Consent switches and submission stay disabl
 
 ## Selection and screen ownership
 
+Search starts idle and makes no initial request. Blank input and IME composition show only its filters. Committed nonblank input enters loading for the 300ms debounce and first request, then content/empty/failure. Input deletion and dismissal clear results and cancel pending first/page requests while preserving independent filters for the result controller's lifetime. Replacing filters restarts the first page for the current committed keyword. Additional pages keep content, merge duplicate IDs with last values at first positions, advance by raw response count, and keep the cursor on failure. A zero-progress page stops pagination until an explicit first-page retry. Search IDs pass directly to Detail and do not require a Main lookup. Search cancellation restores Main's saved content offset and does not refresh its snapshot or filters.
+
 Selection uses stable diffable Study.ID, never a saved array index. Detail fetches independently. Back navigation retains the list and scroll position. Search owns a separate ViewModel/filter/snapshot and must not replace Main's list. No automatic refresh occurs on Detail return or search cancellation. UIKit/Combine observation and async Repository operations remain separate.
 
 ## MyPage
