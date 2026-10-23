@@ -7,17 +7,38 @@ struct Repository: RepositoryProtocol {
     private let isListAPIEnabled: Bool
     private let isDetailAPIEnabled: Bool
     private let isMyStudiesAPIEnabled: Bool
+    private let isSearchEnabled: Bool
 
     init(
         isListAPIEnabled: Bool = DevelopmentSettingsStore().isEnabled(FeatureFlag.studyListAPI.definition),
         isDetailAPIEnabled: Bool = DevelopmentSettingsStore().isEnabled(FeatureFlag.studyDetailAPI.definition),
         authorization: DefaultAuthRepository? = nil,
-        isMyStudiesAPIEnabled: Bool = DevelopmentSettingsStore().isEnabled(FeatureFlag.myStudies.definition)
+        isMyStudiesAPIEnabled: Bool = DevelopmentSettingsStore().isEnabled(FeatureFlag.myStudies.definition),
+        isSearchEnabled: Bool = DevelopmentSettingsStore().isEnabled(FeatureFlag.studySearch.definition)
     ) {
         self.isListAPIEnabled = isListAPIEnabled
         self.isDetailAPIEnabled = isDetailAPIEnabled
         self.authorization = authorization
         self.isMyStudiesAPIEnabled = isMyStudiesAPIEnabled
+        self.isSearchEnabled = isSearchEnabled
+    }
+
+    func searchStudies(query: StudySearchQuery, offset: Int) async throws -> StudyPage {
+        try Task.checkCancellation()
+        guard isSearchEnabled else { throw RepositoryError.featureUnavailable }
+        guard !query.keyword.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+              offset >= 0, offset <= Int(Int32.max) else {
+            throw RepositoryError.invalidData
+        }
+        do {
+            let response = try await client.searchStudies(query: query, offset: offset, limit: 20)
+            try Task.checkCancellation()
+            try validatePage(response, expectedOffset: offset)
+            return StudyPage(studies: response.items.map { $0.toDomain() },
+                             totalCount: response.total, offset: response.offset)
+        } catch {
+            throw mapError(error)
+        }
     }
 
     func fetchStudy(id: Study.ID) async throws -> StudyDetail {

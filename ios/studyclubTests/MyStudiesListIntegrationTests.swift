@@ -114,6 +114,10 @@ final class MyStudiesListIntegrationTests: XCTestCase {
 }
 
 private actor ControlledMyStudiesRepository: RepositoryProtocol {
+    func searchStudies(query: StudySearchQuery, offset: Int) async throws -> StudyPage {
+        throw RepositoryError.unavailable
+    }
+
     private var requests: [CheckedContinuation<[MyStudy], Error>?] = []
     private var waiters: [(Int, CheckedContinuation<Void, Never>)] = []
     var count: Int { requests.count }

@@ -118,6 +118,10 @@ final class DetailViewModelTests: XCTestCase {
 }
 
 private actor DetailRepositoryDouble: RepositoryProtocol {
+    func searchStudies(query: StudySearchQuery, offset: Int) async throws -> StudyPage {
+        throw RepositoryError.unavailable
+    }
+
     private(set) var requestedIDs: [Study.ID] = []
     let error: RepositoryError?
     let returnedID: Study.ID?
