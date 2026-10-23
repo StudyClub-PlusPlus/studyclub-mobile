@@ -30,7 +30,7 @@ enum FeatureFlag: CaseIterable {
             FeatureFlagDefinition(
                 id: "study.list-api",
                 name: "스터디 목록 API 연동",
-                stage: .inProgress
+                stage: .ready
             )
         case .studyDetailAPI:
             FeatureFlagDefinition(
@@ -42,7 +42,7 @@ enum FeatureFlag: CaseIterable {
             FeatureFlagDefinition(
                 id: "study.design-system",
                 name: "디자인 시스템 적용 · 앱 재실행",
-                stage: .inProgress
+                stage: .ready
             )
         case .myPage:
             FeatureFlagDefinition(id: "account.mypage", name: "MyPage · 앱 재실행", stage: .inProgress)
