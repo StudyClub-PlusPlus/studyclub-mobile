@@ -17,6 +17,7 @@ final class SettingAccountViewModel {
 
     private let repository: any AuthRepository
     private let allowsConsentAndSubmit: Bool
+    private let isMock: Bool
     private let stateSubject: CurrentValueSubject<State, Never>
     private let presentationSubject: CurrentValueSubject<Presentation, Never>
     private var accountTask: Task<Void, Never>?
@@ -50,15 +51,23 @@ final class SettingAccountViewModel {
     }
 
     convenience init() {
+        let repositories = RepositoryFactory.makeMemberRepositories()
         self.init(
-            repository: RepositoryFactory.makeAuthRepository(),
-            isFeatureEnabled: DevelopmentSettingsStore().isEnabled(FeatureFlag.googleLogin.definition)
+            repository: repositories.auth,
+            isFeatureEnabled: DevelopmentSettingsStore().isEnabled(FeatureFlag.googleLogin.definition),
+            isMock: repositories.isMock
         )
     }
 
-    init(repository: any AuthRepository, isFeatureEnabled: Bool, allowsConsentAndSubmit: Bool = AuthDocuments().allowsConsentAndSubmit) {
+    init(repository: any AuthRepository, isFeatureEnabled: Bool, allowsConsentAndSubmit: Bool = AuthDocuments().allowsConsentAndSubmit,
+         isMock: Bool = false) {
         self.repository = repository
-        self.allowsConsentAndSubmit = allowsConsentAndSubmit
+        #if DEBUG
+        self.isMock = isMock
+        #else
+        self.isMock = false
+        #endif
+        self.allowsConsentAndSubmit = allowsConsentAndSubmit || self.isMock
         self.isFeatureEnabled = isFeatureEnabled
         let initial: State = isFeatureEnabled ? .checking : .hidden
         state = initial
@@ -121,7 +130,7 @@ final class SettingAccountViewModel {
 
     func startLogin() {
         guard allows(.login), presentation == .none, !isBusy else { return }
-        loginViewModel = LoginViewModel()
+        loginViewModel = LoginViewModel(isMock: isMock)
         onboardingViewModel = nil
         publishPresentation(.login)
     }
@@ -355,10 +364,11 @@ final class SettingAccountViewModel {
             if let suggestedNickname {
                 onboardingViewModel = OnboardingViewModel(
                     suggestedNickname: suggestedNickname,
-                    allowsConsentAndSubmit: allowsConsentAndSubmit
+                    allowsConsentAndSubmit: allowsConsentAndSubmit,
+                    isMock: isMock
                 )
             } else {
-                onboardingViewModel = OnboardingViewModel(allowsConsentAndSubmit: allowsConsentAndSubmit)
+                onboardingViewModel = OnboardingViewModel(allowsConsentAndSubmit: allowsConsentAndSubmit, isMock: isMock)
             }
             loginViewModel = nil
             publishPresentation(.signup)

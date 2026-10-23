@@ -3,6 +3,7 @@ enum RepositoryFactory {
     struct MemberRepositories {
         let auth: any AuthRepository
         let studies: any RepositoryProtocol
+        let isMock: Bool
     }
 
     static func makeMemberRepositories() -> MemberRepositories {
@@ -10,7 +11,8 @@ enum RepositoryFactory {
         if DevelopmentSettingsStore().repositoryMode == .mock {
             return MemberRepositories(
                 auth: MockAuthRepository(isFeatureEnabled: { DevelopmentSettingsStore().isEnabled(FeatureFlag.googleLogin.definition) }),
-                studies: MockRepository()
+                studies: MockRepository(),
+                isMock: true
             )
         }
         #endif
@@ -20,7 +22,8 @@ enum RepositoryFactory {
             studies: Repository(
                 authorization: auth,
                 isMyStudiesAPIEnabled: DevelopmentSettingsStore().isEnabled(FeatureFlag.myStudies.definition)
-            )
+            ),
+            isMock: false
         )
     }
 

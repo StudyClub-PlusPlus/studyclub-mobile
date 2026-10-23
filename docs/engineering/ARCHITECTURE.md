@@ -24,6 +24,8 @@ Domain -> Foundation only
 
 `RepositoryFactory.makeMemberRepositories()` builds the account and Study repository graph. It passes the same `DefaultAuthRepository` to `Repository` for authenticated member requests. `AuthRepository` remains separate because credentials, refresh, logout, and session invalidation have their own lifecycle. It does not create a second Study repository, API client, or router.
 
+The same graph carries its selected Mock mode into the account presentation. Debug Mock permits local consent and signup with a short test notice; Real and Release retain the unapproved-terms gate. Presentation does not infer that mode by rereading a saved preference after repository creation. This is test behavior, not legal approval or live OAuth evidence.
+
 `StudyRouter` owns the shared Production `/api/` base URL, HTTP method, paths, common headers, and request-specific headers. `StudyAPIClient` owns Alamofire calls and decoding. `Repository` owns Domain error mapping, validation, feature-flag gates, and repository orchestration. Mock data contains Domain models, not DTOs or fake transport responses.
 
 App-facing ViewModel initializers obtain repositories through `RepositoryFactory`. Separate initializers accept Domain protocols for deterministic tests. Do not add a UseCase, second Study repository, second Study router, Coordinator, or generic dependency container without a concrete second use case and an architecture decision update.

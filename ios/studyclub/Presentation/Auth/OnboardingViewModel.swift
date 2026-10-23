@@ -48,6 +48,10 @@ final class OnboardingViewModel {
     var requiresStatusCheck: Bool { state == .unknownStatus || state == .checkingStatus }
     /// Closed unless a caller has an explicit confirmation that the displayed terms are current.
     let allowsConsentAndSubmit: Bool
+    let isMock: Bool
+    var introduction: String {
+        isMock ? "Mock 가입 테스트예요. 동의와 제출은 실제 가입이나 약관 승인으로 저장되지 않아요." : "닉네임과 시간대를 확인하고 필요한 항목에 동의해 주세요."
+    }
     var canSubmit: Bool {
         isEditing && allowsConsentAndSubmit && input.hasNickname && input.hasRequiredConsents
     }
@@ -55,14 +59,20 @@ final class OnboardingViewModel {
     init(
         suggestedNickname: String = "스터디친구",
         deviceTimeZone: String = TimeZone.current.identifier,
-        allowsConsentAndSubmit: Bool = AuthDocuments().allowsConsentAndSubmit
+        allowsConsentAndSubmit: Bool = AuthDocuments().allowsConsentAndSubmit,
+        isMock: Bool = false
     ) {
-        self.allowsConsentAndSubmit = allowsConsentAndSubmit
+        #if DEBUG
+        self.isMock = isMock
+        #else
+        self.isMock = false
+        #endif
+        self.allowsConsentAndSubmit = allowsConsentAndSubmit || self.isMock
         let zone = Self.timeZoneIdentifiers.contains(deviceTimeZone) ? deviceTimeZone : "Etc/UTC"
         let initial = Input(nickname: suggestedNickname, timeZone: zone)
         input = initial
         originalInput = initial
-        if !allowsConsentAndSubmit {
+        if !self.allowsConsentAndSubmit {
             consentError = "확정된 약관이 없어 동의하거나 가입을 제출할 수 없어요."
         }
     }

@@ -4,6 +4,71 @@ import XCTest
 
 @MainActor
 final class MemberAreaViewModelTests: XCTestCase {
+    #if DEBUG
+    func testMockSignupConsentCompletesSharedMemberAreaAndLogoutClearsIt() async throws {
+        // If: the actual Debug Mock graph has no member or approved production terms.
+        let auth = MockAuthRepository(isFeatureEnabled: { true })
+        try await auth.logout()
+        let model = MemberAreaViewModel(authRepository: auth, studiesRepository: MockRepository(),
+                                        isAuthEnabled: true, isListEnabled: true, isMyPageEnabled: true, isMock: true)
+        await waitUntil { model.account.state == .guest }
+        XCTAssertFalse(AuthDocuments().allowsConsentAndSubmit)
+
+        // When: the user explicitly starts the mock signup and supplies required consent.
+        model.account.startLogin()
+        let login = try XCTUnwrap(model.account.loginViewModel)
+        XCTAssertTrue(login.isMock)
+        XCTAssertTrue(login.requestSignIn())
+        model.account.signInWithGoogle()
+        await waitUntil { model.account.presentation == .signup }
+        let form = try XCTUnwrap(model.account.onboardingViewModel)
+        XCTAssertTrue(form.isMock)
+        XCTAssertTrue(form.allowsConsentAndSubmit)
+        XCTAssertFalse(form.canSubmit, "Mock still requires explicit consent")
+        XCTAssertFalse(form.input.marketingAgreed)
+        form.updateNickname("로컬 회원")
+        form.updateConsents(age: true, terms: true, privacy: true, marketing: false)
+        model.account.submitSignup(try XCTUnwrap(form.submit()))
+
+        // Then: the shared member list loads and logout clears the same session.
+        await waitUntil { model.myStudies.state == .content }
+        XCTAssertEqual(model.account.nickname, "로컬 회원")
+        XCTAssertEqual(model.account.presentation, .none)
+        model.account.logout()
+        await waitUntil { model.account.state == .guest }
+        XCTAssertTrue(model.myStudies.items.isEmpty)
+        let restored = try await auth.restoreSession()
+        XCTAssertNil(restored)
+        XCTAssertFalse(AuthDocuments().allowsConsentAndSubmit)
+    }
+
+    func testMockSignupCloseDiscardsAttemptAndRequiresConsentAgain() async throws {
+        let auth = MockAuthRepository(isFeatureEnabled: { true })
+        try await auth.logout()
+        let model = MemberAreaViewModel(authRepository: auth, studiesRepository: MockRepository(),
+                                        isAuthEnabled: true, isListEnabled: true, isMyPageEnabled: true, isMock: true)
+        await waitUntil { model.account.state == .guest }
+        model.account.startLogin()
+        XCTAssertTrue(model.account.loginViewModel?.requestSignIn() == true)
+        model.account.signInWithGoogle()
+        await waitUntil { model.account.presentation == .signup }
+        let first = try XCTUnwrap(model.account.onboardingViewModel)
+        first.updateConsents(age: true, terms: true, privacy: true, marketing: true)
+        model.account.abandonSignup()
+        await waitUntil { model.account.presentation == .none }
+        XCTAssertEqual(first.state, .closed)
+        XCTAssertFalse(first.input.hasRequiredConsents)
+        model.account.startLogin()
+        XCTAssertTrue(model.account.loginViewModel?.requestSignIn() == true)
+        model.account.signInWithGoogle()
+        await waitUntil { model.account.presentation == .signup }
+        let next = try XCTUnwrap(model.account.onboardingViewModel)
+        XCTAssertFalse(next.canSubmit)
+        XCTAssertFalse(next.input.hasRequiredConsents)
+        XCTAssertFalse(next.input.marketingAgreed)
+    }
+    #endif
+
     func testGuestBootstrapLeavesGuestSurfaceAndMakesNoListRequest() async {
         let auth = RootAuthStub(member: nil)
         let list = RootListStub()

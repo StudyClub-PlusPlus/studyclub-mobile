@@ -188,6 +188,7 @@ final class OnboardingViewController: UIViewController, UITextFieldDelegate {
         content.addArrangedSubview(heading)
         content.setCustomSpacing(AppTheme.Spacing.medium, after: heading)
         content.addArrangedSubview(introduction)
+        introduction.text = viewModel.introduction
 
         content.addArrangedSubview(informationGroup)
         informationGroup.addArrangedSubview(nicknameRow)
