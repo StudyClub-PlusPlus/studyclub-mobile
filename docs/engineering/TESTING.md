@@ -4,6 +4,8 @@ Read [Simulator test storage](SIMULATOR_TESTING.md) before running XCTest. The s
 
 ## Unit tests
 
+SC77 adds a focused synthetic public-detail decoding check for the removed deliveryFormat boundary: valid supplied value, omitted/null value, wrong type/unknown enum, and missing/invalid identity. This scoped contract regression does not add a general DTO JSON fixture suite or production-dependent tests. Detail ViewModel also checks omission of only the unavailable metadata segment.
+
 Feature-boundary tests directly verify Real OFF errors, distinct Main unavailable presentation and OFF suppression of repeated requests with immutable bool inputs. Existing ON pagination/refresh tests remain. These are feature behavior tests, not an internal settings suite. No Client injection or live endpoint tests are added.
 
 - DTO-to-Domain mapping, including optional/default handling and invalid member counts
