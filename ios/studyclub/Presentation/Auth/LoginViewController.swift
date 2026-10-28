@@ -1,3 +1,4 @@
+import AuthenticationServices
 import Combine
 import GoogleSignIn
 import UIKit
@@ -6,6 +7,7 @@ import UIKit
 final class LoginViewController: UIViewController {
     private let viewModel: LoginViewModel
     private let onGoogleSignIn: (LoginViewController) -> Void
+    private let onAppleSignIn: () -> Void
     private let onCancelSignIn: () -> Void
     private let onRetryCleanup: () -> Void
     private let onClose: () -> Void
@@ -76,6 +78,13 @@ final class LoginViewController: UIViewController {
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
+    /// Rebuilt when the appearance changes; the system button's style is fixed at creation.
+    private var appleButton = ASAuthorizationAppleIDButton(type: .signIn, style: .black)
+    private let appleContainer: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
     private let spinner: UIActivityIndicatorView = {
         let view = UIActivityIndicatorView(style: .medium)
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -115,6 +124,7 @@ final class LoginViewController: UIViewController {
 
     convenience init(
         onGoogleSignIn: @escaping (LoginViewController) -> Void,
+        onAppleSignIn: @escaping () -> Void = {},
         onCancelSignIn: @escaping () -> Void,
         onRetryCleanup: @escaping () -> Void,
         onClose: @escaping () -> Void
@@ -122,6 +132,7 @@ final class LoginViewController: UIViewController {
         self.init(
             viewModel: LoginViewModel(),
             onGoogleSignIn: onGoogleSignIn,
+            onAppleSignIn: onAppleSignIn,
             onCancelSignIn: onCancelSignIn,
             onRetryCleanup: onRetryCleanup,
             onClose: onClose
@@ -131,12 +142,14 @@ final class LoginViewController: UIViewController {
     init(
         viewModel: LoginViewModel,
         onGoogleSignIn: @escaping (LoginViewController) -> Void,
+        onAppleSignIn: @escaping () -> Void = {},
         onCancelSignIn: @escaping () -> Void,
         onRetryCleanup: @escaping () -> Void,
         onClose: @escaping () -> Void
     ) {
         self.viewModel = viewModel
         self.onGoogleSignIn = onGoogleSignIn
+        self.onAppleSignIn = onAppleSignIn
         self.onCancelSignIn = onCancelSignIn
         self.onRetryCleanup = onRetryCleanup
         self.onClose = onClose
@@ -155,6 +168,7 @@ final class LoginViewController: UIViewController {
             .store(in: &subscriptions)
         registerForTraitChanges([UITraitUserInterfaceStyle.self]) { (self: LoginViewController, _) in
             self.updateGoogleStyle()
+            self.updateAppleStyle()
         }
     }
 
@@ -218,6 +232,11 @@ final class LoginViewController: UIViewController {
         googleButton.addTarget(self, action: #selector(requestGoogleSignIn), for: .touchUpInside)
         updateGoogleStyle()
 
+        // Same width as the Google button; HIG minimum height 44pt.
+        providerGroup.addArrangedSubview(appleContainer)
+        appleContainer.heightAnchor.constraint(equalToConstant: 48).isActive = true
+        updateAppleStyle()
+
         providerGroup.addArrangedSubview(statusRow)
         statusRow.addArrangedSubview(spinner)
         spinner.setContentHuggingPriority(.required, for: .horizontal)
@@ -235,6 +254,8 @@ final class LoginViewController: UIViewController {
         let signingIn = viewModel.state == .signingIn
         let cleaning = viewModel.state == .cancelling
         googleButton.isEnabled = viewModel.canSignIn
+        appleButton.isEnabled = viewModel.canSignIn
+        appleButton.alpha = viewModel.canSignIn ? 1 : 0.5
         statusLabel.text = viewModel.statusMessage
         statusRow.isHidden = viewModel.statusMessage == nil
         statusLabel.textColor = viewModel.state == .failure || viewModel.state == .cleanupFailed
@@ -247,6 +268,29 @@ final class LoginViewController: UIViewController {
 
     private func updateGoogleStyle() {
         googleButton.colorScheme = traitCollection.userInterfaceStyle == .dark ? .dark : .light
+    }
+
+    private func updateAppleStyle() {
+        appleButton.removeFromSuperview()
+        appleButton = ASAuthorizationAppleIDButton(
+            type: .signIn, style: traitCollection.userInterfaceStyle == .dark ? .white : .black
+        )
+        appleButton.translatesAutoresizingMaskIntoConstraints = false
+        appleButton.cornerRadius = 4
+        appleButton.addTarget(self, action: #selector(requestAppleSignIn), for: .touchUpInside)
+        appleContainer.addSubview(appleButton)
+        NSLayoutConstraint.activate([
+            appleButton.topAnchor.constraint(equalTo: appleContainer.topAnchor),
+            appleButton.bottomAnchor.constraint(equalTo: appleContainer.bottomAnchor),
+            appleButton.leadingAnchor.constraint(equalTo: appleContainer.leadingAnchor),
+            appleButton.trailingAnchor.constraint(equalTo: appleContainer.trailingAnchor)
+        ])
+        if isViewLoaded { updateViews() }
+    }
+
+    @objc private func requestAppleSignIn() {
+        guard viewModel.requestSignIn() else { return }
+        onAppleSignIn()
     }
 
     @objc private func requestGoogleSignIn() {

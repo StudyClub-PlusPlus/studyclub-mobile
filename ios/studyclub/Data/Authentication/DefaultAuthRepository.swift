@@ -22,6 +22,7 @@ actor DefaultAuthRepository: AuthRepository {
 
     private let api: any AuthRemoteAPI
     private let google: any GoogleAuthorizationProviding
+    private let apple: any AppleAuthorizationProviding
     private let store: any CredentialStore
     private let isFeatureEnabled: @Sendable () -> Bool
     private nonisolated let invalidation: AuthInvalidationClock
@@ -33,6 +34,7 @@ actor DefaultAuthRepository: AuthRepository {
         self.init(
             api: AuthAPIClient(),
             google: GoogleSignInProvider(),
+            apple: AppleSignInProvider(),
             store: KeychainCredentialStore(),
             isFeatureEnabled: { DevelopmentSettingsStore().isEnabled(FeatureFlag.googleLogin.definition) }
         )
@@ -41,22 +43,25 @@ actor DefaultAuthRepository: AuthRepository {
     init(
         api: any AuthRemoteAPI,
         google: any GoogleAuthorizationProviding,
+        apple: any AppleAuthorizationProviding = AppleSignInProvider(),
         store: any CredentialStore,
         isFeatureEnabled: @escaping @Sendable () -> Bool
     ) {
-        self.init(api: api, google: google, store: store,
+        self.init(api: api, google: google, apple: apple, store: store,
                   isFeatureEnabled: isFeatureEnabled, invalidation: AuthInvalidationClock())
     }
 
     init(
         api: any AuthRemoteAPI,
         google: any GoogleAuthorizationProviding,
+        apple: any AppleAuthorizationProviding = AppleSignInProvider(),
         store: any CredentialStore,
         isFeatureEnabled: @escaping @Sendable () -> Bool,
         invalidation: AuthInvalidationClock
     ) {
         self.api = api
         self.google = google
+        self.apple = apple
         self.store = store
         self.isFeatureEnabled = isFeatureEnabled
         self.invalidation = invalidation
@@ -138,11 +143,24 @@ actor DefaultAuthRepository: AuthRepository {
     }
 
     func signInWithGoogle() async throws -> SignInOutcome {
+        try await signIn { [google] in
+            SocialAuthorization(provider: .google, code: try await google.authorizationCode())
+        }
+    }
+
+    func signInWithApple() async throws -> SignInOutcome {
+        try await signIn { [apple] in try await apple.authorization() }
+    }
+
+    /// Provider authorization, then the shared server exchange and session publication.
+    private func signIn(
+        _ authorize: @escaping @Sendable () async throws -> SocialAuthorization
+    ) async throws -> SignInOutcome {
         _ = try begin()
         let epoch = invalidate()
-        let code = try await guarded(epoch) { try await google.authorizationCode() }
+        let authorization = try await guarded(epoch) { try await authorize() }
         do {
-            let session = try await guarded(epoch) { try await api.socialLogin(authorizationCode: code) }
+            let session = try await guarded(epoch) { try await api.socialLogin(authorization) }
             let tokens = try session.validatedTokens()
             if let member = try session.account.toMember() {
                 try commit(tokens, epoch: epoch)

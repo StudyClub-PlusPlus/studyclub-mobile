@@ -2,7 +2,7 @@ import Alamofire
 import Foundation
 
 enum AuthRouter: URLRequestConvertible {
-    case socialLogin(authorizationCode: String)
+    case socialLogin(SocialAuthorization)
     case refresh(refreshToken: String)
     case me(accessToken: String)
     case onboarding(accessToken: String, body: OnboardingRequestDTO)
@@ -15,7 +15,7 @@ enum AuthRouter: URLRequestConvertible {
     }
 
     /// Auth routes are on the host root. `/api/auth/*` is rejected by the server security filter.
-    private static let rootURL = URL(string: "https://api.studyclub-plusplus.com")!
+    private static var rootURL: URL { APIHost.root }
 
     private var url: URL {
         switch self {
@@ -35,11 +35,19 @@ enum AuthRouter: URLRequestConvertible {
         request.method = method
         request.headers = [.accept("application/json")]
         switch self {
-        case let .socialLogin(code):
-            // redirectUri is omitted. The server then uses its configured web callback, and native
-            // authorization-code exchange against that callback is not yet proven.
+        case let .socialLogin(authorization):
+            // Google: the SDK's serverAuthCode is issued without a callback, so redirectUri is an
+            // explicit empty string (omitting it makes the server use its web callback).
+            // Apple: the first-time name rides along; Apple never sends it again.
+            let isGoogle = authorization.provider == .google
             return try JSONParameterEncoder.default.encode(
-                SocialLoginBody(code: code, provider: "google", platform: "CORE"),
+                SocialLoginBody(
+                    code: authorization.code,
+                    provider: authorization.provider.rawValue,
+                    platform: "CORE",
+                    redirectUri: isGoogle ? "" : nil,
+                    name: isGoogle ? nil : authorization.name
+                ),
                 into: request
             )
         case let .refresh(refreshToken):
@@ -57,6 +65,8 @@ enum AuthRouter: URLRequestConvertible {
         let code: String
         let provider: String
         let platform: String
+        let redirectUri: String?
+        let name: String?
     }
 
     private struct RefreshBody: Encodable { let refreshToken: String }

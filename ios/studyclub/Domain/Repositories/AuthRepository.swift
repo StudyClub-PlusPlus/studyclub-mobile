@@ -17,6 +17,9 @@ protocol AuthRepository: Sendable {
     /// Incomplete signup keeps temporary authentication in memory only.
     func signInWithGoogle() async throws -> SignInOutcome
 
+    /// Same contract as `signInWithGoogle()`, using Sign in with Apple.
+    func signInWithApple() async throws -> SignInOutcome
+
     /// Submits signup once. Stores credentials only after the server confirms completion.
     /// An uncertain result throws `signupStatusUnknown`; call `checkSignupCompletion()` instead of
     /// submitting again.
@@ -34,6 +37,11 @@ protocol AuthRepository: Sendable {
     /// Deletes stored credentials and ends the session. Throws `logoutFailed` and keeps the
     /// session when the credentials cannot be deleted.
     func logout() async throws
+}
+
+extension AuthRepository {
+    /// Repositories without Apple support report it as not configured.
+    func signInWithApple() async throws -> SignInOutcome { throw AuthError.configurationMissing }
 }
 
 enum AuthError: Error, Equatable, Sendable {

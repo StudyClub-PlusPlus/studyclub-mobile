@@ -17,7 +17,7 @@ final class LoginViewModel {
     private let stateSubject: CurrentValueSubject<State, Never>
     let isMock: Bool
     var introduction: String {
-        isMock ? "Mock 로그인 테스트예요. 실제 Google 계정이나 서버를 사용하지 않아요." : "Google 계정으로 스터디클럽에 로그인하세요."
+        isMock ? "Mock 로그인 테스트예요. 실제 Google·Apple 계정이나 서버를 사용하지 않아요." : "Google 또는 Apple 계정으로 스터디클럽에 로그인하세요."
     }
 
     var state: State { stateSubject.value }
@@ -36,7 +36,7 @@ final class LoginViewModel {
         case .cancelled: "로그인을 취소했어요. 다시 시작할 수 있어요."
         case .cleanupFailed: "로그인 정리를 끝내지 못했어요. 다시 시도해 주세요."
         case .failure: "로그인하지 못했어요. 다시 시도해 주세요."
-        case .unavailable: "지금은 Google 로그인을 이용할 수 없어요. 잠시 후 다시 시도해 주세요."
+        case .unavailable: "지금은 로그인을 이용할 수 없어요. 잠시 후 다시 시도해 주세요."
         }
     }
 

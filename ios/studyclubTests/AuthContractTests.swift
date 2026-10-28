@@ -3,8 +3,10 @@ import XCTest
 @testable import studyclub
 
 final class AuthContractTests: XCTestCase {
-    func testSocialLoginUsesRootPathAndOmitsRedirectURI() throws {
-        let request = try AuthRouter.socialLogin(authorizationCode: "one-time-code").asURLRequest()
+    func testGoogleSocialLoginSendsEmptyRedirectURI() throws {
+        let request = try AuthRouter.socialLogin(
+            SocialAuthorization(provider: .google, code: "one-time-code")
+        ).asURLRequest()
         let body = try JSONSerialization.jsonObject(with: XCTUnwrap(request.httpBody)) as? [String: String]
 
         XCTAssertEqual(request.url?.absoluteString, "https://api.studyclub-plusplus.com/auth/social-login")
@@ -12,8 +14,22 @@ final class AuthContractTests: XCTestCase {
         XCTAssertEqual(body?["code"], "one-time-code")
         XCTAssertEqual(body?["provider"], "google")
         XCTAssertEqual(body?["platform"], "CORE")
-        XCTAssertNil(body?["redirectUri"])
+        // The SDK's serverAuthCode has no callback; omitting it would make the server use the web one.
+        XCTAssertEqual(body?["redirectUri"], "")
+        XCTAssertNil(body?["name"])
         XCTAssertNil(request.value(forHTTPHeaderField: "Authorization"))
+    }
+
+    func testAppleSocialLoginSendsNameWithoutRedirectURI() throws {
+        let request = try AuthRouter.socialLogin(
+            SocialAuthorization(provider: .apple, code: "apple-code", name: "홍길동")
+        ).asURLRequest()
+        let body = try JSONSerialization.jsonObject(with: XCTUnwrap(request.httpBody)) as? [String: String]
+
+        XCTAssertEqual(body?["provider"], "apple")
+        XCTAssertEqual(body?["code"], "apple-code")
+        XCTAssertEqual(body?["name"], "홍길동")
+        XCTAssertNil(body?["redirectUri"])
     }
 
     func testRefreshMeAndOnboardingRoutes() throws {

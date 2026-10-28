@@ -62,9 +62,9 @@ final class FakeAuthAPI: AuthRemoteAPI, @unchecked Sendable {
     var recordedCalls: [String] { calls.read { $0 } }
     func count(of name: String) -> Int { calls.read { $0.filter { $0 == name }.count } }
 
-    func socialLogin(authorizationCode: String) async throws -> AuthSessionDTO {
+    func socialLogin(_ authorization: SocialAuthorization) async throws -> AuthSessionDTO {
         calls.mutate { $0.append("socialLogin") }
-        return try await onSocialLogin(authorizationCode)
+        return try await onSocialLogin(authorization.code)
     }
 
     func refresh(refreshToken: String) async throws -> String {

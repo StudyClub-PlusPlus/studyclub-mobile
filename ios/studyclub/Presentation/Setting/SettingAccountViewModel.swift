@@ -136,10 +136,18 @@ final class SettingAccountViewModel {
     }
 
     func signInWithGoogle() {
+        signIn { try await $0.signInWithGoogle() }
+    }
+
+    func signInWithApple() {
+        signIn { try await $0.signInWithApple() }
+    }
+
+    private func signIn(_ run: @escaping @MainActor (any AuthRepository) async throws -> SignInOutcome) {
         guard isFeatureEnabled, presentation == .login, loginViewModel?.state == .signingIn, !isBusy else { return }
         begin { [weak self] operation, repository in
             do {
-                let outcome = try await repository.signInWithGoogle()
+                let outcome = try await run(repository)
                 guard let self, self.isCurrent(operation), self.isFeatureEnabled else { return }
                 self.apply(outcome)
             } catch is CancellationError {

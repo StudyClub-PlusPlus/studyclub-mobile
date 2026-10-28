@@ -2,8 +2,8 @@ import Alamofire
 import Foundation
 
 final class AuthAPIClient: AuthRemoteAPI {
-    func socialLogin(authorizationCode: String) async throws -> AuthSessionDTO {
-        try await send(AuthRouter.socialLogin(authorizationCode: authorizationCode), as: AuthSessionDTO.self)
+    func socialLogin(_ authorization: SocialAuthorization) async throws -> AuthSessionDTO {
+        try await send(AuthRouter.socialLogin(authorization), as: AuthSessionDTO.self)
     }
 
     func refresh(refreshToken: String) async throws -> String {

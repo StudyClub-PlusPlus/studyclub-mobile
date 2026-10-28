@@ -27,9 +27,21 @@ enum AuthRemoteError: Error, Equatable, Sendable {
     case server
 }
 
+/// One-time provider authorization handed to `/auth/social-login`.
+struct SocialAuthorization: Equatable, Sendable {
+    enum Provider: String, Sendable {
+        case google, apple
+    }
+
+    let provider: Provider
+    let code: String
+    /// Apple only: the name Apple returns on the first authorization. Never stored.
+    var name: String?
+}
+
 /// Server endpoints used by session orchestration. The concrete `AuthAPIClient` owns transport.
 protocol AuthRemoteAPI: Sendable {
-    func socialLogin(authorizationCode: String) async throws -> AuthSessionDTO
+    func socialLogin(_ authorization: SocialAuthorization) async throws -> AuthSessionDTO
     /// Returns the new access token.
     func refresh(refreshToken: String) async throws -> String
     func fetchAccount(accessToken: String) async throws -> AccountDTO
@@ -40,6 +52,12 @@ protocol AuthRemoteAPI: Sendable {
 /// Throws `AuthError.configurationMissing`, `.userCancelled`, `.unavailable` or `CancellationError`.
 protocol GoogleAuthorizationProviding: Sendable {
     func authorizationCode() async throws -> String
+}
+
+/// Runs Sign in with Apple and returns the authorization code plus the first-time name.
+/// Throws `AuthError.userCancelled`, `.unavailable` or `CancellationError`.
+protocol AppleAuthorizationProviding: Sendable {
+    func authorization() async throws -> SocialAuthorization
 }
 
 enum CredentialStoreError: Error, Equatable, Sendable {

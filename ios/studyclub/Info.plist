@@ -17,6 +17,8 @@
 	<string>$(GID_CLIENT_ID)</string>
 	<key>GIDServerClientID</key>
 	<string>$(GID_SERVER_CLIENT_ID)</string>
+	<key>StudyClubAPIHost</key>
+	<string>$(API_HOST)</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

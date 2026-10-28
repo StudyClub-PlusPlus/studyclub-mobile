@@ -1,10 +1,13 @@
-// Checked-in default configuration for Google OAuth.
-// Values are intentionally safe defaults to avoid accidental credential leaks.
-// Empty client IDs and the non-secret placeholder scheme guarantee that unconfigured builds
-// fail gracefully with AuthError.configurationMissing instead of presenting sign-in or crashing.
-GID_CLIENT_ID =
-GID_SERVER_CLIENT_ID =
-GID_REVERSED_CLIENT_ID = studyclub.oauth-unconfigured
+// Checked-in configuration for Google OAuth and the API host.
+// OAuth client IDs are public identifiers (they ship inside the app binary), not secrets.
+// The iOS client is bound to the bundle ID life.studyclub. GID_SERVER_CLIENT_ID is the web
+// client the server uses to exchange the serverAuthCode.
+GID_CLIENT_ID = 310991078079-m1lpeun69qvks63r6c9gjac9pqljkvl1.apps.googleusercontent.com
+GID_SERVER_CLIENT_ID = 310991078079-cmcgg14ce540qu75mp5cu81dhc8hp3e8.apps.googleusercontent.com
+GID_REVERSED_CLIENT_ID = com.googleusercontent.apps.310991078079-m1lpeun69qvks63r6c9gjac9pqljkvl1
+
+// API host without scheme. Point Config.local.xcconfig at the stage API to test there.
+API_HOST = api.studyclub-plusplus.com
 
 // Optional developer/QA local override (git-ignored)
 #include? "Config.local.xcconfig"

@@ -7,7 +7,7 @@ enum StudyRouter: URLRequestConvertible {
     case study(id: Study.ID)
     case myStudies(accessToken: String)
 
-    private static let baseURL = URL(string: "https://api.studyclub-plusplus.com/api/")!
+    private static let baseURL = APIHost.root.appending(path: "api/")
 
     private var method: HTTPMethod { .get }
 

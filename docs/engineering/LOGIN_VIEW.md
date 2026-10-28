@@ -9,3 +9,12 @@
 - 설정 계정이 플래그 ON에서 로그인을 선택하면 이 화면을 전체 화면 모달로 연다. 화면은 여전히 SDK 인증·네트워크·저장을 직접 수행하지 않고, 결과 표시는 `SettingAccountViewModel`이 `update(state:)`로 반영한다. `auth.google-login`은 InProgress/OFF다.
 
 GoogleSignIn-iOS는 SC95와 동일한 10.0.0 및 PBX 식별자를 사용한다. 패키지 연결은 공식 버튼 표시용이며 OAuth 설정이 완료됐다는 뜻이 아니다. Debug·Release 빌드와 기존 단위 테스트, 설치된 임시 검증 화면의 다섯 상태·320pt 폭·긴 한국어·플래그 ON/OFF 및 synthetic 콜백을 별도 증거로 확인한다. 이 확인은 실제 Google 인증·API·물리 기기 또는 독립 최종 검증을 뜻하지 않는다. SC52 연결과 독립 후보 검토는 남아 있다. 임시 화면 검증 코드는 제품 소스에 포함하지 않는다.
+
+## 구글·애플 실연동 (2026-10-28)
+
+- 번들 ID 는 `life.studyclub`(팀 4TS88K9HKJ). 구글 iOS OAuth 클라이언트가 이 번들에 묶여 있고, 클라이언트 ID 세 개는 공개값이라 `Config.xcconfig` 에 둔다. `GID_SERVER_CLIENT_ID` 는 서버가 교환에 쓰는 웹 클라이언트다.
+- 구글은 `redirectUri` 를 **빈 문자열**로 보낸다. SDK 의 serverAuthCode 는 콜백 없이 발급되고, 생략하면 서버가 웹 콜백을 넣어 교환이 실패한다.
+- 애플은 `AppleSignInProvider`(AuthenticationServices)가 authorization code 와 첫 인가에만 오는 이름을 받아 `provider: "apple"` 로 보낸다. 서버 계약은 studyclub-engineering `specs/auth-apple-login`.
+- 로그인 화면은 구글 버튼 아래에 시스템 `ASAuthorizationAppleIDButton` 을 둔다. 상태 다섯 가지는 두 버튼이 같이 쓴다.
+- API 호스트는 `API_HOST`(Config.xcconfig → Info.plist `StudyClubAPIHost`). stage 로 확인하려면 `Config.local.xcconfig` 에 `API_HOST = api-stage.studyclub-plusplus.com`.
+- 시뮬레이터에서 애플 로그인은 시뮬레이터 설정 앱에 Apple 계정이 로그인돼 있어야 한다.
