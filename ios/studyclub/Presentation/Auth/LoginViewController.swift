@@ -1,6 +1,4 @@
-import AuthenticationServices
 import Combine
-import GoogleSignIn
 import UIKit
 
 @MainActor
@@ -60,11 +58,6 @@ final class LoginViewController: UIViewController {
         view.clipsToBounds = true
         return view
     }()
-    private let googleContainer: UIView = {
-        let view = UIView()
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
-    }()
     private let statusRow: UIStackView = {
         let view = UIStackView()
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -72,19 +65,10 @@ final class LoginViewController: UIViewController {
         view.spacing = AppTheme.Spacing.medium
         return view
     }()
-    private let googleButton: GIDSignInButton = {
-        let view = GIDSignInButton()
-        view.style = .wide
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
-    }()
-    /// Rebuilt when the appearance changes; the system button's style is fixed at creation.
-    private var appleButton = ASAuthorizationAppleIDButton(type: .signIn, style: .black)
-    private let appleContainer: UIView = {
-        let view = UIView()
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
-    }()
+    /// Custom buttons that follow both brands' rules (official Google "G" from the SDK, Apple logo,
+    /// brand colors) so the two share one height, radius, type and icon position.
+    private let googleButton = LoginViewController.providerButton(title: "Google로 계속하기", image: UIImage(named: "GoogleLogo"))
+    private let appleButton = LoginViewController.providerButton(title: "Apple로 계속하기", image: UIImage(systemName: "apple.logo"))
     private let spinner: UIActivityIndicatorView = {
         let view = UIActivityIndicatorView(style: .medium)
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -167,8 +151,7 @@ final class LoginViewController: UIViewController {
             .sink { [weak self] _ in self?.updateViews() }
             .store(in: &subscriptions)
         registerForTraitChanges([UITraitUserInterfaceStyle.self]) { (self: LoginViewController, _) in
-            self.updateGoogleStyle()
-            self.updateAppleStyle()
+            self.updateProviderStyle()
         }
     }
 
@@ -176,6 +159,7 @@ final class LoginViewController: UIViewController {
         super.viewDidLayoutSubviews()
         providerGroup.layer.borderWidth = 1 / max(traitCollection.displayScale, 1)
         providerGroup.layer.borderColor = AppTheme.Palette.border.resolvedColor(with: traitCollection).cgColor
+        updateProviderStyle()
     }
 
     private func configureView() {
@@ -220,22 +204,12 @@ final class LoginViewController: UIViewController {
         introduction.text = viewModel.introduction
 
         content.addArrangedSubview(providerGroup)
-        providerGroup.addArrangedSubview(googleContainer)
-        googleContainer.addSubview(googleButton)
-        // Wide style can fill the available width while the SDK owns its height.
-        NSLayoutConstraint.activate([
-            googleContainer.heightAnchor.constraint(equalTo: googleButton.heightAnchor, constant: 2),
-            googleButton.centerYAnchor.constraint(equalTo: googleContainer.centerYAnchor),
-            googleButton.leadingAnchor.constraint(equalTo: googleContainer.leadingAnchor),
-            googleButton.trailingAnchor.constraint(equalTo: googleContainer.trailingAnchor)
-        ])
+        for button in [googleButton, appleButton] {
+            providerGroup.addArrangedSubview(button)
+            button.heightAnchor.constraint(equalToConstant: 50).isActive = true
+        }
         googleButton.addTarget(self, action: #selector(requestGoogleSignIn), for: .touchUpInside)
-        updateGoogleStyle()
-
-        // Same width as the Google button; HIG minimum height 44pt.
-        providerGroup.addArrangedSubview(appleContainer)
-        appleContainer.heightAnchor.constraint(equalToConstant: 48).isActive = true
-        updateAppleStyle()
+        appleButton.addTarget(self, action: #selector(requestAppleSignIn), for: .touchUpInside)
 
         providerGroup.addArrangedSubview(statusRow)
         statusRow.addArrangedSubview(spinner)
@@ -253,9 +227,10 @@ final class LoginViewController: UIViewController {
     private func updateViews() {
         let signingIn = viewModel.state == .signingIn
         let cleaning = viewModel.state == .cancelling
-        googleButton.isEnabled = viewModel.canSignIn
-        appleButton.isEnabled = viewModel.canSignIn
-        appleButton.alpha = viewModel.canSignIn ? 1 : 0.5
+        for button in [googleButton, appleButton] {
+            button.isEnabled = viewModel.canSignIn
+            button.alpha = viewModel.canSignIn ? 1 : 0.5
+        }
         statusLabel.text = viewModel.statusMessage
         statusRow.isHidden = viewModel.statusMessage == nil
         statusLabel.textColor = [.failure, .cleanupFailed, .emailInUse].contains(viewModel.state)
@@ -266,26 +241,42 @@ final class LoginViewController: UIViewController {
         cleanupRetryButton.isHidden = viewModel.state != .cleanupFailed
     }
 
-    private func updateGoogleStyle() {
-        googleButton.colorScheme = traitCollection.userInterfaceStyle == .dark ? .dark : .light
+    /// Brand colors follow the surface behind the buttons, not the system appearance: the design
+    /// system keeps a light surface in dark mode. Light surface: white Google, black Apple.
+    private func updateProviderStyle() {
+        var white: CGFloat = 1
+        AppTheme.Palette.surface.resolvedColor(with: traitCollection).getWhite(&white, alpha: nil)
+        let dark = white < 0.5
+        let google = (foreground: UIColor(white: dark ? 0.89 : 0.12, alpha: 1),
+                      background: UIColor(white: dark ? 0.075 : 1, alpha: 1))
+        let apple = (foreground: dark ? UIColor.black : .white, background: dark ? UIColor.white : .black)
+        googleButton.configuration?.baseForegroundColor = google.foreground
+        googleButton.configuration?.baseBackgroundColor = google.background
+        googleButton.layer.borderWidth = 1
+        googleButton.layer.cornerRadius = AppTheme.Radius.control
+        googleButton.layer.borderColor = UIColor(white: dark ? 0.56 : 0.46, alpha: 1).cgColor
+        appleButton.configuration?.baseForegroundColor = apple.foreground
+        appleButton.configuration?.baseBackgroundColor = apple.background
     }
 
-    private func updateAppleStyle() {
-        appleButton.removeFromSuperview()
-        appleButton = ASAuthorizationAppleIDButton(
-            type: .signIn, style: traitCollection.userInterfaceStyle == .dark ? .white : .black
-        )
-        appleButton.translatesAutoresizingMaskIntoConstraints = false
-        appleButton.cornerRadius = 4
-        appleButton.addTarget(self, action: #selector(requestAppleSignIn), for: .touchUpInside)
-        appleContainer.addSubview(appleButton)
-        NSLayoutConstraint.activate([
-            appleButton.topAnchor.constraint(equalTo: appleContainer.topAnchor),
-            appleButton.bottomAnchor.constraint(equalTo: appleContainer.bottomAnchor),
-            appleButton.leadingAnchor.constraint(equalTo: appleContainer.leadingAnchor),
-            appleButton.trailingAnchor.constraint(equalTo: appleContainer.trailingAnchor)
-        ])
-        if isViewLoaded { updateViews() }
+    private static func providerButton(title: String, image: UIImage?) -> UIButton {
+        var configuration = UIButton.Configuration.filled()
+        configuration.title = title
+        // The Google "G" keeps its colors; the Apple symbol takes the title color.
+        configuration.image = image?.withRenderingMode(image?.isSymbolImage == true ? .alwaysTemplate : .alwaysOriginal)
+        configuration.preferredSymbolConfigurationForImage = UIImage.SymbolConfiguration(pointSize: 18, weight: .medium)
+        configuration.imagePadding = AppTheme.Spacing.small
+        configuration.background.cornerRadius = AppTheme.Radius.control
+        configuration.cornerStyle = .fixed
+        configuration.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { attributes in
+            var attributes = attributes
+            attributes.font = UIFontMetrics(forTextStyle: .body)
+                .scaledFont(for: .systemFont(ofSize: 17, weight: .semibold))
+            return attributes
+        }
+        let button = UIButton(configuration: configuration)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
     }
 
     @objc private func requestAppleSignIn() {

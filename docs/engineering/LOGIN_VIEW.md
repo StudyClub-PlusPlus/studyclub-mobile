@@ -15,6 +15,7 @@ GoogleSignIn-iOS는 SC95와 동일한 10.0.0 및 PBX 식별자를 사용한다. 
 - 번들 ID 는 `life.studyclub`(팀 4TS88K9HKJ). 구글 iOS OAuth 클라이언트가 이 번들에 묶여 있고, 클라이언트 ID 세 개는 공개값이라 `Config.xcconfig` 에 둔다. `GID_SERVER_CLIENT_ID` 는 서버가 교환에 쓰는 웹 클라이언트다.
 - 구글은 `redirectUri` 를 **빈 문자열**로 보낸다. SDK 의 serverAuthCode 는 콜백 없이 발급되고, 생략하면 서버가 웹 콜백을 넣어 교환이 실패한다.
 - 애플은 `AppleSignInProvider`(AuthenticationServices)가 authorization code 와 첫 인가에만 오는 이름을 받아 `provider: "apple"` 로 보낸다. 서버 계약은 studyclub-engineering `specs/auth-apple-login`.
-- 로그인 화면은 구글 버튼 아래에 시스템 `ASAuthorizationAppleIDButton` 을 둔다. 상태 다섯 가지는 두 버튼이 같이 쓴다.
+- 로그인 화면의 두 버튼은 같은 틀(50pt 높이·`Radius.control`·17pt semibold·아이콘 왼쪽)로 직접 그린다. SDK·시스템 버튼은 모양이 서로 달라 쓰지 않는다. 브랜드 규칙은 지킨다: 구글은 SDK 의 공식 "G"(`GoogleLogo` 에셋), 흰 바탕·회색 테두리, 애플은 `apple.logo`·검정 바탕. 문구는 「Google로 계속하기」「Apple로 계속하기」. 색은 시스템 다크가 아니라 버튼 뒤 surface 밝기를 따른다(디자인 시스템은 다크에서도 밝은 surface). 상태 다섯 가지와 「다른 방법으로 가입된 이메일」(409)은 두 버튼이 같이 쓴다.
+- 아래 SC-50 의 `GIDSignInButton` 설명은 이 변경으로 대체됐다.
 - API 호스트는 `API_HOST`(Config.xcconfig → Info.plist `StudyClubAPIHost`). stage 로 확인하려면 `Config.local.xcconfig` 에 `API_HOST = api-stage.studyclub-plusplus.com`.
 - 시뮬레이터에서 애플 로그인은 시뮬레이터 설정 앱에 Apple 계정이 로그인돼 있어야 한다.
