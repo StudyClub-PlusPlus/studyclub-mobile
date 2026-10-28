@@ -171,7 +171,9 @@ actor DefaultAuthRepository: AuthRepository {
             return .signupRequired(suggestedNickname: suggested)
         } catch let error as AuthRemoteError {
             switch error {
-            case .unauthorized, .badRequest, .conflict: throw AuthError.authenticationInvalid
+            // 409 ACCOUNT_LINK_REQUIRED: same email, different provider.
+            case .conflict: throw AuthError.emailRegisteredWithOtherProvider
+            case .unauthorized, .badRequest: throw AuthError.authenticationInvalid
             case .connection: throw AuthError.connectionFailure
             case .server: throw AuthError.unavailable
             }

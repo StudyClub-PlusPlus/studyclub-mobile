@@ -55,6 +55,9 @@ enum AuthError: Error, Equatable, Sendable {
     case connectionFailure
     /// The server rejected the credentials, temporary authentication or Google authorization.
     case authenticationInvalid
+    /// The email already belongs to an account that signed up with another provider.
+    /// Accounts are never merged by email; the user signs in with the original provider.
+    case emailRegisteredWithOtherProvider
     /// The server definitely refused the signup input. The user may edit and submit again.
     case signupRejected(SignupRejection)
     /// The signup outcome is uncertain. Check completion; do not submit again.

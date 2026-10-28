@@ -258,7 +258,7 @@ final class LoginViewController: UIViewController {
         appleButton.alpha = viewModel.canSignIn ? 1 : 0.5
         statusLabel.text = viewModel.statusMessage
         statusRow.isHidden = viewModel.statusMessage == nil
-        statusLabel.textColor = viewModel.state == .failure || viewModel.state == .cleanupFailed
+        statusLabel.textColor = [.failure, .cleanupFailed, .emailInUse].contains(viewModel.state)
             ? AppTheme.Palette.error : AppTheme.Palette.secondaryText
         spinner.isHidden = !(signingIn || cleaning)
         if signingIn || cleaning { spinner.startAnimating() } else { spinner.stopAnimating() }

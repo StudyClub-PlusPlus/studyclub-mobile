@@ -11,6 +11,7 @@ final class LoginViewModel {
         case cancelled
         case cleanupFailed
         case failure
+        case emailInUse
         case unavailable
     }
 
@@ -24,7 +25,7 @@ final class LoginViewModel {
     var statePublisher: AnyPublisher<State, Never> { stateSubject.eraseToAnyPublisher() }
     var canSignIn: Bool {
         switch state {
-        case .idle, .cancelled, .failure: true
+        case .idle, .cancelled, .failure, .emailInUse: true
         case .signingIn, .cancelling, .cleanupFailed, .unavailable: false
         }
     }
@@ -36,6 +37,7 @@ final class LoginViewModel {
         case .cancelled: "로그인을 취소했어요. 다시 시작할 수 있어요."
         case .cleanupFailed: "로그인 정리를 끝내지 못했어요. 다시 시도해 주세요."
         case .failure: "로그인하지 못했어요. 다시 시도해 주세요."
+        case .emailInUse: "이미 다른 방법으로 가입된 이메일이에요. 처음 가입한 방법으로 로그인해 주세요."
         case .unavailable: "지금은 로그인을 이용할 수 없어요. 잠시 후 다시 시도해 주세요."
         }
     }

@@ -390,6 +390,8 @@ final class SettingAccountViewModel {
             loginViewModel.update(state: .unavailable)
         case .userCancelled:
             loginViewModel.update(state: .cancelled)
+        case .emailRegisteredWithOtherProvider:
+            loginViewModel.update(state: .emailInUse)
         case .featureUnavailable:
             applyFeatureOff()
         default:
