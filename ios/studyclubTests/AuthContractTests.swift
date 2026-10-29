@@ -3,17 +3,33 @@ import XCTest
 @testable import studyclub
 
 final class AuthContractTests: XCTestCase {
-    func testSocialLoginUsesRootPathAndOmitsRedirectURI() throws {
-        let request = try AuthRouter.socialLogin(authorizationCode: "one-time-code").asURLRequest()
+    func testGoogleSocialLoginSendsEmptyRedirectURI() throws {
+        let request = try AuthRouter.socialLogin(
+            SocialAuthorization(provider: .google, code: "one-time-code")
+        ).asURLRequest()
         let body = try JSONSerialization.jsonObject(with: XCTUnwrap(request.httpBody)) as? [String: String]
 
-        XCTAssertEqual(request.url?.absoluteString, "https://api.studyclub-plusplus.com/auth/social-login")
+        XCTAssertEqual(request.url?.absoluteString, "\(APIHost.root.absoluteString)/auth/social-login")
         XCTAssertEqual(request.httpMethod, "POST")
         XCTAssertEqual(body?["code"], "one-time-code")
         XCTAssertEqual(body?["provider"], "google")
         XCTAssertEqual(body?["platform"], "CORE")
-        XCTAssertNil(body?["redirectUri"])
+        // The SDK's serverAuthCode has no callback; omitting it would make the server use the web one.
+        XCTAssertEqual(body?["redirectUri"], "")
+        XCTAssertNil(body?["name"])
         XCTAssertNil(request.value(forHTTPHeaderField: "Authorization"))
+    }
+
+    func testAppleSocialLoginSendsNameWithoutRedirectURI() throws {
+        let request = try AuthRouter.socialLogin(
+            SocialAuthorization(provider: .apple, code: "apple-code", name: "홍길동")
+        ).asURLRequest()
+        let body = try JSONSerialization.jsonObject(with: XCTUnwrap(request.httpBody)) as? [String: String]
+
+        XCTAssertEqual(body?["provider"], "apple")
+        XCTAssertEqual(body?["code"], "apple-code")
+        XCTAssertEqual(body?["name"], "홍길동")
+        XCTAssertNil(body?["redirectUri"])
     }
 
     func testRefreshMeAndOnboardingRoutes() throws {
@@ -25,11 +41,11 @@ final class AuthContractTests: XCTestCase {
         ).asURLRequest()
         let onboardingBody = try JSONSerialization.jsonObject(with: XCTUnwrap(onboarding.httpBody)) as? [String: Any]
 
-        XCTAssertEqual(refresh.url?.absoluteString, "https://api.studyclub-plusplus.com/auth/refresh")
-        XCTAssertEqual(me.url?.absoluteString, "https://api.studyclub-plusplus.com/auth/me")
+        XCTAssertEqual(refresh.url?.absoluteString, "\(APIHost.root.absoluteString)/auth/refresh")
+        XCTAssertEqual(me.url?.absoluteString, "\(APIHost.root.absoluteString)/api/me")
         XCTAssertEqual(me.httpMethod, "GET")
         XCTAssertEqual(me.value(forHTTPHeaderField: "Authorization"), "Bearer access-token")
-        XCTAssertEqual(onboarding.url?.absoluteString, "https://api.studyclub-plusplus.com/accounts/onboarding")
+        XCTAssertEqual(onboarding.url?.absoluteString, "\(APIHost.root.absoluteString)/accounts/onboarding")
         XCTAssertEqual(onboardingBody?["nickname"] as? String, "새닉네임")
         XCTAssertEqual(onboardingBody?["timeZone"] as? String, "Asia/Seoul")
         XCTAssertEqual(onboardingBody?["marketingAgreed"] as? Bool, false)

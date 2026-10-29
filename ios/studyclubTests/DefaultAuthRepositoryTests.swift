@@ -105,7 +105,7 @@ final class DefaultAuthRepositoryTests: XCTestCase {
     func testSignInFailuresAreClassified() async {
         let cases: [(AuthRemoteError, AuthError)] = [
             (.unauthorized, .authenticationInvalid), (.badRequest, .authenticationInvalid),
-            (.conflict, .authenticationInvalid), (.connection, .connectionFailure), (.server, .unavailable)
+            (.conflict, .emailRegisteredWithOtherProvider), (.connection, .connectionFailure), (.server, .unavailable)
         ]
         for (remote, expected) in cases {
             let harness = Harness()

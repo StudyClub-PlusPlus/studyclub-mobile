@@ -289,6 +289,7 @@ class SettingViewController: UIViewController, UICollectionViewDelegate {
             let login = LoginViewController(
                 viewModel: loginViewModel,
                 onGoogleSignIn: { [weak self] _ in self?.viewModel.signInWithGoogle() },
+                onAppleSignIn: { [weak self] in self?.viewModel.signInWithApple() },
                 onCancelSignIn: { [weak self] in self?.viewModel.cancelSignIn() },
                 onRetryCleanup: { [weak self] in self?.viewModel.retryLoginCleanup() },
                 onClose: { [weak self] in self?.viewModel.closeLogin() }

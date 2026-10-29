@@ -32,7 +32,7 @@ final class StudyRouterTests: XCTestCase {
     func testDetailRequestUsesBackendStudyPath() throws {
         let request = try StudyRouter.study(id: "42").asURLRequest()
 
-        XCTAssertEqual(request.url?.absoluteString, "https://api.studyclub-plusplus.com/api/studies/42")
+        XCTAssertEqual(request.url?.absoluteString, "\(APIHost.root.absoluteString)/api/studies/42")
         XCTAssertEqual(request.httpMethod, "GET")
         XCTAssertEqual(request.value(forHTTPHeaderField: "Accept"), "application/json")
     }
@@ -40,7 +40,7 @@ final class StudyRouterTests: XCTestCase {
     func testMemberListUsesSharedAPIBaseAndBearerAuthorization() throws {
         let request = try StudyRouter.myStudies(accessToken: " test-token \n").asURLRequest()
 
-        XCTAssertEqual(request.url?.absoluteString, "https://api.studyclub-plusplus.com/api/me/studies")
+        XCTAssertEqual(request.url?.absoluteString, "\(APIHost.root.absoluteString)/api/me/studies")
         XCTAssertEqual(request.httpMethod, "GET")
         XCTAssertEqual(request.value(forHTTPHeaderField: "Accept"), "application/json")
         XCTAssertEqual(request.value(forHTTPHeaderField: "Authorization"), "Bearer test-token")

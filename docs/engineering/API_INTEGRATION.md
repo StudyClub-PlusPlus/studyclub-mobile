@@ -41,7 +41,7 @@ The source contract is studyclub-engineering `origin/main` `e9b58021`, checked b
 | Method | Path | Auth |
 |---|---|---|
 | POST | `/auth/social-login` | none |
-| GET | `/auth/me` | Bearer access token |
+| GET | `/api/me` | Bearer access token |
 | POST | `/auth/refresh` | none; body `refreshToken` |
 | POST | `/accounts/onboarding` | Bearer access token |
 

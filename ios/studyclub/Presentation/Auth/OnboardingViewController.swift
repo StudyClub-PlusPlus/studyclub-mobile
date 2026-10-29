@@ -1,4 +1,5 @@
 import Combine
+import SafariServices
 import UIKit
 
 @MainActor
@@ -343,6 +344,10 @@ final class OnboardingViewController: UIViewController, UITextFieldDelegate {
     }
 
     private func openDocument(_ kind: AuthDocuments.Kind) {
+        if let url = AuthDocuments().url(for: kind) {
+            present(SFSafariViewController(url: url), animated: true)
+            return
+        }
         let controller = UIViewController()
         controller.title = kind.rawValue
         controller.view.backgroundColor = AppTheme.Palette.canvas

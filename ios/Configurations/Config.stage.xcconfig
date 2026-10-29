@@ -1,0 +1,10 @@
+// Stage app (bundle life.studyclub.stage) — used by the Debug and Stage build configurations.
+// Release uses Config.xcconfig (bundle life.studyclub, production API).
+#include "Config.xcconfig"
+
+// iOS OAuth client bound to life.studyclub.stage. The server client (web) is shared.
+GID_CLIENT_ID = 310991078079-umfbns1sjb50g5dtrfhif15ffepfdmjm.apps.googleusercontent.com
+GID_REVERSED_CLIENT_ID = com.googleusercontent.apps.310991078079-umfbns1sjb50g5dtrfhif15ffepfdmjm
+
+API_HOST = api-stage.studyclub-plusplus.com
+WEB_HOST = stage.studyclub.life

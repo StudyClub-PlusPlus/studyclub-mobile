@@ -17,6 +17,9 @@ protocol AuthRepository: Sendable {
     /// Incomplete signup keeps temporary authentication in memory only.
     func signInWithGoogle() async throws -> SignInOutcome
 
+    /// Same contract as `signInWithGoogle()`, using Sign in with Apple.
+    func signInWithApple() async throws -> SignInOutcome
+
     /// Submits signup once. Stores credentials only after the server confirms completion.
     /// An uncertain result throws `signupStatusUnknown`; call `checkSignupCompletion()` instead of
     /// submitting again.
@@ -36,6 +39,11 @@ protocol AuthRepository: Sendable {
     func logout() async throws
 }
 
+extension AuthRepository {
+    /// Repositories without Apple support report it as not configured.
+    func signInWithApple() async throws -> SignInOutcome { throw AuthError.configurationMissing }
+}
+
 enum AuthError: Error, Equatable, Sendable {
     /// The `auth.google-login` flag is OFF. Stored credentials are kept.
     case featureUnavailable
@@ -47,6 +55,9 @@ enum AuthError: Error, Equatable, Sendable {
     case connectionFailure
     /// The server rejected the credentials, temporary authentication or Google authorization.
     case authenticationInvalid
+    /// The email already belongs to an account that signed up with another provider.
+    /// Accounts are never merged by email; the user signs in with the original provider.
+    case emailRegisteredWithOtherProvider
     /// The server definitely refused the signup input. The user may edit and submit again.
     case signupRejected(SignupRejection)
     /// The signup outcome is uncertain. Check completion; do not submit again.

@@ -24,6 +24,10 @@ actor MockAuthRepository: AuthRepository {
         return .signupRequired(suggestedNickname: "스터디친구")
     }
 
+    func signInWithApple() async throws -> SignInOutcome {
+        try await signInWithGoogle()
+    }
+
     func completeSignup(_ registration: MemberRegistration) async throws -> Member {
         try requireEnabled()
         guard registration.hasRequiredConsents else { throw AuthError.signupRejected(.consentRequired) }

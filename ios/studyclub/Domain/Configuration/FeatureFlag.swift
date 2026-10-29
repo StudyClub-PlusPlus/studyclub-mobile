@@ -2,7 +2,14 @@ enum FeatureFlagStage: String, CaseIterable, Sendable {
     case ready
     case inProgress
 
-    var defaultValue: Bool { self == .ready }
+    /// Stage (TestFlight) builds have no development settings screen, so in-progress features default on there.
+    var defaultValue: Bool {
+        #if STAGE
+        true
+        #else
+        self == .ready
+        #endif
+    }
 }
 
 struct FeatureFlagDefinition: Hashable, Sendable {

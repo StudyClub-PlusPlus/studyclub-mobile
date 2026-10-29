@@ -12,7 +12,6 @@ final class MemberAreaViewModelTests: XCTestCase {
         let model = MemberAreaViewModel(authRepository: auth, studiesRepository: MockRepository(),
                                         isAuthEnabled: true, isListEnabled: true, isMyPageEnabled: true, isMock: true)
         await waitUntil { model.account.state == .guest }
-        XCTAssertFalse(AuthDocuments().allowsConsentAndSubmit)
 
         // When: the user explicitly starts the mock signup and supplies required consent.
         model.account.startLogin()
@@ -39,7 +38,6 @@ final class MemberAreaViewModelTests: XCTestCase {
         XCTAssertTrue(model.myStudies.items.isEmpty)
         let restored = try await auth.restoreSession()
         XCTAssertNil(restored)
-        XCTAssertFalse(AuthDocuments().allowsConsentAndSubmit)
     }
 
     func testMockSignupCloseDiscardsAttemptAndRequiresConsentAgain() async throws {
