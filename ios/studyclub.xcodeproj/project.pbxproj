@@ -247,7 +247,7 @@
 				CODE_SIGN_ENTITLEMENTS = studyclub/studyclub.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 4TS88K9HKJ;
+				DEVELOPMENT_TEAM = NR984AHM5Z;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = studyclub/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -280,7 +280,7 @@
 				CODE_SIGN_ENTITLEMENTS = studyclub/studyclub.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 4TS88K9HKJ;
+				DEVELOPMENT_TEAM = NR984AHM5Z;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = studyclub/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
