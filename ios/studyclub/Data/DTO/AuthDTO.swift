@@ -6,7 +6,7 @@ struct AccountDTO: Decodable, Sendable {
     let nickname: String?
     /// Present once the server has confirmed signup completion.
     let onboardingCompletedAt: String?
-    /// Returned only by `GET /auth/me` (`AccountSelfView`). Login and onboarding omit it.
+    /// Returned only by `GET /api/me` (`AccountSelfView`). Login and onboarding omit it.
     let discordNickname: String?
 
     init(id: Int64, nickname: String?, onboardingCompletedAt: String?, discordNickname: String? = nil) {

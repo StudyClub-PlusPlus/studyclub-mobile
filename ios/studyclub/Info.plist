@@ -21,6 +21,8 @@
 	<false/>
 	<key>StudyClubAPIHost</key>
 	<string>$(API_HOST)</string>
+	<key>StudyClubWebHost</key>
+	<string>$(WEB_HOST)</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

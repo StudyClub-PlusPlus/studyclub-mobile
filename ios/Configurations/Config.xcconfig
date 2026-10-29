@@ -9,5 +9,8 @@ GID_REVERSED_CLIENT_ID = com.googleusercontent.apps.310991078079-m1lpeun69qvks63
 // API host without scheme. Debug/Stage builds override it in Config.stage.xcconfig.
 API_HOST = api.studyclub-plusplus.com
 
+// Site host for the live terms and privacy pages shown at signup.
+WEB_HOST = studyclub.life
+
 // Optional developer/QA local override (git-ignored)
 #include? "Config.local.xcconfig"

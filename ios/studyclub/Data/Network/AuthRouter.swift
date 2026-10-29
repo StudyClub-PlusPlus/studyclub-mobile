@@ -24,7 +24,7 @@ enum AuthRouter: URLRequestConvertible {
         case .refresh:
             Self.rootURL.appending(path: "auth").appending(path: "refresh")
         case .me:
-            Self.rootURL.appending(path: "auth").appending(path: "me")
+            Self.rootURL.appending(path: "api").appending(path: "me")
         case .onboarding:
             Self.rootURL.appending(path: "accounts").appending(path: "onboarding")
         }

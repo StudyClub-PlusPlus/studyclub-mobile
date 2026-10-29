@@ -144,8 +144,16 @@ final class SettingAccountViewModelTests: XCTestCase {
         withExtendedLifetime(subscription) {}
     }
 
+    func testTermsAndPrivacyOpenLiveSitePagesAndAllowConsent() {
+        let documents = AuthDocuments()
+        XCTAssertTrue(documents.allowsConsentAndSubmit)
+        XCTAssertEqual(documents.url(for: .terms)?.path(), "/ko/terms")
+        XCTAssertEqual(documents.url(for: .privacy)?.path(), "/ko/privacy")
+        XCTAssertEqual(documents.url(for: .terms)?.host(), AuthDocuments.webRoot.host())
+        XCTAssertNil(documents.url(for: .marketing))
+    }
+
     func testUnconfirmedTermsBlockConsentAndSubmitWhileFlagIsOn() async throws {
-        XCTAssertFalse(AuthDocuments().allowsConsentAndSubmit)
         let (viewModel, repository) = await openSignup(suggested: "제안", allowsConsent: false)
         let onboarding = try XCTUnwrap(viewModel.onboardingViewModel)
         XCTAssertFalse(onboarding.allowsConsentAndSubmit)

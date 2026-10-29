@@ -7,3 +7,4 @@ GID_CLIENT_ID = 310991078079-umfbns1sjb50g5dtrfhif15ffepfdmjm.apps.googleusercon
 GID_REVERSED_CLIENT_ID = com.googleusercontent.apps.310991078079-umfbns1sjb50g5dtrfhif15ffepfdmjm
 
 API_HOST = api-stage.studyclub-plusplus.com
+WEB_HOST = stage.studyclub.life
