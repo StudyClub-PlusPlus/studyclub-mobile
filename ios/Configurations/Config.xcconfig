@@ -6,7 +6,7 @@ GID_CLIENT_ID = 310991078079-m1lpeun69qvks63r6c9gjac9pqljkvl1.apps.googleusercon
 GID_SERVER_CLIENT_ID = 310991078079-cmcgg14ce540qu75mp5cu81dhc8hp3e8.apps.googleusercontent.com
 GID_REVERSED_CLIENT_ID = com.googleusercontent.apps.310991078079-m1lpeun69qvks63r6c9gjac9pqljkvl1
 
-// API host without scheme. Point Config.local.xcconfig at the stage API to test there.
+// API host without scheme. Debug/Stage builds override it in Config.stage.xcconfig.
 API_HOST = api.studyclub-plusplus.com
 
 // Optional developer/QA local override (git-ignored)
