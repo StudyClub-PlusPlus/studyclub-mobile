@@ -529,7 +529,7 @@ final class SettingAccountViewModelTests: XCTestCase {
         withExtendedLifetime(subscription) {}
     }
 
-    func testResetFlagsTurnsAuthOffAndDropsTheSuspendedRestore() async {
+    func testResetFlagsRestoresReadyAuthAndStartsRestore() async {
         let previous = UserDefaults.standard.dictionary(forKey: flagDefaultsKey)
         defer { restoreFlagDefaults(previous) }
         var account: SettingAccountViewModel?
@@ -538,24 +538,16 @@ final class SettingAccountViewModelTests: XCTestCase {
                 isEnabled: DevelopmentSettingsStore().isEnabled(FeatureFlag.googleLogin.definition)
             )
         }
-        settings.setFlag(id: FeatureFlag.googleLogin.definition.id, isEnabled: true)
+        settings.setFlag(id: FeatureFlag.googleLogin.definition.id, isEnabled: false)
         let repository = AuthRepositoryDouble()
-        let started = expectation(description: "reset restore")
-        repository.onRestore = { started.fulfill() }
-        account = SettingAccountViewModel(repository: repository, isFeatureEnabled: true)
-        await fulfillment(of: [started], timeout: 2)
-        let leaked = expectation(description: "reset late member")
-        leaked.isInverted = true
-        let subscription = account?.statePublisher.sink { state in
-            if case .member = state { leaked.fulfill() }
-        }
-        settings.resetFlagsToDefaults()
-        await waitUntil(account?.state == .hidden)
-        repository.finishRestore(.success(Member(nickname: "늦은회원")))
-        await fulfillment(of: [leaked], timeout: 0.3)
+        account = SettingAccountViewModel(repository: repository, isFeatureEnabled: false)
         XCTAssertEqual(account?.state, .hidden)
-        XCTAssertGreaterThanOrEqual(repository.counts().discard, 1)
-        withExtendedLifetime(subscription) {}
+        XCTAssertEqual(repository.counts().restore, 0)
+        settings.resetFlagsToDefaults()
+        await waitUntil(repository.counts().restore == 1)
+        repository.finishRestore(.success(Member(nickname: "회원")))
+        await waitUntil(account?.state == .member(nickname: "회원"))
+        XCTAssertEqual(account?.state, .member(nickname: "회원"))
     }
     #endif
 

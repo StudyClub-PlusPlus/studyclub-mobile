@@ -64,7 +64,7 @@ enum FeatureFlag: CaseIterable {
             FeatureFlagDefinition(
                 id: "auth.google-login",
                 name: "Google 로그인",
-                stage: .inProgress
+                stage: .ready
             )
         case .myStudies:
             FeatureFlagDefinition(
