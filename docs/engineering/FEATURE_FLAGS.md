@@ -4,9 +4,9 @@
 
 ## Current foundation
 
-The app catalog in `ios/studyclub/Domain/Configuration/FeatureFlag.swift` contains Ready study.detail-api, study.list-api, study.design-system, auth.google-login and account.mypage. Normal Debug and Release builds default Ready ON and InProgress OFF; STAGE builds default all flags ON. Both Debug and Release resolve persisted overrides before stage defaults. Only Debug exposes developer settings and mutation/reset methods. Repository mode alone differs: Debug follows its saved Mock/Real selection; Release always uses Real. Feature flags never select Mock/Real.
+The app catalog in `ios/studyclub/Domain/Configuration/FeatureFlag.swift` contains Ready study.detail-api, study.list-api, study.design-system, auth.google-login, account.mypage and study.my-studies. Normal Debug and Release builds default Ready ON and InProgress OFF; STAGE builds default all flags ON. Both Debug and Release resolve persisted overrides before stage defaults. Only Debug exposes developer settings and mutation/reset methods. Repository mode alone differs: Debug follows its saved Mock/Real selection; Release always uses Real. Feature flags never select Mock/Real.
 
-On 2026-10-23, the user explicitly selected default ON for study.list-api and study.design-system (SC72). This rollout decision changes their stage to Ready; it is not new evidence of deployment-specific QA. Existing saved overrides remain effective until reset. My Studies remains InProgress (default OFF in normal Debug/Release).
+On 2026-10-23, the user explicitly selected default ON for study.list-api and study.design-system (SC72). This rollout decision changes their stage to Ready; it is not new evidence of deployment-specific QA. Existing saved overrides remain effective until reset.
 
 ## Design-system rollout
 
@@ -26,7 +26,7 @@ The `auth.google-login` definition is Ready (default ON). Despite its name, it g
 
 ## My Studies list · SC65
 
-`study.my-studies` is InProgress (default OFF in normal Debug/Release, ON in STAGE). SC65 registers the definition only; it adds no screen, navigation or API request. The existing development catalog, persisted overrides and reset behavior apply in both build configurations. Repository mode selection is unchanged. SC66/SC67 prepare the View and API, and SC68 owns their connection and side-effect guards. SC69 is the separate Ready decision; a prepared Draft PR alone is not that decision. Calendar work is outside this flag's current scope.
+`study.my-studies` is Ready (default ON in normal Debug/Release and STAGE). SC65 registers the definition only; it adds no screen, navigation or API request. The existing development catalog, persisted overrides and reset behavior apply in both build configurations. Repository mode selection is unchanged. SC66/SC67 prepare the View and API, and SC68 owns their connection and side-effect guards. SC69 records the user’s 2026-10-30 Ready decision and its evidence limits in [the rollout record](../product/MY_STUDIES_READY_GATE.md). Calendar work is outside this flag's current scope.
 
 ## Add a feature
 
