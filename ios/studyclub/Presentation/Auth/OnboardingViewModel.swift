@@ -53,7 +53,7 @@ final class OnboardingViewModel {
         isMock ? "Mock 가입 테스트예요. 동의와 제출은 실제 가입이나 약관 승인으로 저장되지 않아요." : "닉네임과 시간대를 확인하고 필요한 항목에 동의해 주세요."
     }
     var canSubmit: Bool {
-        isEditing && allowsConsentAndSubmit && input.hasNickname && input.hasRequiredConsents
+        isEditing && allowsConsentAndSubmit && input.hasNickname && nicknameFormatError == nil && input.hasRequiredConsents
     }
 
     init(
@@ -72,22 +72,36 @@ final class OnboardingViewModel {
         let initial = Input(nickname: suggestedNickname, timeZone: zone)
         input = initial
         originalInput = initial
+        nicknameError = nicknameFormatError
         if !self.allowsConsentAndSubmit {
             consentError = "확정된 약관이 없어 동의하거나 가입을 제출할 수 없어요."
         }
     }
 
+    private var nicknameFormatError: String? {
+        let scalars = input.nickname.unicodeScalars
+        if scalars.contains(where: { CharacterSet.whitespacesAndNewlines.contains($0) }) {
+            return "띄어쓰기는 사용할 수 없어요."
+        }
+        if scalars.contains(where: {
+            !CharacterSet.letters.contains($0) && $0.properties.generalCategory != .decimalNumber && $0 != "_"
+        }) {
+            return "특수문자는 _만 사용할 수 있어요."
+        }
+        return nil
+    }
+
     func updateNickname(_ nickname: String) {
         guard isEditing else { return }
         input.nickname = nickname
-        nicknameError = nil
+        nicknameError = nicknameFormatError
         errorMessage = nil
         publish()
     }
 
     func validateNickname() {
         guard isEditing else { return }
-        nicknameError = input.hasNickname ? nil : "닉네임을 입력해 주세요."
+        nicknameError = input.hasNickname ? nicknameFormatError : "닉네임을 입력해 주세요."
         publish()
     }
 
@@ -111,7 +125,7 @@ final class OnboardingViewModel {
     /// Returns local input once; does not send a request or complete signup.
     func submit() -> Input? {
         guard isEditing, allowsConsentAndSubmit else { return nil }
-        nicknameError = input.hasNickname ? nil : "닉네임을 입력해 주세요."
+        nicknameError = input.hasNickname ? nicknameFormatError : "닉네임을 입력해 주세요."
         consentError = input.hasRequiredConsents ? nil : "필수 항목을 모두 확인해 주세요."
         errorMessage = nil
         guard canSubmit else { publish(); return nil }

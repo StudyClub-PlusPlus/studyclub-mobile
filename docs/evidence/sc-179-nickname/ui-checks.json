@@ -1,0 +1,311 @@
+{
+  "checks" : [
+    {
+      "enabled" : false,
+      "error" : "",
+      "field" : "스터디친구",
+      "model" : "스터디친구",
+      "name" : "default has no nickname error",
+      "passed" : true
+    },
+    {
+      "enabled" : true,
+      "error" : "",
+      "field" : "스터디친구",
+      "model" : "스터디친구",
+      "name" : "valid input with required consent enables submit",
+      "passed" : true
+    },
+    {
+      "enabled" : false,
+      "error" : "띄어쓰기는 사용할 수 없어요.",
+      "field" : "스터디 친구",
+      "model" : "스터디 친구",
+      "name" : "space error: \"스터디 친구\"",
+      "passed" : true
+    },
+    {
+      "enabled" : false,
+      "error" : "띄어쓰기는 사용할 수 없어요.",
+      "field" : "스터디 친구",
+      "model" : "스터디 친구",
+      "name" : "space error uses shared red: \"스터디 친구\"",
+      "passed" : true
+    },
+    {
+      "enabled" : false,
+      "error" : "띄어쓰기는 사용할 수 없어요.",
+      "field" : " 친구",
+      "model" : " 친구",
+      "name" : "space error: \" 친구\"",
+      "passed" : true
+    },
+    {
+      "enabled" : false,
+      "error" : "띄어쓰기는 사용할 수 없어요.",
+      "field" : " 친구",
+      "model" : " 친구",
+      "name" : "space error uses shared red: \" 친구\"",
+      "passed" : true
+    },
+    {
+      "enabled" : false,
+      "error" : "띄어쓰기는 사용할 수 없어요.",
+      "field" : "친구 ",
+      "model" : "친구 ",
+      "name" : "space error: \"친구 \"",
+      "passed" : true
+    },
+    {
+      "enabled" : false,
+      "error" : "띄어쓰기는 사용할 수 없어요.",
+      "field" : "친구 ",
+      "model" : "친구 ",
+      "name" : "space error uses shared red: \"친구 \"",
+      "passed" : true
+    },
+    {
+      "enabled" : false,
+      "error" : "띄어쓰기는 사용할 수 없어요.",
+      "field" : "친구  이름",
+      "model" : "친구  이름",
+      "name" : "space error: \"친구  이름\"",
+      "passed" : true
+    },
+    {
+      "enabled" : false,
+      "error" : "띄어쓰기는 사용할 수 없어요.",
+      "field" : "친구  이름",
+      "model" : "친구  이름",
+      "name" : "space error uses shared red: \"친구  이름\"",
+      "passed" : true
+    },
+    {
+      "enabled" : false,
+      "error" : "띄어쓰기는 사용할 수 없어요.",
+      "field" : "친구\t이름",
+      "model" : "친구\t이름",
+      "name" : "space error: \"친구\\t이름\"",
+      "passed" : true
+    },
+    {
+      "enabled" : false,
+      "error" : "띄어쓰기는 사용할 수 없어요.",
+      "field" : "친구\t이름",
+      "model" : "친구\t이름",
+      "name" : "space error uses shared red: \"친구\\t이름\"",
+      "passed" : true
+    },
+    {
+      "enabled" : false,
+      "error" : "띄어쓰기는 사용할 수 없어요.",
+      "field" : "친구 이름",
+      "model" : "친구 이름",
+      "name" : "space error: \"친구\\n이름\"",
+      "passed" : true
+    },
+    {
+      "enabled" : false,
+      "error" : "띄어쓰기는 사용할 수 없어요.",
+      "field" : "친구 이름",
+      "model" : "친구 이름",
+      "name" : "space error uses shared red: \"친구\\n이름\"",
+      "passed" : true
+    },
+    {
+      "enabled" : false,
+      "error" : "띄어쓰기는 사용할 수 없어요.",
+      "field" : "친구 이름",
+      "model" : "친구 이름",
+      "name" : "space error: \"친구 이름\"",
+      "passed" : true
+    },
+    {
+      "enabled" : false,
+      "error" : "띄어쓰기는 사용할 수 없어요.",
+      "field" : "친구 이름",
+      "model" : "친구 이름",
+      "name" : "space error uses shared red: \"친구 이름\"",
+      "passed" : true
+    },
+    {
+      "enabled" : false,
+      "error" : "띄어쓰기는 사용할 수 없어요.",
+      "field" : "친구　이름",
+      "model" : "친구　이름",
+      "name" : "space error: \"친구　이름\"",
+      "passed" : true
+    },
+    {
+      "enabled" : false,
+      "error" : "띄어쓰기는 사용할 수 없어요.",
+      "field" : "친구　이름",
+      "model" : "친구　이름",
+      "name" : "space error uses shared red: \"친구　이름\"",
+      "passed" : true
+    },
+    {
+      "enabled" : false,
+      "error" : "띄어쓰기는 사용할 수 없어요.",
+      "field" : "친구​이름",
+      "model" : "친구​이름",
+      "name" : "space error: \"친구​이름\"",
+      "passed" : true
+    },
+    {
+      "enabled" : false,
+      "error" : "띄어쓰기는 사용할 수 없어요.",
+      "field" : "친구​이름",
+      "model" : "친구​이름",
+      "name" : "space error uses shared red: \"친구​이름\"",
+      "passed" : true
+    },
+    {
+      "enabled" : false,
+      "error" : "띄어쓰기는 사용할 수 없어요.",
+      "field" : "친구 !",
+      "model" : "친구 !",
+      "name" : "space error: \"친구 !\"",
+      "passed" : true
+    },
+    {
+      "enabled" : false,
+      "error" : "띄어쓰기는 사용할 수 없어요.",
+      "field" : "친구 !",
+      "model" : "친구 !",
+      "name" : "space error uses shared red: \"친구 !\"",
+      "passed" : true
+    },
+    {
+      "enabled" : false,
+      "error" : "특수문자는 _만 사용할 수 있어요.",
+      "field" : "친구!",
+      "model" : "친구!",
+      "name" : "special error: \"친구!\"",
+      "passed" : true
+    },
+    {
+      "enabled" : false,
+      "error" : "특수문자는 _만 사용할 수 있어요.",
+      "field" : "친구-이름",
+      "model" : "친구-이름",
+      "name" : "special error: \"친구-이름\"",
+      "passed" : true
+    },
+    {
+      "enabled" : false,
+      "error" : "특수문자는 _만 사용할 수 있어요.",
+      "field" : "친구.이름",
+      "model" : "친구.이름",
+      "name" : "special error: \"친구.이름\"",
+      "passed" : true
+    },
+    {
+      "enabled" : false,
+      "error" : "특수문자는 _만 사용할 수 있어요.",
+      "field" : "친구😀",
+      "model" : "친구😀",
+      "name" : "special error: \"친구😀\"",
+      "passed" : true
+    },
+    {
+      "enabled" : false,
+      "error" : "특수문자는 _만 사용할 수 있어요.",
+      "field" : "친구@이름",
+      "model" : "친구@이름",
+      "name" : "special error: \"친구@이름\"",
+      "passed" : true
+    },
+    {
+      "enabled" : true,
+      "error" : "",
+      "field" : "스터디친구",
+      "model" : "스터디친구",
+      "name" : "valid correction: 스터디친구",
+      "passed" : true
+    },
+    {
+      "enabled" : true,
+      "error" : "",
+      "field" : "abc123",
+      "model" : "abc123",
+      "name" : "valid correction: abc123",
+      "passed" : true
+    },
+    {
+      "enabled" : true,
+      "error" : "",
+      "field" : "친구_123",
+      "model" : "친구_123",
+      "name" : "valid correction: 친구_123",
+      "passed" : true
+    },
+    {
+      "enabled" : true,
+      "error" : "",
+      "field" : "친구１２３",
+      "model" : "친구１２３",
+      "name" : "valid correction: 친구１２３",
+      "passed" : true
+    },
+    {
+      "enabled" : true,
+      "error" : "",
+      "field" : "스터디",
+      "model" : "스터디",
+      "name" : "valid correction: 스터디",
+      "passed" : true
+    },
+    {
+      "enabled" : false,
+      "error" : "",
+      "field" : "",
+      "model" : "",
+      "name" : "empty while editing has no immediate error and cannot submit",
+      "passed" : true
+    },
+    {
+      "enabled" : false,
+      "error" : "닉네임을 입력해 주세요.",
+      "field" : "",
+      "model" : "",
+      "name" : "empty on blur has required error",
+      "passed" : true
+    },
+    {
+      "enabled" : false,
+      "error" : "특수문자는 _만 사용할 수 있어요.",
+      "field" : "ㅎ",
+      "model" : "친구!",
+      "name" : "marked Korean defers validation and hides error",
+      "passed" : true
+    },
+    {
+      "enabled" : true,
+      "error" : "",
+      "field" : "한글친구",
+      "model" : "한글친구",
+      "name" : "committed Korean clears error and enables submit",
+      "passed" : true
+    },
+    {
+      "enabled" : false,
+      "error" : "특수문자는 _만 사용할 수 있어요.",
+      "field" : "친구!",
+      "model" : "친구!",
+      "name" : "special error persists after blur",
+      "passed" : true
+    },
+    {
+      "enabled" : true,
+      "error" : "",
+      "field" : "친구_123",
+      "model" : "친구_123",
+      "name" : "correction after blur restores submit",
+      "passed" : true
+    }
+  ],
+  "count" : 38,
+  "mode" : "--qa=valid",
+  "passed" : true
+}
