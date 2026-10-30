@@ -14,7 +14,7 @@
 
 선택은 diffable identifier를 검증한 뒤 기존 공개 Detail 화면에 같은 Study.ID를 넘긴다. 인증 전용 상세 API·캘린더는 이 범위에 없다.
 
-`study.my-studies`는 생성 시 읽는 InProgress 기본 OFF 값이다. 기존 `Repository`도 요청 전에 이를 확인한다. Debug `MockRepository`는 순수 Domain 샘플만 반환하며 화면의 회원 게이트는 유지한다. `RepositoryFactory`는 플래그로 Mock/Real을 고르지 않고 Release는 항상 Real이다. 로컬 테스트의 Member 주입은 실제 토큰·인증 우회를 뜻하지 않는다.
+`study.my-studies`는 생성 시 읽는 InProgress 값이다. 일반 Debug/Release에서 기본 OFF이며 STAGE에서 기본 ON이다. 기존 `Repository`도 요청 전에 이를 확인한다. Debug `MockRepository`는 순수 Domain 샘플만 반환하며 화면의 회원 게이트는 유지한다. `RepositoryFactory`는 플래그로 Mock/Real을 고르지 않고 Release는 항상 Real이다. 로컬 테스트의 Member 주입은 실제 토큰·인증 우회를 뜻하지 않는다.
 
 검증 대상은 `MemberAuthorizationTests`(최종 거부→늦은 refresh 포함 11개), `MyStudiesListIntegrationTests`(세션·취소·refresh·403 경계 6개), `MemberAreaViewModelTests`(guest·회원/로그아웃·인증 OFF·작업 중 재확인·거부 뒤 요청 상한·가입 안내·실패한 정리 재시도 7개)다. 실제 실행 결과와 root/화면 QA는 별도 정확 후보에 연결한다. OAuth 값·서버 코드 교환·법적 승인·배포 QA가 없으므로 Ready는 별도 Draft 게이트로 남는다.
 

@@ -8,7 +8,7 @@ This file is the short entry point for AI-assisted work in this repository.
 2. Open [the engineering index](docs/engineering/INDEX.md).
 3. Read the documents listed for the task. Do not load unrelated engineering or feature documents.
 4. Read the relevant product/API contract. For UI work, also read `DESIGN.md`.
-5. Before implementation, verify the matching Notion issue and work branch. If no issue exists, create or reuse one and prepare its branch first. Use the installed `notion-ticket-branch` workflow when available; otherwise follow `docs/engineering/TASK_WORKFLOW.md`.
+5. Follow [the task workflow](docs/engineering/TASK_WORKFLOW.md) for the mandatory one-commit PR, squash merge, and branch update rules. Before implementation, verify the matching Notion issue and work branch. If no issue exists, create or reuse one and prepare its branch first. Use the installed `notion-ticket-branch` workflow when available; otherwise follow `docs/engineering/TASK_WORKFLOW.md`.
 
 ## Stable boundaries
 
@@ -18,7 +18,7 @@ This file is the short entry point for AI-assisted work in this repository.
 - `RepositoryProtocol` and `Repository` are the single Study repository boundary for recruiting studies, details, and a member's studies. `AuthRepository` separately owns authentication and credentials. Do not add parallel Study repositories, routers, mutable global overrides, or a generic service locator.
 - DTOs stay in Data. Repository protocols return Domain models. Domain imports no UI, reactive, or networking framework.
 - App-facing ViewModels obtain repositories through `RepositoryFactory`. ViewControllers do not receive or forward repositories. Keep protocol-injecting initializers for unit tests.
-- Feature flags start InProgress and default OFF. Move a flag to Ready/default ON only after deployment-specific QA. Remove a stable flag and its previous branch together after a later deployment.
+- Feature flags start InProgress. Normal Debug/Release default InProgress OFF and Ready ON; STAGE defaults all flags ON. Move a flag to Ready only after deployment-specific QA. Remove a stable flag and its previous branch together after a later deployment.
 - Lists and feeds define loading, content, empty, and failure behavior. Detail treats missing, invalid, or mismatched identity as empty. Main and Detail retain their documented request policies; see the indexed UI state and concurrency rules.
 - Do not add a UseCase, Router, Coordinator, or generic DI container without a concrete second use case and an architecture decision update.
 
