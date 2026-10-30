@@ -2,7 +2,7 @@
 
 기존 [MyPage #94](https://app.notion.com/p/benkang/3d283feabad38098a5c9fb0d420ac198)와 PR9의 프로필 의도를 보존하고 SC51/52 인증 정책에 연결한다. 원본 커밋5d1b7fb는 archive ref와 과거 증거에서 보존한다.
 
-`account.mypage` ON은 스터디/내 스터디 두 탭과 양 루트의 우측 프로필 버튼을 제공한다. 프로필은 자체 UINavigationController로 fullScreen 표시한다. 닫기는 원래 선택 탭과 두 탭의 탐색 스택을 보존한다. OFF는 이전 Main/Setting 구조다. `auth.google-login`은 별도 Ready 기본 ON이며 인증 요청과 진입을 제어한다.
+`account.mypage`는 Ready이며 일반 Debug/Release와 STAGE에서 기본 ON이다. 저장 override가 우선한다. ON은 스터디/내 스터디 두 탭과 양 루트의 우측 프로필 버튼을 제공한다. 프로필은 자체 UINavigationController로 fullScreen 표시한다. 닫기는 원래 선택 탭과 두 탭의 탐색 스택을 보존한다. OFF는 이전 Main/Setting 구조다. `auth.google-login`은 별도 Ready 기본 ON이며 인증 요청과 진입을 제어한다.
 
 프로필은 기존 AppTheme·스크롤 카드·시스템 프로필 심볼을 사용한다. SC52의 계정 표시 모델과 인증 presentation/cleanup을 공유하며 별도 AccountRepository·DTO·클라이언트·메모리 토큰을 만들지 않는다. 회원에게 확인된 닉네임과 로그인됨을 표시한다. 이메일과 가짜 데모 세션은 추가하지 않는다. 비회원은 명시적으로 로그인하며 checking·재확인 실패·로그아웃 실패를 구분한다. 로그아웃 실패는 회원 정보와 재시도를 유지한다.
 

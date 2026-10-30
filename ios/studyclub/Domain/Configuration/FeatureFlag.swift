@@ -59,7 +59,7 @@ enum FeatureFlag: CaseIterable {
                 stage: .ready
             )
         case .myPage:
-            FeatureFlagDefinition(id: "account.mypage", name: "MyPage · 앱 재실행", stage: .inProgress)
+            FeatureFlagDefinition(id: "account.mypage", name: "MyPage · 앱 재실행", stage: .ready)
         case .googleLogin:
             FeatureFlagDefinition(
                 id: "auth.google-login",

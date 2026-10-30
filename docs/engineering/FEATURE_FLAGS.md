@@ -4,9 +4,9 @@
 
 ## Current foundation
 
-The app catalog in `ios/studyclub/Domain/Configuration/FeatureFlag.swift` contains Ready study.detail-api, study.list-api, study.design-system and auth.google-login. Normal Debug and Release builds default Ready ON and InProgress OFF; STAGE builds default all flags ON. Both Debug and Release resolve persisted overrides before stage defaults. Only Debug exposes developer settings and mutation/reset methods. Repository mode alone differs: Debug follows its saved Mock/Real selection; Release always uses Real. Feature flags never select Mock/Real.
+The app catalog in `ios/studyclub/Domain/Configuration/FeatureFlag.swift` contains Ready study.detail-api, study.list-api, study.design-system, auth.google-login and account.mypage. Normal Debug and Release builds default Ready ON and InProgress OFF; STAGE builds default all flags ON. Both Debug and Release resolve persisted overrides before stage defaults. Only Debug exposes developer settings and mutation/reset methods. Repository mode alone differs: Debug follows its saved Mock/Real selection; Release always uses Real. Feature flags never select Mock/Real.
 
-On 2026-10-23, the user explicitly selected default ON for study.list-api and study.design-system (SC72). This rollout decision changes their stage to Ready; it is not new evidence of deployment-specific QA. Existing saved overrides remain effective until reset. MyPage and My Studies remain InProgress (default OFF in normal Debug/Release).
+On 2026-10-23, the user explicitly selected default ON for study.list-api and study.design-system (SC72). This rollout decision changes their stage to Ready; it is not new evidence of deployment-specific QA. Existing saved overrides remain effective until reset. My Studies remains InProgress (default OFF in normal Debug/Release).
 
 ## Design-system rollout
 
@@ -19,6 +19,10 @@ ON/OFF native comparison and an ordinary Release build cover this slice. Automat
 Feature flags select new versus previous behavior at the feature's Repository/ViewModel/View boundary, independently of Repository mode. Factory selects Debug saved Mock/Real or Release Real only. Real list OFF makes no API request and returns featureUnavailable; Main shows a distinct unavailable state. List OFF has no pagination, refresh or footer; Mock continues returning trusted Domain samples. Real detail OFF makes no API request and returns unavailable to preserve its previous failure presentation; ON calls the sc-93 API. Mock detail keeps its Domain samples. The list flag never changes detail behavior or implementation.
 
 The `auth.google-login` definition is Ready (default ON). Despite its name, it gates both Google and Apple authentication. Both Debug and Release resolve saved overrides before the stage default through the existing store. `DefaultAuthRepository` reads it at the start of each operation and again before changing credentials. OFF performs no auth request and keeps stored completed-member credentials. The flag does not choose Mock or Real. On 2026-10-30 the user said they personally tested the login-dependent flagged features and they worked, then explicitly ordered the three Ready transitions and PR merges. The environment and cases were not specified; this is not agent-verified OAuth or legal approval. Settings reads the flag on appear and before an account action. Debug `setFlag` and `resetFlagsToDefaults` notify that screen only when `auth.google-login` changes, so an in-flight restore is invalidated without rebuilding tabs. Other flags keep their current capture behavior. The current app links web terms and privacy pages, and `AuthDocuments.allowsConsentAndSubmit` is true. This source behavior does not establish legal approval.
+
+## MyPage rollout · SC79
+
+`account.mypage` is Ready. On 2026-10-30 the user said they personally tested the login-dependent flagged features and they worked, then ordered the Ready transitions and PR merges. The environment and cases were not specified. Existing overrides still take precedence; this is not agent verification of live OAuth or legal approval.
 
 ## My Studies list · SC65
 
