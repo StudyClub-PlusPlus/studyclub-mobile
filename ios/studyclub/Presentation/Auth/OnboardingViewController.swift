@@ -32,7 +32,6 @@ final class OnboardingViewController: UIViewController, UITextFieldDelegate {
     private let nicknameRow = OnboardingViewController.paddedRow()
     private let timeZoneRow = OnboardingViewController.paddedRow()
     private let nicknameTitle = OnboardingViewController.label("닉네임", style: .headline)
-    private let nicknameHelp = OnboardingViewController.label("스터디클럽에서 사용할 이름이에요.", style: .subheadline, secondary: true)
     private let timeZoneTitle = OnboardingViewController.label("시간대", style: .headline)
     private let timeZoneHelp = OnboardingViewController.label("스터디 일정은 이 시간대를 기준으로 표시돼요.", style: .subheadline, secondary: true)
     private let requiredTitle = OnboardingViewController.label("필수 동의", style: .subheadline, secondary: true)
@@ -199,7 +198,6 @@ final class OnboardingViewController: UIViewController, UITextFieldDelegate {
         nickname.text = viewModel.input.nickname
         nickname.delegate = self
         nickname.addTarget(self, action: #selector(nicknameChanged), for: .editingChanged)
-        nicknameRow.addArrangedSubview(nicknameHelp)
         nicknameRow.addArrangedSubview(nicknameError)
 
         addSeparator(to: informationGroup)
@@ -251,7 +249,7 @@ final class OnboardingViewController: UIViewController, UITextFieldDelegate {
         let consentEnabled = viewModel.isEditing && viewModel.allowsConsentAndSubmit
         for control in [ageSwitch, termsSwitch, privacySwitch, marketingSwitch] { control.isEnabled = consentEnabled }
         nicknameError.text = viewModel.nicknameError.map { "ⓘ \($0)" }
-        nicknameError.isHidden = viewModel.nicknameError == nil
+        nicknameError.isHidden = viewModel.nicknameError == nil || nickname.markedTextRange != nil
         consentError.text = viewModel.consentError.map { "ⓘ \($0)" }
         consentError.isHidden = viewModel.consentError == nil
         failureLabel.text = viewModel.errorMessage
@@ -279,11 +277,17 @@ final class OnboardingViewController: UIViewController, UITextFieldDelegate {
             submitButton.isEnabled = true
         } else {
             submitButton.setTitle(viewModel.requiresStatusCheck ? "다시 확인" : "가입 완료", for: .normal)
-            submitButton.isEnabled = viewModel.canSubmit || viewModel.state == .unknownStatus
+            submitButton.isEnabled = (viewModel.canSubmit && nickname.markedTextRange == nil) || viewModel.state == .unknownStatus
         }
     }
 
-    @objc private func nicknameChanged() { viewModel.updateNickname(nickname.text ?? "") }
+    @objc private func nicknameChanged() {
+        guard nickname.markedTextRange == nil else {
+            updateViews()
+            return
+        }
+        viewModel.updateNickname(nickname.text ?? "")
+    }
 
     @objc private func consentsChanged() {
         viewModel.updateConsents(age: ageSwitch.isOn, terms: termsSwitch.isOn,

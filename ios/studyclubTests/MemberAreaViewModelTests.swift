@@ -25,13 +25,13 @@ final class MemberAreaViewModelTests: XCTestCase {
         XCTAssertTrue(form.allowsConsentAndSubmit)
         XCTAssertFalse(form.canSubmit, "Mock still requires explicit consent")
         XCTAssertFalse(form.input.marketingAgreed)
-        form.updateNickname("로컬 회원")
+        form.updateNickname("로컬회원")
         form.updateConsents(age: true, terms: true, privacy: true, marketing: false)
         model.account.submitSignup(try XCTUnwrap(form.submit()))
 
         // Then: the shared member list loads and logout clears the same session.
         await waitUntil { model.myStudies.state == .content }
-        XCTAssertEqual(model.account.nickname, "로컬 회원")
+        XCTAssertEqual(model.account.nickname, "로컬회원")
         XCTAssertEqual(model.account.presentation, .none)
         model.account.logout()
         await waitUntil { model.account.state == .guest }
